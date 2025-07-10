@@ -8,13 +8,14 @@ class AmigurumiSection extends Model
 {
    protected $fillable = ['amigurumi_pattern_id', 'title', 'order'];
 
-    public function pattern()
-    {
-        return $this->belongsTo(AmigurumiPattern::class);
-    }
 
-    public function rows()
+    public function amigurumiRows()
     {
         return $this->hasMany(AmigurumiRow::class);
     }
+    public function amigurumiPattern()
+    {
+        return $this->belongsTo(AmigurumiPattern::class);
+    }
+    
 }

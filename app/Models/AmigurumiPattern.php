@@ -8,8 +8,10 @@ class AmigurumiPattern extends Model
 {
     protected $fillable = ['title', 'image_path', 'yarn_description', 'tools_description'];
 
-    public function sections()
+    public function amigurumiSections()
     {
         return $this->hasMany(AmigurumiSection::class);
     }
+
+
 }

@@ -10,18 +10,8 @@ class AmigurumiPatternController extends Controller
 {
     public function index()
     {
-        $patterns = AmigurumiPattern::with('sections.rows')->orderByDesc('created_at')->get();
+        $patterns = AmigurumiPattern::with('amigurumiSections.rows')->orderByDesc('created_at')->get();
         return view('amigurumi.patterns.index', compact('patterns'));
-    }
-
-
-    public function show($id)
-    {
-        $pattern = AmigurumiPattern::with('sections.rows')->find($id);
-        if (!$pattern) {
-            return response()->json(['message' => 'Pattern not found'], 404);
-        }
-        return response()->json($pattern);
     }
 
     public function store(Request $request)
@@ -55,7 +45,10 @@ class AmigurumiPatternController extends Controller
         ]);
 
         $pattern->update($validated);
-        return response()->json($pattern);
+        //return response()->json($pattern);
+        return redirect()->route('amigurumi-patterns.index')
+                     ->with('success', __('Pattern updated successfully.'));
+        
     }
 
     public function destroy($id)
@@ -72,8 +65,17 @@ class AmigurumiPatternController extends Controller
     }
     public function create()
     {
-    
         return view('amigurumi.patterns.create');
     }
-    
+    public function show(AmigurumiPattern $amigurumiPattern)
+    {
+        $amigurumiPattern->load('amigurumiSections.amigurumiRows');
+
+        return view('amigurumi.patterns.show', compact('amigurumiPattern'));
+    }
+
+    public function edit(AmigurumiPattern $amigurumiPattern)
+    {
+        return view('amigurumi.patterns.edit', compact('amigurumiPattern'));
+    }
 }

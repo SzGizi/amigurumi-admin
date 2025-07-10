@@ -8,7 +8,7 @@ class AmigurumiRow extends Model
 {
     protected $fillable = ['amigurumi_section_id', 'row_number', 'instructions'];
 
-    public function section()
+    public function amigurumiSection()
     {
         return $this->belongsTo(AmigurumiSection::class);
     }
