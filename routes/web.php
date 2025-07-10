@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AmigurumiPatternController;
+use App\Http\Controllers\AmigurumiSectionController;
+use App\Http\Controllers\AmigurumiRowController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,6 +19,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    //Amigurumi edit 
+
+    Route::resource('/amigurumi-patterns', AmigurumiPatternController::class);
+    //Route::apiResource('/amigurumi-patterns', AmigurumiPatternController::class);
+
+    Route::post('/amigurumi-sections', [AmigurumiSectionController::class, 'store']);
+    Route::put('/amigurumi-sections/{id}', [AmigurumiSectionController::class, 'update']);
+    Route::delete('/amigurumi-sections/{id}', [AmigurumiSectionController::class, 'destroy']);
+
+    Route::post('/amigurumi-rows', [AmigurumiRowController::class, 'store']);
+    Route::put('/amigurumi-rows/{id}', [AmigurumiRowController::class, 'update']);
+    Route::delete('/amigurumi-rows/{id}', [AmigurumiRowController::class, 'destroy']);
 });
 
 require __DIR__.'/auth.php';
