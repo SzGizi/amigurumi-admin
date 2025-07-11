@@ -12,7 +12,7 @@ class AmigurumiPatternController extends Controller
 {
     public function index()
     {
-        $patterns = AmigurumiPattern::with('amigurumiSections.rows')->orderByDesc('created_at')->get();
+        $patterns = AmigurumiPattern::with('amigurumiSections.amigurumiRows')->orderByDesc('created_at')->get();
         return view('amigurumi.patterns.index', compact('patterns'));
     }
 
@@ -32,43 +32,22 @@ class AmigurumiPatternController extends Controller
     
     }
 
-    // public function update(Request $request, $id)
-    // {
-    //     $pattern = AmigurumiPattern::find($id);
-    //     if (!$pattern) {
-    //         return response()->json(['message' => 'Pattern not found'], 404);
-    //     }
-
-    //     $validated = $request->validate([
-    //         'title' => 'sometimes|required|string|max:255',
-    //         'image_path' => 'nullable|string|max:255',
-    //         'yarn_description' => 'sometimes|required|string',
-    //         'tools_description' => 'sometimes|required|string',
-    //     ]);
-
-    //     $pattern->update($validated);
-    //     //return response()->json($pattern);
-    //     return redirect()->route('amigurumi-patterns.index')
-    //                  ->with('success', __('Pattern updated successfully.'));
-        
-    // }
     public function update(UpdateAmigurumiPatternRequest $request, AmigurumiPattern $amigurumiPattern)
     {
-        
-            // 1. Frissítjük a pattern alap adatait
+        // Frissítés
         $amigurumiPattern->update($request->only([
             'title',
             'yarn_description',
             'tools_description',
         ]));
 
-        // 2. Töröljük a meglévő section-öket és azok row-jait
+        // Régiek törlése
         foreach ($amigurumiPattern->amigurumiSections as $section) {
             $section->amigurumiRows()->delete();
             $section->delete();
         }
 
-        // 3. Új sectionök és row-k létrehozása
+        // Újak mentése
         $sections = $request->input('sections', []);
 
         foreach ($sections as $sectionData) {
@@ -83,12 +62,15 @@ class AmigurumiPatternController extends Controller
                     'instructions' => $rowData['instructions'] ?? '',
                 ]);
             }
+          
         }
 
-        return compact('amigurumiPattern');
-        return redirect()->route('amigurumi-patterns.edit', $amigurumiPattern)
-                        ->with('success', __('Pattern updated successfully.'));
+        // Csak ez maradjon itt!
+        return redirect()
+            ->route('amigurumi-patterns.edit', $amigurumiPattern)
+            ->with('success', __('Pattern updated successfully.'));
     }
+
 
     public function destroy($id)
     {

@@ -75,11 +75,11 @@
                 <button type="button" class="btn btn-danger btn-sm float-end remove-section">&times;</button>
                 <div class="mb-2">
                     <label class="form-label">{{ __('Section Title') }}</label>
-                    <input type="text" name="sections[\${sectionIndex}][title]" class="form-control">
+                    <input type="text" name="sections[${sectionIndex}][title]" class="form-control">
                 </div>
                 <div class="mb-2">
                     <label class="form-label">{{ __('Order') }}</label>
-                    <input type="number" name="sections[\${sectionIndex}][order]" class="form-control">
+                    <input type="number" name="sections[${sectionIndex}][order]" class="form-control">
                 </div>
                 <div class="row-list"></div>
                 <button type="button" class="btn btn-secondary add-row mt-2">{{ __('Add Row') }}</button>
@@ -98,8 +98,8 @@
                 rowDiv.classList.add('border', 'p-2', 'mb-2', 'row-block');
                 rowDiv.innerHTML = `
                     <button type="button" class="btn btn-sm btn-outline-danger float-end remove-row">&times;</button>
-                    <input type="number" name="sections[\${sectionIdx}][rows][\${rows}][row_number]" class="form-control mb-1" placeholder="{{ __('Row number') }}">
-                    <input type="text" name="sections[\${sectionIdx}][rows][\${rows}][instructions]" class="form-control" placeholder="{{ __('Instructions') }}">
+                    <input type="number" name="sections[${sectionIdx}][rows][${rows}][row_number]" class="form-control mb-1" placeholder="{{ __('Row number') }}">
+                    <input type="text" name="sections[${sectionIdx}][rows][${rows}][instructions]" class="form-control" placeholder="{{ __('Instructions') }}">
                 `;
                 section.querySelector('.row-list').appendChild(rowDiv);
             }
