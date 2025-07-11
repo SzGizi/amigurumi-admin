@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreAmigurumiSectionRequest;
 use App\Http\Requests\UpdateAmigurumiSectionRequest;
+use App\Http\Resources\AmigurumiSectionResource;
 
 class AmigurumiSectionController extends Controller
 {

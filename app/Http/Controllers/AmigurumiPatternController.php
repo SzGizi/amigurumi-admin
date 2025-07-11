@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AmigurumiPattern;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Resources\AmigurumiPatternResource;
 
 class AmigurumiPatternController extends Controller
 {
@@ -73,7 +74,7 @@ class AmigurumiPatternController extends Controller
 
         return view('amigurumi.patterns.show', compact('amigurumiPattern'));
     }
-
+   
     public function edit(AmigurumiPattern $amigurumiPattern)
     {
         return view('amigurumi.patterns.edit', compact('amigurumiPattern'));

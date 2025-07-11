@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreAmigurumiRowRequest;
 use App\Http\Requests\UpdateAmigurumiRowRequest;
+use App\Http\Resources\AmigurumiRowResource;
 
 class AmigurumiRowController extends Controller
 {
