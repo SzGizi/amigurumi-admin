@@ -2,38 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AmigurumiSection;
 use App\Models\AmigurumiRow;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreAmigurumiRowRequest;
+use App\Http\Requests\UpdateAmigurumiRowRequest;
 
 class AmigurumiRowController extends Controller
 {
-    public function store(Request $request)
+    public function store(StoreAmigurumiRowRequest $request,AmigurumiSection $amigurumi_section)
     {
-        $validated = $request->validate([
-            'amigurumi_section_id' => 'required|exists:amigurumi_sections,id',
-            'row_number' => 'required|integer|min:1',
-            'instructions' => 'nullable|string',
-        ]);
+        
+        $data = $request->validated();
 
-        $row = AmigurumiRow::create($validated);
-        return response()->json($row, 201);
+        $amigurumi_section->amigurumiRows()->create($data);
+
+        return response()->json(['message' => 'Section created successfully'], 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateAmigurumiRowRequest $request, $id)
     {
+
         $row = AmigurumiRow::find($id);
+        
         if (!$row) {
             return response()->json(['message' => 'Row not found'], 404);
         }
 
-        $validated = $request->validate([
-            'row_number' => 'sometimes|required|integer|min:1',
-            'instructions' => 'nullable|string',
-        ]);
-
-        $row->update($validated);
-        return response()->json($row);
+        $data = $request->validated();
+    
+        $row->update($data);
+        return response()->json(['message' => 'Row updated successfully'], 201);
     }
 
     public function destroy($id)

@@ -24,14 +24,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('/amigurumi-patterns', AmigurumiPatternController::class);
     //Route::apiResource('/amigurumi-patterns', AmigurumiPatternController::class);
-
-    Route::post('/amigurumi-sections', [AmigurumiSectionController::class, 'store']);
-    Route::put('/amigurumi-sections/{id}', [AmigurumiSectionController::class, 'update']);
-    Route::delete('/amigurumi-sections/{id}', [AmigurumiSectionController::class, 'destroy']);
-
-    Route::post('/amigurumi-rows', [AmigurumiRowController::class, 'store']);
-    Route::put('/amigurumi-rows/{id}', [AmigurumiRowController::class, 'update']);
-    Route::delete('/amigurumi-rows/{id}', [AmigurumiRowController::class, 'destroy']);
+    Route::apiResource('amigurumi-patterns.sections', AmigurumiSectionController::class);
+    Route::apiResource('amigurumi-patterns.sections.rows', AmigurumiRowController::class);
 });
 
 require __DIR__.'/auth.php';
