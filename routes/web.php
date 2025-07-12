@@ -15,6 +15,10 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
+
+
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -22,8 +26,8 @@ Route::middleware('auth')->group(function () {
 
     //Amigurumi edit 
 
+     
     Route::resource('/amigurumi-patterns', AmigurumiPatternController::class);
-    //Route::apiResource('/amigurumi-patterns', AmigurumiPatternController::class);
     Route::apiResource('amigurumi-patterns.sections', AmigurumiSectionController::class);
     Route::apiResource('amigurumi-patterns.sections.rows', AmigurumiRowController::class);
 });

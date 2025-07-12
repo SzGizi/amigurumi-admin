@@ -6,7 +6,10 @@ use App\Models\AmigurumiPattern;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Resources\AmigurumiPatternResource;
+use App\Http\Resources\AmigurumiSectionResource;
 use App\Http\Requests\UpdateAmigurumiPatternRequest;
+use Illuminate\Support\Facades\Log;
+
 
 class AmigurumiPatternController extends Controller
 {
@@ -34,8 +37,12 @@ class AmigurumiPatternController extends Controller
 
     public function update(UpdateAmigurumiPatternRequest $request, AmigurumiPattern $amigurumiPattern)
     {
-      // dd($request->all());
-        // Frissítés
+    
+        //Log::info('Beérkezett PUT kérés', $request->all());
+        //Log::info('Sections:', $request->input('sections'));
+    
+        
+
         $amigurumiPattern->update($request->only([
             'title',
             'yarn_description',
@@ -55,23 +62,27 @@ class AmigurumiPatternController extends Controller
             $section = $amigurumiPattern->amigurumiSections()->create([
                 'title' => $sectionData['title'] ?? '',
                 'order' => $sectionData['order'] ?? 0,
+                'amigurumi_pattern_id' => $amigurumiPattern->id
             ]);
 
             foreach ($sectionData['rows'] ?? [] as $rowData) {
+                    //Log::info($sectionData['rows']);
                 $section->amigurumiRows()->create([
                     'row_number' => $rowData['row_number'] ?? 0,
                     'instructions' => $rowData['instructions'] ?? '',
                     'stitch_number' => $rowData['stitch_number'] ?? null,
-                    'comment' => $rowData['comment'] ?? ''
+                    'comment' => $rowData['comment'] ?? '',
+                    'amigurumi_section_id' => $section->id
                 ]);
             }
           
         }
 
-        // Csak ez maradjon itt!
-        return redirect()
-            ->route('amigurumi-patterns.edit', $amigurumiPattern)
-            ->with('success', __('Pattern updated successfully.'));
+        
+       return response()->json([
+        'message' => __('Pattern updated successfully.'),
+        'pattern' => $amigurumiPattern->load('amigurumiSections.amigurumiRows')
+    ]);
     }
 
 
@@ -100,6 +111,12 @@ class AmigurumiPatternController extends Controller
    
     public function edit(AmigurumiPattern $amigurumiPattern)
     {
-        return view('amigurumi.patterns.edit', compact('amigurumiPattern'));
+        $amigurumiPattern->load('amigurumiSections.amigurumiRows');
+
+        return view('amigurumi.patterns.edit', [
+            'amigurumiPattern' => $amigurumiPattern,
+            'sectionsJson' => AmigurumiSectionResource::collection($amigurumiPattern->amigurumiSections)->toJson(),
+        ]);
+        //return view('amigurumi.patterns.edit', compact('amigurumiPattern'));
     }
 }

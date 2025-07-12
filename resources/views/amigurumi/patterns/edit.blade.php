@@ -4,13 +4,13 @@
 
 
     <div id="app">
-        {{-- {{dd(route('amigurumi-patterns.update', $amigurumiPattern))}} --}}
+      
         
         <amigurumi-pattern-edit
             :initial-title='@json($amigurumiPattern->title)'
             :initial-yarn-description='@json($amigurumiPattern->yarn_description)'
             :initial-tools-description='@json($amigurumiPattern->tools_description)'
-            :initial-sections='@json($amigurumiPattern->amigurumiSections->load("amigurumiRows"))'
+            :initial-sections='{{ $sectionsJson }}'
             update-url="{{ route('amigurumi-patterns.update', $amigurumiPattern) }}"
             
         />
