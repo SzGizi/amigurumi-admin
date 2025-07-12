@@ -20,6 +20,8 @@ class AmigurumiRowResource extends JsonResource
             'instructions' => $this->instructions,
             'created_at'   => $this->created_at->toISOString(),
             'updated_at'   => $this->updated_at->toISOString(),
+            'stitch_number' => $this->stitch_number,
+            'comment' => $this->comment,
         ];
     }
 }

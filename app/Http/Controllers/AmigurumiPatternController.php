@@ -60,6 +60,8 @@ class AmigurumiPatternController extends Controller
                 $section->amigurumiRows()->create([
                     'row_number' => $rowData['row_number'] ?? 0,
                     'instructions' => $rowData['instructions'] ?? '',
+                    'stitch_number' => $rowData['stitch_number'] ?? null,
+                    'comment' => $rowData['comment'] ?? ''
                 ]);
             }
           

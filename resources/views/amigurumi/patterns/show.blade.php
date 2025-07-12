@@ -19,9 +19,12 @@
             <ul class="list-group">
                 @foreach ($section->amigurumiRows as $row)
                     <li class="list-group-item">
-                        <strong>{{ __('Row') }} {{ $row->row_number }}:</strong> {{ $row->description }}
-                        @if($row->note)
-                            <br><small class="text-muted">{{ __('Note') }}: {{ $row->note }}</small>
+                        <strong>{{ __('Row') }} {{ $row->row_number }}:</strong> {{ $row->instructions }}
+                        @if(isset($row->stitch_number))
+                            | {{ $row->stitch_number }}
+                        @endif
+                        @if(isset($row->comment))
+                            | {{ $row->comment }}
                         @endif
                     </li>
                 @endforeach

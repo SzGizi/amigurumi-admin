@@ -51,6 +51,8 @@
                                 <button type="button" class="btn btn-sm btn-outline-danger float-end remove-row">&times;</button>
                                 <input type="number" name="sections[{{ $sectionIndex }}][rows][{{ $rowIndex }}][row_number]" class="form-control mb-1" placeholder="{{ __('Row number') }}" value="{{ $row->row_number }}">
                                 <input type="text" name="sections[{{ $sectionIndex }}][rows][{{ $rowIndex }}][instructions]" class="form-control" placeholder="{{ __('Instructions') }}" value="{{ $row->instructions }}">
+                                <input type="number" name="sections[{{ $sectionIndex }}][rows][{{ $rowIndex }}][stitch_number]" class="form-control mb-1" placeholder="{{ __('Stitch number') }}" value="{{ $row->stitch_number }}">
+                                <input type="text" name="sections[{{ $sectionIndex }}][rows][{{ $rowIndex }}][comment]" class="form-control mb-1" placeholder="{{ __('Comment') }}" value="{{ $row->comment }}">
                             </div>
                         @endforeach
                     </div>
@@ -100,7 +102,9 @@
                     <button type="button" class="btn btn-sm btn-outline-danger float-end remove-row">&times;</button>
                     <input type="number" name="sections[${sectionIdx}][rows][${rows}][row_number]" class="form-control mb-1" placeholder="{{ __('Row number') }}">
                     <input type="text" name="sections[${sectionIdx}][rows][${rows}][instructions]" class="form-control" placeholder="{{ __('Instructions') }}">
-                `;
+                    <input type="number" name="sections[${sectionIdx}][rows][${rows}][stitch_number]" class="form-control mb-1" placeholder="{{ __('Stitch number') }}">
+                    <input type="text" name="sections[${sectionIdx}][rows][${rows}][comment]" class="form-control mb-1" placeholder="{{ __('Comment') }}">
+                    `;
                 section.querySelector('.row-list').appendChild(rowDiv);
             }
 
