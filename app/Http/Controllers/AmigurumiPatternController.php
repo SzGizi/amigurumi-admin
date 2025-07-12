@@ -34,6 +34,7 @@ class AmigurumiPatternController extends Controller
 
     public function update(UpdateAmigurumiPatternRequest $request, AmigurumiPattern $amigurumiPattern)
     {
+      // dd($request->all());
         // Frissítés
         $amigurumiPattern->update($request->only([
             'title',

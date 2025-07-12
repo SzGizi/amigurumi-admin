@@ -47,7 +47,7 @@
                     <div class="row-list">
                         <label class="form-label">{{ __('Rows') }}</label>
                         @foreach ($section->amigurumiRows as $rowIndex => $row)
-                            <div class="border p-2 mb-2 row-block">
+                            <div class="border p-2 mb-2 row-block d-flex">
                                 <button type="button" class="btn btn-sm btn-outline-danger float-end remove-row">&times;</button>
                                 <input type="number" name="sections[{{ $sectionIndex }}][rows][{{ $rowIndex }}][row_number]" class="form-control mb-1" placeholder="{{ __('Row number') }}" value="{{ $row->row_number }}">
                                 <input type="text" name="sections[{{ $sectionIndex }}][rows][{{ $rowIndex }}][instructions]" class="form-control" placeholder="{{ __('Instructions') }}" value="{{ $row->instructions }}">
@@ -92,15 +92,30 @@
 
         document.addEventListener('click', function (e) {
             if (e.target.classList.contains('add-row')) {
+                
+
                 const section = e.target.closest('.section-block');
                 const rows = section.querySelectorAll('.row-block').length;
                 const sectionIdx = Array.from(document.querySelectorAll('.section-block')).indexOf(section);
+                // row_number default row_number++
+                const rowsItems = section.querySelectorAll('.row-block');
+        
+                let newRowNumber = 1;
+
+                if (rowsItems.length > 0) {
+                    const lastRow = rowsItems[rowsItems.length - 1];
+                    const lastRowNumberInput = lastRow.querySelector('input[name*="[row_number]"]');
+                    const lastRowNumber = parseInt(lastRowNumberInput.value);
+                    if (!isNaN(lastRowNumber)) {
+                        newRowNumber = lastRowNumber + 1;
+                    }
+                }
 
                 const rowDiv = document.createElement('div');
-                rowDiv.classList.add('border', 'p-2', 'mb-2', 'row-block');
+                rowDiv.classList.add('border', 'p-2', 'mb-2', 'row-block', 'd-flex');
                 rowDiv.innerHTML = `
                     <button type="button" class="btn btn-sm btn-outline-danger float-end remove-row">&times;</button>
-                    <input type="number" name="sections[${sectionIdx}][rows][${rows}][row_number]" class="form-control mb-1" placeholder="{{ __('Row number') }}">
+                    <input type="number" name="sections[${sectionIdx}][rows][${rows}][row_number]" class="form-control mb-1" placeholder="{{ __('Row number') }}" value="${newRowNumber}">
                     <input type="text" name="sections[${sectionIdx}][rows][${rows}][instructions]" class="form-control" placeholder="{{ __('Instructions') }}">
                     <input type="number" name="sections[${sectionIdx}][rows][${rows}][stitch_number]" class="form-control mb-1" placeholder="{{ __('Stitch number') }}">
                     <input type="text" name="sections[${sectionIdx}][rows][${rows}][comment]" class="form-control mb-1" placeholder="{{ __('Comment') }}">
