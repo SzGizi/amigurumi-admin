@@ -68,7 +68,7 @@ class AmigurumiPatternController extends Controller
             foreach ($sectionData['rows'] ?? [] as $rowData) {
                     //Log::info($sectionData['rows']);
                 $section->amigurumiRows()->create([
-                    'row_number' => $rowData['row_number'] ?? 0,
+                    'row_number' => $rowData['row_number'] ?? '',
                     'instructions' => $rowData['instructions'] ?? '',
                     'stitch_number' => $rowData['stitch_number'] ?? null,
                     'comment' => $rowData['comment'] ?? '',

@@ -77,7 +77,7 @@
             :key="row.id ?? rowIndex"
             class="border p-2 mb-2 d-flex flex-row gap-2"
           >
-            <input type="number" v-model.number="row.row_number" class="form-control" placeholder="Row number" />
+            <input type="text" v-model="row.row_number" class="form-control" placeholder="Row number" />
             <input type="text" v-model="row.instructions" class="form-control" placeholder="Instructions" />
             <input type="number" v-model.number="row.stitch_number" class="form-control" placeholder="Stitch number" />
             <input type="text" v-model="row.comment" class="form-control" placeholder="Comment" />

@@ -29,7 +29,7 @@ class UpdateAmigurumiPatternRequest extends FormRequest
             'sections.*.title' => 'required|string|max:255',
             'sections.*.order' => 'nullable|integer|min:0',
             'sections.*.rows' => 'nullable|array',
-            'sections.*.rows.*.row_number' => 'required|integer|min:1',
+            'sections.*.rows.*.row_number' => 'required|string|max:255',
             'sections.*.rows.*.instructions' => 'required|string|max:1000',
             'sections.*.rows.*.stitch_number' => 'integer|min:1',
             'sections.*.rows.*.comment' => 'string|max:255',
