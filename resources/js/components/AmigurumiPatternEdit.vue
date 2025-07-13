@@ -14,7 +14,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <p>Are you sure you want to delete this section?</p>
+            <p>Are you sure you want to delete this item?</p>
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -48,7 +48,7 @@
         :key="section.id ?? sectionIndex"
         class="card mb-3 p-3"
       >
-        <button type="button" class="btn btn-danger btn-sm float-end" @click="confirmDelete(sectionIndex)">
+        <button type="button" class="btn btn-danger btn-sm float-end" @click="confirmDelete('section', sectionIndex)">
           &times;
         </button>
 
@@ -67,7 +67,7 @@
           <div
             v-for="(row, rowIndex) in section.rows"
             :key="row.id ?? rowIndex"
-            class="border p-2 mb-2 d-flex flex-row gap-2 "
+            class="border p-2 mb-2 d-flex flex-row gap-2"
           >
             <input
               type="number"
@@ -96,7 +96,7 @@
             <button
               type="button"
               class="btn btn-sm btn-outline-danger align-self-end"
-              @click="removeRow(sectionIndex, rowIndex)"
+              @click="confirmDelete('row', sectionIndex, rowIndex)"
             >
               &times;
             </button>
@@ -118,14 +118,21 @@
 </template>
 
 <script>
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Modal } from 'bootstrap';
 
 export default {
-  props: ['initialSections', 'initialTitle', 'initialYarnDescription', 'initialToolsDescription', 'updateUrl'],
+  props: [
+    'initialSections',
+    'initialTitle',
+    'initialYarnDescription',
+    'initialToolsDescription',
+    'updateUrl'
+  ],
   data() {
     return {
       isSaving: false,
-      sectionToDeleteIndex: null,
+      deleteTarget: null,
       pattern: {
         title: this.initialTitle,
         yarn_description: this.initialYarnDescription,
@@ -138,25 +145,16 @@ export default {
         }))
       },
       success: null,
-      error: null
+      error: null,
+      modalInstance: null,
     };
+  },
+  mounted() {
+    this.modalInstance = new Modal(this.$refs.deleteModal);
   },
   methods: {
     addSection() {
       this.pattern.sections.push({ title: '', order: 0, rows: [] });
-    },
-    confirmDelete(index) {
-      this.sectionToDeleteIndex = index;
-      const modal = new Modal(this.$refs.deleteModal);
-      modal.show();
-    },
-    deleteConfirmed() {
-      this.removeSection(this.sectionToDeleteIndex);
-      const modal = Modal.getInstance(this.$refs.deleteModal);
-      modal.hide();
-    },
-    removeSection(index) {
-      this.pattern.sections.splice(index, 1);
     },
     addRow(sectionIndex) {
       this.pattern.sections[sectionIndex].rows.push({
@@ -166,8 +164,27 @@ export default {
         comment: ''
       });
     },
+    removeSection(index) {
+      this.pattern.sections.splice(index, 1);
+    },
     removeRow(sectionIndex, rowIndex) {
       this.pattern.sections[sectionIndex].rows.splice(rowIndex, 1);
+    },
+    confirmDelete(type, sectionIndex, rowIndex = null) {
+      this.deleteTarget = { type, sectionIndex, rowIndex };
+      this.modalInstance.show();
+    },
+    deleteConfirmed() {
+      if (!this.deleteTarget) return;
+
+      if (this.deleteTarget.type === 'section') {
+        this.removeSection(this.deleteTarget.sectionIndex);
+      } else if (this.deleteTarget.type === 'row') {
+        this.removeRow(this.deleteTarget.sectionIndex, this.deleteTarget.rowIndex);
+      }
+
+      this.modalInstance.hide();
+      this.deleteTarget = null;
     },
     submit() {
       this.isSaving = true;
