@@ -48,18 +48,26 @@
         :key="section.id ?? sectionIndex"
         class="card mb-3 p-3"
       >
-        <button type="button" class="btn btn-danger btn-sm float-end" @click="confirmDelete('section', sectionIndex)">
-          &times;
-        </button>
+      <div class="p-2 mb-2 d-flex flex-row  justify-content-between gap-2">
+         
 
-        <div class="mb-2">
-          <label class="form-label">Section Title</label>
-          <input type="text" v-model="section.title" class="form-control" />
-        </div>
+          <div class="mb-2">
+            <label class="form-label">Section Title</label>
+            <input type="text" v-model="section.title" class="form-control" />
+          </div>
 
-        <div class="mb-2">
-          <label class="form-label">Order</label>
-          <input type="number" v-model.number="section.order" class="form-control" />
+          <div class="mb-2">
+            <label class="form-label">Order</label>
+            <input type="number" v-model.number="section.order" class="form-control" />
+          </div>
+          <div class="align-content-center btn-contanier">
+            <button type="button" class="btn btn-sm btn-primary align-self-end me-2" @click="duplicateSection(sectionIndex)">⧉</button>
+
+            <button type="button" class="btn btn-danger btn-sm align-self-end" @click="confirmDelete('section', sectionIndex)">
+              &times;
+            </button>
+          </div>
+          
         </div>
 
         <div class="row-list">
@@ -69,43 +77,21 @@
             :key="row.id ?? rowIndex"
             class="border p-2 mb-2 d-flex flex-row gap-2"
           >
-            <input
-              type="number"
-              v-model.number="row.row_number"
-              class="form-control"
-              placeholder="Row number"
-            />
-            <input
-              type="text"
-              v-model="row.instructions"
-              class="form-control"
-              placeholder="Instructions"
-            />
-            <input
-              type="number"
-              v-model.number="row.stitch_number"
-              class="form-control"
-              placeholder="Stitch number"
-            />
-            <input
-              type="text"
-              v-model="row.comment"
-              class="form-control"
-              placeholder="Comment"
-            />
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-danger align-self-end"
-              @click="confirmDelete('row', sectionIndex, rowIndex)"
-            >
+            <input type="number" v-model.number="row.row_number" class="form-control" placeholder="Row number" />
+            <input type="text" v-model="row.instructions" class="form-control" placeholder="Instructions" />
+            <input type="number" v-model.number="row.stitch_number" class="form-control" placeholder="Stitch number" />
+            <input type="text" v-model="row.comment" class="form-control" placeholder="Comment" />
+
+            <!-- Duplicate Row Button -->
+            <button type="button" class="btn btn-sm btn-outline-primary align-self-end" @click="duplicateRow(sectionIndex, rowIndex)">⧉</button>
+
+            <button type="button" class="btn btn-sm btn-outline-danger align-self-end" @click="confirmDelete('row', sectionIndex, rowIndex)">
               &times;
             </button>
           </div>
         </div>
 
-        <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">
-          Add Row
-        </button>
+        <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">Add Row</button>
       </div>
 
       <button type="button" class="btn btn-outline-primary my-3" @click="addSection">Add Section</button>
@@ -122,13 +108,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Modal } from 'bootstrap';
 
 export default {
-  props: [
-    'initialSections',
-    'initialTitle',
-    'initialYarnDescription',
-    'initialToolsDescription',
-    'updateUrl'
-  ],
+  props: ['initialSections', 'initialTitle', 'initialYarnDescription', 'initialToolsDescription', 'updateUrl'],
   data() {
     return {
       isSaving: false,
@@ -164,6 +144,22 @@ export default {
         comment: ''
       });
     },
+    duplicateRow(sectionIndex, rowIndex) {
+      const row = this.pattern.sections[sectionIndex].rows[rowIndex];
+      const newRow = { ...row};
+      this.pattern.sections[sectionIndex].rows.splice(rowIndex + 1, 0, newRow);
+    },
+    duplicateSection(sectionIndex) {
+
+      const section = this.pattern.sections[sectionIndex];
+      const newSection = { ...section};
+      this.pattern.sections.splice(sectionIndex + 1, 0, newSection);
+
+      this.pattern.sections[sectionIndex].rows.forEach(row => {
+        const newRow = { ...row};
+        this.pattern.sections[newSection.sectionIndex].rows.splice(newRow.rowIndex + 1, 0, newRow);
+      });
+    },
     removeSection(index) {
       this.pattern.sections.splice(index, 1);
     },
@@ -176,13 +172,11 @@ export default {
     },
     deleteConfirmed() {
       if (!this.deleteTarget) return;
-
       if (this.deleteTarget.type === 'section') {
         this.removeSection(this.deleteTarget.sectionIndex);
       } else if (this.deleteTarget.type === 'row') {
         this.removeRow(this.deleteTarget.sectionIndex, this.deleteTarget.rowIndex);
       }
-
       this.modalInstance.hide();
       this.deleteTarget = null;
     },
@@ -194,10 +188,10 @@ export default {
           'Content-Type': 'application/json'
         }
       })
-      .then(response => {
+      .then(() => {
         this.success = 'Pattern updated successfully.';
         this.error = null;
-        setTimeout(() => this.success = null, 3000);
+        setTimeout(() => (this.success = null), 3000);
       })
       .catch(error => {
         this.success = null;
@@ -206,11 +200,9 @@ export default {
         } else {
           this.error = 'Network error.';
         }
-        setTimeout(() => this.error = null, 5000);
+        setTimeout(() => (this.error = null), 5000);
       })
-      .finally(() => {
-        this.isSaving = false;
-      });
+      .finally(() => (this.isSaving = false));
     }
   }
 };
