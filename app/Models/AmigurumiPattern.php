@@ -10,7 +10,7 @@ class AmigurumiPattern extends Model
 
     public function amigurumiSections()
     {
-        return $this->hasMany(AmigurumiSection::class);
+        return $this->hasMany(AmigurumiSection::class)->orderBy('order');
     }
 
 

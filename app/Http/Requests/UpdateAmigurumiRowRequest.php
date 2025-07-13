@@ -26,6 +26,7 @@ class UpdateAmigurumiRowRequest extends FormRequest
             'row_number' => 'sometimes|required|string|max:255',
             'stitch_number' => 'nullable|integer|min:1',
             'comment' => 'nullable|string|max:255',
+            'order' => 'required|integer',
         ];
     }
 }

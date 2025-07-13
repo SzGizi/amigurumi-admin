@@ -27,12 +27,13 @@ class UpdateAmigurumiPatternRequest extends FormRequest
             'tools_description' => 'nullable|string',
             'sections' => 'nullable|array',
             'sections.*.title' => 'required|string|max:255',
-            'sections.*.order' => 'nullable|integer|min:0',
+            'sections.*.order' => 'required|integer|min:0',
             'sections.*.rows' => 'nullable|array',
             'sections.*.rows.*.row_number' => 'required|string|max:255',
             'sections.*.rows.*.instructions' => 'required|string|max:1000',
             'sections.*.rows.*.stitch_number' => 'nullable|integer|min:1',
             'sections.*.rows.*.comment' => 'nullable|string|max:255',
+            'sections.*.rows.*.order' => 'required|integer',
         ];
     }
 }

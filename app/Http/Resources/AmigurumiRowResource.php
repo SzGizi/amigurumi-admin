@@ -22,6 +22,7 @@ class AmigurumiRowResource extends JsonResource
             'updated_at'   => $this->updated_at->toISOString(),
             'stitch_number' => $this->stitch_number,
             'comment' => $this->comment,
+            'order' => $this->order,
         ];
     }
 }

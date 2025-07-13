@@ -43,57 +43,65 @@
 
       <!-- Sections -->
       <h4 class="mt-4">Sections</h4>
+      <div ref="sectionContainer">
       <div
         v-for="(section, sectionIndex) in pattern.sections"
-        :key="section.id ?? sectionIndex"
-        class="card mb-3 p-3"
+        :key="section.id != null ? section.id : 'section-' + sectionIndex"
+        class="card mb-3 p-3 section-card"
       >
-      <div class="p-2 mb-2 d-flex flex-row  justify-content-between gap-2">
+        <span class="drag-handle cursor-move">⠿</span>
+        <input type="hidden" v-model.number="section.order" />
+    
+        <div class="p-2 mb-2 d-flex flex-row  justify-content-between gap-2">
+              <div class="mb-2">
+                <label class="form-label">Section Title</label>
+                <input type="text" v-model="section.title" class="form-control" required  />
+              </div>
+
+              <div class="align-content-center btn-contanier">
+                
+                <button @click="moveSectionUp(sectionIndex)" :disabled="sectionIndex === 0">⬆️</button>
+                <button @click="moveSectionDown(sectionIndex)" :disabled="sectionIndex === pattern.sections.length - 1">⬇️</button>
+
+                <button type="button" class="btn btn-sm btn-primary align-self-end me-2" @click="duplicateSection(sectionIndex)">⧉</button>
+
+                <button type="button" class="btn btn-danger btn-sm align-self-end" @click="confirmDelete('section', sectionIndex)">
+                  &times;
+                </button>
+              </div>
+              </div>
+            
+          <h3 class="">Rows</h3>
+          <div class="row-list">
          
+            <div
+                v-for="(row, rowIndex) in section.rows"
+                :key="row.id != null ? row.id : 'row-' + row.order"
+                class="border p-2 mb-2 d-flex flex-row gap-2"
+              >
+              <span class="drag-handle-row" style="cursor: grab; user-select: none; padding: 0 8px;">⠿</span>
+              <span>{{ row.order }}</span>
+              <input type="hidden" v-model.number="row.order" />
+              <input type="text" v-model="row.row_number" class="form-control" placeholder="Row number" required />
+              <input type="text" v-model="row.instructions" class="form-control" placeholder="Instructions" required />
+              <input type="number" v-model.number="row.stitch_number" class="form-control" placeholder="Stitch number" />
+              <input type="text" v-model="row.comment" class="form-control" placeholder="Comment" />
 
-          <div class="mb-2">
-            <label class="form-label">Section Title</label>
-            <input type="text" v-model="section.title" class="form-control" required  />
+
+              <button type="button" class="btn btn-sm btn-outline-primary align-self-end" @click="duplicateRow(sectionIndex, rowIndex)">⧉</button>
+
+              <button type="button" class="btn btn-sm btn-outline-danger align-self-end" @click="confirmDelete('row', sectionIndex, rowIndex)">
+                &times;
+              </button>
+  
+              <button @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">⬆️</button>
+              <button @click="moveRowDown(sectionIndex, rowIndex)" :disabled="rowIndex === section.rows.length - 1">⬇️</button>
+            </div>
           </div>
-
-          <div class="mb-2">
-            <label class="form-label">Order</label>
-            <input type="number" v-model.number="section.order" class="form-control" />
-          </div>
-          <div class="align-content-center btn-contanier">
-            <button type="button" class="btn btn-sm btn-primary align-self-end me-2" @click="duplicateSection(sectionIndex)">⧉</button>
-
-            <button type="button" class="btn btn-danger btn-sm align-self-end" @click="confirmDelete('section', sectionIndex)">
-              &times;
-            </button>
-          </div>
-          
-        </div>
-
-        <div class="row-list">
-          <label class="form-label">Rows</label>
-          <div
-            v-for="(row, rowIndex) in section.rows"
-            :key="row.id ?? rowIndex"
-            class="border p-2 mb-2 d-flex flex-row gap-2"
-          >
-            <input type="text" v-model="row.row_number" class="form-control" placeholder="Row number" required />
-            <input type="text" v-model="row.instructions" class="form-control" placeholder="Instructions" required />
-            <input type="number" v-model.number="row.stitch_number" class="form-control" placeholder="Stitch number" />
-            <input type="text" v-model="row.comment" class="form-control" placeholder="Comment" />
-
-            <!-- Duplicate Row Button -->
-            <button type="button" class="btn btn-sm btn-outline-primary align-self-end" @click="duplicateRow(sectionIndex, rowIndex)">⧉</button>
-
-            <button type="button" class="btn btn-sm btn-outline-danger align-self-end" @click="confirmDelete('row', sectionIndex, rowIndex)">
-              &times;
-            </button>
-          </div>
-        </div>
-
+       
         <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">Add Row</button>
       </div>
-
+      </div>
       <button type="button" class="btn btn-outline-primary my-3" @click="addSection">Add Section</button>
       <button type="submit" class="btn btn-primary" :disabled="isSaving">
         <span v-if="isSaving" class="spinner-border spinner-border-sm me-1"></span>
@@ -106,6 +114,7 @@
 <script>
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Modal } from 'bootstrap';
+import Sortable from 'sortablejs';
 
 export default {
   props: ['initialSections', 'initialTitle', 'initialYarnDescription', 'initialToolsDescription', 'updateUrl'],
@@ -121,7 +130,14 @@ export default {
           id: section.id,
           title: section.title,
           order: section.order,
-          rows: section.rows || []
+          rows: (section.rows ?? []).map(row => ({
+            id: row.id ?? null,
+            row_number: row.row_number ?? '',
+            instructions: row.instructions ?? '',
+            stitch_number: row.stitch_number ?? null,
+            comment: row.comment ?? '',
+            order: row.order ?? 0,
+          }))
         }))
       },
       success: null,
@@ -131,37 +147,71 @@ export default {
   },
   mounted() {
     this.modalInstance = new Modal(this.$refs.deleteModal);
+
+    this.$nextTick(() => {
+      Sortable.create(this.$refs.sectionContainer, {
+        handle: '.drag-handle',
+        animation: 150,
+        onEnd: evt => {
+          const moved = this.pattern.sections.splice(evt.oldIndex, 1)[0];
+          this.pattern.sections.splice(evt.newIndex, 0, moved);
+          this.updateSectionOrders();
+        }
+      });
+      this.initSortableRows();
+    });
+
+    
   },
+  onEnd: evt => {
+  const rows = this.pattern.sections[sectionIndex].rows;
+  console.log('Before splice:', rows, 'oldIndex:', evt.oldIndex, 'newIndex:', evt.newIndex);
+
+  const movedRow = rows.splice(evt.oldIndex, 1)[0];
+
+  console.log('Moved row:', movedRow);
+
+  rows.splice(evt.newIndex, 0, movedRow);
+
+  console.log('After splice:', rows);
+
+  this.updateRowOrders(sectionIndex);
+},
   methods: {
     addSection() {
-      this.pattern.sections.push({ title: '', order: 0, rows: [] });
+      this.pattern.sections.push({ 
+        title: '', 
+        id: null,
+        order: this.pattern.sections.length + 1,
+        rows: [] 
+      });
     },
     addRow(sectionIndex) {
-      const rows   = this.pattern.sections[sectionIndex].rows;
-      const last   = rows[rows.length - 1] || null;
-      let nextNum  = '';           // default when we cannot auto‑increment
+      const rows = this.pattern.sections[sectionIndex].rows;
+      const last = rows[rows.length - 1] || null;
+      let nextNum = '';
 
       if (last) {
-        // Try to read the previous row_number as an integer
         const parsed = parseInt(last.row_number, 10);
-
-        // Only increment if the *entire* value is a number (e.g. "5", "12")
         if (!isNaN(parsed) && String(parsed) === String(last.row_number)) {
           nextNum = parsed + 1;
         }
       }
 
       rows.push({
-        row_number   : nextNum === '' ? '' : String(nextNum),     // ''  or incremented numeric value
-        instructions : '',
+        row_number: nextNum === '' ? '' : String(nextNum),
+        instructions: '',
         stitch_number: null,
-        comment      : ''
+        comment: '',
+        id: null,
+        order: rows.length + 1  // Itt adjunk alapértelmezett order értéket
       });
     },
     duplicateRow(sectionIndex, rowIndex) {
       const row = this.pattern.sections[sectionIndex].rows[rowIndex];
-      const newRow = { ...row,row_number: String(row.row_number)};
+      const newRow = { ...row, row_number: String(row.row_number), order: row.order + 1 };
       this.pattern.sections[sectionIndex].rows.splice(rowIndex + 1, 0, newRow);
+      this.updateRowOrders(sectionIndex); // Frissítsd az order-eket utána
     },
     duplicateSection(sectionIndex) {
 
@@ -194,6 +244,78 @@ export default {
       this.modalInstance.hide();
       this.deleteTarget = null;
     },
+    moveSectionUp(index) {
+      if (index > 0) {
+        const sections = this.pattern.sections;
+        [sections[index - 1], sections[index]] = [sections[index], sections[index - 1]];
+        this.updateSectionOrders();
+      }
+    },
+    moveSectionDown(index) {
+      if (index < this.pattern.sections.length - 1) {
+        const sections = this.pattern.sections;
+        [sections[index + 1], sections[index]] = [sections[index], sections[index + 1]];
+        this.updateSectionOrders();
+      }
+    },
+    updateSectionOrders() {
+      this.pattern.sections.forEach((section, index) => {
+        section.order = index + 1;
+      });
+    },
+    moveRowUp(sectionIndex, rowIndex) {
+      if (rowIndex === 0) return;
+      const rows = this.pattern.sections[sectionIndex].rows;
+
+      [rows[rowIndex - 1], rows[rowIndex]] = [rows[rowIndex], rows[rowIndex - 1]];
+
+      this.updateRowOrders(sectionIndex);
+    },
+    moveRowDown(sectionIndex, rowIndex) {
+      const rows = this.pattern.sections[sectionIndex].rows;
+      if (rowIndex >= rows.length - 1) return;
+
+      [rows[rowIndex + 1], rows[rowIndex]] = [rows[rowIndex], rows[rowIndex + 1]];
+
+      this.updateRowOrders(sectionIndex);
+    },
+    
+    initSortableRows() {
+      this.pattern.sections.forEach((section, sectionIndex) => {
+        const sectionEl = this.$refs.sectionContainer.querySelectorAll('.section-card')[sectionIndex];
+        if (!sectionEl) {
+          console.warn(`Section container not found for index ${sectionIndex}`);
+          return;
+        }
+        const rowListContainer = sectionEl.querySelector('.row-list');
+        if (!rowListContainer) {
+          console.warn(`Row list container not found for section index ${sectionIndex}`);
+          return;
+        }
+
+        Sortable.create(rowListContainer, {
+          handle: '.drag-handle-row',
+          animation: 150,
+          onEnd: evt => {
+            const rows = this.pattern.sections[sectionIndex].rows;
+            const movedRow = rows.splice(evt.oldIndex, 1)[0];
+            rows.splice(evt.newIndex, 0, movedRow);
+            this.updateRowOrders(sectionIndex);
+          }
+        });
+      });
+    },
+    updateRowOrders(sectionIndex) {
+      const rows = this.pattern.sections[sectionIndex].rows;
+      if (!rows) return;
+      this.pattern.sections[sectionIndex].rows = rows.map((row, idx) => ({
+        ...row,
+        order: idx + 1
+      }));
+      console.log("Updated rows orders:", this.pattern.sections[sectionIndex].rows.map(r => r.order));
+    },
+
+
     submit() {
       this.isSaving = true;
     

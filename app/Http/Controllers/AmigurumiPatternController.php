@@ -72,6 +72,7 @@ class AmigurumiPatternController extends Controller
                     'instructions' => $rowData['instructions'] ?? '',
                     'stitch_number' => $rowData['stitch_number'] ?? null,
                     'comment' => $rowData['comment'] ?? '',
+                    'order' => $rowData['order'] ?? null,
                     'amigurumi_section_id' => $section->id
                 ]);
             }
