@@ -91,7 +91,10 @@
       </div>
 
       <button type="button" class="btn btn-outline-primary my-3" @click="addSection">Add Section</button>
-      <button type="submit" class="btn btn-primary">Save</button>
+      <button type="submit" class="btn btn-primary" :disabled="isSaving">
+        <span v-if="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+        {{ isSaving ? 'Saving...' : 'Save' }}
+      </button>
     </form>
   </div>
 </template>
@@ -103,6 +106,7 @@ export default {
   props: ['initialSections', 'initialTitle', 'initialYarnDescription', 'initialToolsDescription', 'updateUrl'],
   data() {
     return {
+      isSaving: false,
       pattern: {
         title: this.initialTitle,
         yarn_description: this.initialYarnDescription,
@@ -111,16 +115,13 @@ export default {
           id: section.id,
           title: section.title,
           order: section.order,
-          rows: section.rows  || []
+          rows: section.rows || []
         }))
       },
       success: null,
       error: null
     };
   },
-  mounted() {
-  console.log('Initial Sections:', this.pattern.sections);
-},
   methods: {
     addSection() {
       this.pattern.sections.push({ title: '', order: 0, rows: [] });
@@ -140,6 +141,7 @@ export default {
       this.pattern.sections[sectionIndex].rows.splice(rowIndex, 1);
     },
     submit() {
+      this.isSaving = true;
       axios.put(this.updateUrl, this.pattern, {
         headers: {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -150,6 +152,7 @@ export default {
         this.success = 'Pattern updated successfully.';
         this.error = null;
         console.log('Sikeres mentés:', response.data);
+        setTimeout(() => this.success = null, 3000);
       })
       .catch(error => {
         this.success = null;
@@ -159,6 +162,10 @@ export default {
           this.error = 'Hálózati hiba.';
         }
         console.error('Mentés hiba:', error);
+        setTimeout(() => this.error = null, 5000);
+      })
+      .finally(() => {
+        this.isSaving = false;
       });
     }
   }
