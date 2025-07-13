@@ -46,7 +46,7 @@
       <div ref="sectionContainer">
       <div
         v-for="(section, sectionIndex) in pattern.sections"
-        :key="section.id != null ? section.id : 'section-' + sectionIndex"
+        :key="section.uid"
         class="card mb-3 p-3 section-card"
       >
         <span class="drag-handle cursor-move">⠿</span>
@@ -76,11 +76,11 @@
          
             <div
                 v-for="(row, rowIndex) in section.rows"
-                :key="row.id != null ? row.id : 'row-' + row.order"
+                :key="row.uid"
                 class="border p-2 mb-2 d-flex flex-row gap-2"
               >
               <span class="drag-handle-row" style="cursor: grab; user-select: none; padding: 0 8px;">⠿</span>
-              <span>{{ row.order }}</span>
+            
               <input type="hidden" v-model.number="row.order" />
               <input type="text" v-model="row.row_number" class="form-control" placeholder="Row number" required />
               <input type="text" v-model="row.instructions" class="form-control" placeholder="Instructions" required />
@@ -163,25 +163,20 @@ export default {
 
     
   },
-  onEnd: evt => {
-  const rows = this.pattern.sections[sectionIndex].rows;
-  console.log('Before splice:', rows, 'oldIndex:', evt.oldIndex, 'newIndex:', evt.newIndex);
-
-  const movedRow = rows.splice(evt.oldIndex, 1)[0];
-
-  console.log('Moved row:', movedRow);
-
-  rows.splice(evt.newIndex, 0, movedRow);
-
-  console.log('After splice:', rows);
-
-  this.updateRowOrders(sectionIndex);
-},
+  watch: {
+    pattern: {
+      deep: true,
+      handler() {
+        this.$nextTick(this.initSortableRows);
+      }
+    }
+  },
   methods: {
     addSection() {
       this.pattern.sections.push({ 
         title: '', 
         id: null,
+        uid: crypto.randomUUID(),
         order: this.pattern.sections.length + 1,
         rows: [] 
       });
@@ -204,19 +199,21 @@ export default {
         stitch_number: null,
         comment: '',
         id: null,
+        uid: crypto.randomUUID(),
         order: rows.length + 1  // Itt adjunk alapértelmezett order értéket
       });
+      this.updateRowOrders(sectionIndex); // Frissítsd az order-eket utána
     },
     duplicateRow(sectionIndex, rowIndex) {
       const row = this.pattern.sections[sectionIndex].rows[rowIndex];
-      const newRow = { ...row, row_number: String(row.row_number), order: row.order + 1 };
+      const newRow = { ...row, row_number: String(row.row_number), order: row.order + 1, uid: crypto.randomUUID() };
       this.pattern.sections[sectionIndex].rows.splice(rowIndex + 1, 0, newRow);
       this.updateRowOrders(sectionIndex); // Frissítsd az order-eket utána
     },
     duplicateSection(sectionIndex) {
 
       const section = this.pattern.sections[sectionIndex];
-      const newSection = { ...section};
+      const newSection = { ...section, uid: crypto.randomUUID()};
       this.pattern.sections.splice(sectionIndex + 1, 0, newSection);
 
       this.pattern.sections[sectionIndex].rows.forEach(row => {
@@ -306,13 +303,9 @@ export default {
       });
     },
     updateRowOrders(sectionIndex) {
-      const rows = this.pattern.sections[sectionIndex].rows;
-      if (!rows) return;
-      this.pattern.sections[sectionIndex].rows = rows.map((row, idx) => ({
-        ...row,
-        order: idx + 1
-      }));
-      console.log("Updated rows orders:", this.pattern.sections[sectionIndex].rows.map(r => r.order));
+      this.pattern.sections[sectionIndex].rows
+      .forEach((row, i) => row.order = i + 1);
+      
     },
 
 
