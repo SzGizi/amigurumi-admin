@@ -137,11 +137,25 @@ export default {
       this.pattern.sections.push({ title: '', order: 0, rows: [] });
     },
     addRow(sectionIndex) {
-      this.pattern.sections[sectionIndex].rows.push({
-        row_number: this.pattern.sections[sectionIndex].rows.length + 1,
-        instructions: '',
+      const rows   = this.pattern.sections[sectionIndex].rows;
+      const last   = rows[rows.length - 1] || null;
+      let nextNum  = '';           // default when we cannot auto‑increment
+
+      if (last) {
+        // Try to read the previous row_number as an integer
+        const parsed = parseInt(last.row_number, 10);
+
+        // Only increment if the *entire* value is a number (e.g. "5", "12")
+        if (!isNaN(parsed) && String(parsed) === String(last.row_number)) {
+          nextNum = parsed + 1;
+        }
+      }
+
+      rows.push({
+        row_number   : nextNum,     // ''  or incremented numeric value
+        instructions : '',
         stitch_number: null,
-        comment: ''
+        comment      : ''
       });
     },
     duplicateRow(sectionIndex, rowIndex) {
