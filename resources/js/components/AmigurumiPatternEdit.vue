@@ -5,6 +5,25 @@
     <div v-if="success" class="alert alert-success">{{ success }}</div>
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
+    <!-- Confirm Deletion Modal -->
+    <div class="modal fade" tabindex="-1" ref="deleteModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirm Deletion</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete this section?</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn btn-danger" @click="deleteConfirmed">Yes, delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <form @submit.prevent="submit">
       <!-- Pattern Info -->
       <div class="mb-3">
@@ -29,7 +48,7 @@
         :key="section.id ?? sectionIndex"
         class="card mb-3 p-3"
       >
-        <button type="button" class="btn btn-danger btn-sm float-end" @click="removeSection(sectionIndex)">
+        <button type="button" class="btn btn-danger btn-sm float-end" @click="confirmDelete(sectionIndex)">
           &times;
         </button>
 
@@ -50,7 +69,6 @@
             :key="row.id ?? rowIndex"
             class="border p-2 mb-2 d-flex flex-row gap-2 "
           >
-            
             <input
               type="number"
               v-model.number="row.row_number"
@@ -99,14 +117,15 @@
   </div>
 </template>
 
-
-
 <script>
+import { Modal } from 'bootstrap';
+
 export default {
   props: ['initialSections', 'initialTitle', 'initialYarnDescription', 'initialToolsDescription', 'updateUrl'],
   data() {
     return {
       isSaving: false,
+      sectionToDeleteIndex: null,
       pattern: {
         title: this.initialTitle,
         yarn_description: this.initialYarnDescription,
@@ -125,6 +144,16 @@ export default {
   methods: {
     addSection() {
       this.pattern.sections.push({ title: '', order: 0, rows: [] });
+    },
+    confirmDelete(index) {
+      this.sectionToDeleteIndex = index;
+      const modal = new Modal(this.$refs.deleteModal);
+      modal.show();
+    },
+    deleteConfirmed() {
+      this.removeSection(this.sectionToDeleteIndex);
+      const modal = Modal.getInstance(this.$refs.deleteModal);
+      modal.hide();
     },
     removeSection(index) {
       this.pattern.sections.splice(index, 1);
@@ -151,17 +180,15 @@ export default {
       .then(response => {
         this.success = 'Pattern updated successfully.';
         this.error = null;
-        console.log('Sikeres mentés:', response.data);
         setTimeout(() => this.success = null, 3000);
       })
       .catch(error => {
         this.success = null;
         if (error.response && error.response.data) {
-          this.error = error.response.data.message || 'Valami hiba történt a szerveren.';
+          this.error = error.response.data.message || 'An error occurred on the server.';
         } else {
-          this.error = 'Hálózati hiba.';
+          this.error = 'Network error.';
         }
-        console.error('Mentés hiba:', error);
         setTimeout(() => this.error = null, 5000);
       })
       .finally(() => {
@@ -171,4 +198,3 @@ export default {
   }
 };
 </script>
-

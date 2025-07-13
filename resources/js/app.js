@@ -1,5 +1,6 @@
 import './bootstrap';
-import 'bootstrap';
+//import 'bootstrap';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { createApp } from 'vue';
 import axios from 'axios';
 import AmigurumiPatternEdit from './components/AmigurumiPatternEdit.vue';
