@@ -53,7 +53,7 @@
 
           <div class="mb-2">
             <label class="form-label">Section Title</label>
-            <input type="text" v-model="section.title" class="form-control" />
+            <input type="text" v-model="section.title" class="form-control" required  />
           </div>
 
           <div class="mb-2">
@@ -77,8 +77,8 @@
             :key="row.id ?? rowIndex"
             class="border p-2 mb-2 d-flex flex-row gap-2"
           >
-            <input type="text" v-model="row.row_number" class="form-control" placeholder="Row number" />
-            <input type="text" v-model="row.instructions" class="form-control" placeholder="Instructions" />
+            <input type="text" v-model="row.row_number" class="form-control" placeholder="Row number" required />
+            <input type="text" v-model="row.instructions" class="form-control" placeholder="Instructions" required />
             <input type="number" v-model.number="row.stitch_number" class="form-control" placeholder="Stitch number" />
             <input type="text" v-model="row.comment" class="form-control" placeholder="Comment" />
 
@@ -152,7 +152,7 @@ export default {
       }
 
       rows.push({
-        row_number   : nextNum,     // ''  or incremented numeric value
+        row_number   : nextNum === '' ? '' : String(nextNum),     // ''  or incremented numeric value
         instructions : '',
         stitch_number: null,
         comment      : ''
@@ -160,7 +160,7 @@ export default {
     },
     duplicateRow(sectionIndex, rowIndex) {
       const row = this.pattern.sections[sectionIndex].rows[rowIndex];
-      const newRow = { ...row};
+      const newRow = { ...row,row_number: String(row.row_number)};
       this.pattern.sections[sectionIndex].rows.splice(rowIndex + 1, 0, newRow);
     },
     duplicateSection(sectionIndex) {
@@ -196,6 +196,8 @@ export default {
     },
     submit() {
       this.isSaving = true;
+    
+
       axios.put(this.updateUrl, this.pattern, {
         headers: {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -214,7 +216,7 @@ export default {
         } else {
           this.error = 'Network error.';
         }
-        setTimeout(() => (this.error = null), 5000);
+        setTimeout(() => (this.error = null), 50000);
       })
       .finally(() => (this.isSaving = false));
     }
