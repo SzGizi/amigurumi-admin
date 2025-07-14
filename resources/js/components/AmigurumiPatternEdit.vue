@@ -83,84 +83,95 @@
                   &times;
                 </button>
               </div>
+              <button
+                class="btn btn-sm btn-outline-secondary mb-2"
+                type="button"
+                @click="toggleCollapse(sectionIndex)"
+              >
+                Toggle Rows
+              </button>
             </div>
 
             <h3>Rows</h3>
-            <draggable
-              v-model="section.rows"
-              :group="'rows' + sectionIndex"
-              handle=".drag-handle-row"
-              animation="150"
-              @update="() => updateRowOrders(sectionIndex)"
-              item-key="uid"
-              :ref="'draggableRows' + sectionIndex"
-            >
-              <template #item="{element: row, index: rowIndex}">
-                <div class="border p-2 mb-2 d-flex flex-row gap-2" :key="row.uid">
-                  <span
-                    class="drag-handle-row"
-                    style="cursor: grab; user-select: none; padding: 0 8px;"
-                  >
-                    ⠿
-                  </span>
+            <div class="collapse row-list" :id="'rowsCollapse' + sectionIndex">
+              <draggable
+                v-model="section.rows"
+                :group="'rows' + sectionIndex"
+                handle=".drag-handle-row"
+                animation="150"
+                @update="() => updateRowOrders(sectionIndex)"
+                item-key="uid"
+                :ref="'draggableRows' + sectionIndex"
+              >
+              
 
-                  <input type="hidden" v-model.number="row.order" />
-                  <input
-                    type="text"
-                    v-model="row.row_number"
-                    class="form-control"
-                    placeholder="Row number"
-                    required
-                  />
-                  <input
-                    type="text"
-                    v-model="row.instructions"
-                    class="form-control"
-                    placeholder="Instructions"
-                    required
-                  />
-                  <input
-                    type="number"
-                    v-model.number="row.stitch_number"
-                    class="form-control"
-                    placeholder="Stitch number"
-                  />
-                  <input
-                    type="text"
-                    v-model="row.comment"
-                    class="form-control"
-                    placeholder="Comment"
-                  />
+                  <template #item="{element: row, index: rowIndex}">
+                    <div class="border p-2 mb-2 d-flex flex-row gap-2 " :key="row.uid">
+                      <span
+                        class="drag-handle-row"
+                        style="cursor: grab; user-select: none; padding: 0 8px;"
+                      >
+                        ⠿
+                      </span>
 
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-primary align-self-end"
-                    @click="duplicateRow(sectionIndex, rowIndex)"
-                  >
-                    ⧉
-                  </button>
+                      <input type="hidden" v-model.number="row.order" />
+                      <input
+                        type="text"
+                        v-model="row.row_number"
+                        class="form-control"
+                        placeholder="Row number"
+                        required
+                      />
+                      <input
+                        type="text"
+                        v-model="row.instructions"
+                        class="form-control"
+                        placeholder="Instructions"
+                        required
+                      />
+                      <input
+                        type="number"
+                        v-model.number="row.stitch_number"
+                        class="form-control"
+                        placeholder="Stitch number"
+                      />
+                      <input
+                        type="text"
+                        v-model="row.comment"
+                        class="form-control"
+                        placeholder="Comment"
+                      />
 
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger align-self-end"
-                    @click="confirmDelete('row', sectionIndex, rowIndex)"
-                  >
-                    &times;
-                  </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary align-self-end"
+                        @click="duplicateRow(sectionIndex, rowIndex)"
+                      >
+                        ⧉
+                      </button>
 
-                  <button @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">
-                    ⬆️
-                  </button>
-                  <button
-                    @click="moveRowDown(sectionIndex, rowIndex)"
-                    :disabled="rowIndex === section.rows.length - 1"
-                  >
-                    ⬇️
-                  </button>
-                </div>
-              </template>
-            </draggable>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger align-self-end"
+                        @click="confirmDelete('row', sectionIndex, rowIndex)"
+                      >
+                        &times;
+                      </button>
 
+                      <button @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">
+                        ⬆️
+                      </button>
+                      <button
+                        @click="moveRowDown(sectionIndex, rowIndex)"
+                        :disabled="rowIndex === section.rows.length - 1"
+                      >
+                        ⬇️
+                      </button>
+                    </div>
+                  </template>
+                
+              </draggable>
+            </div>
             <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">
               Add Row
             </button>
@@ -181,6 +192,7 @@
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Modal } from 'bootstrap';
 import draggable from 'vuedraggable';
+import { Collapse } from 'bootstrap';
 
 export default {
   components: { draggable },
@@ -343,6 +355,13 @@ export default {
       [rows[rowIndex + 1], rows[rowIndex]] = [rows[rowIndex], rows[rowIndex + 1]];
 
       this.updateRowOrders(sectionIndex);
+    },
+    toggleCollapse(index) {
+      const collapseEl = document.getElementById('rowsCollapse' + index);
+      if (collapseEl) {
+        const collapseInstance = Collapse.getOrCreateInstance(collapseEl);
+        collapseInstance.toggle();
+      }
     },
     submit() {
       this.isSaving = true;
