@@ -1,0 +1,10 @@
+// Bootstrap variables override
+//$primary: #ff6f61;
+
+// Import Bootstrap SCSS
+@import "bootstrap/scss/bootstrap";
+
+// Saját komponens‑stílusok
+body {
+  font-family: 'Figtree', sans-serif;
+}
