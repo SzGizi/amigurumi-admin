@@ -54,10 +54,13 @@
       >
         <template #item="{element: section, index: sectionIndex}">
           <div class="card mb-3 p-3 section-card" :key="section.uid">
-            <span class="drag-handle cursor-move">⠿</span>
-            <input type="hidden" v-model.number="section.order" />
+            
 
             <div class="p-2 mb-2 d-flex flex-row justify-content-between gap-2">
+              <div>
+                <span class="drag-handle cursor-move">⠿</span>
+                <input type="hidden" v-model.number="section.order" />
+              </div>
               <div class="mb-2">
                 <label class="form-label">Section Title</label>
                 <input type="text" v-model="section.title" class="form-control" required />
@@ -82,18 +85,20 @@
                 >
                   &times;
                 </button>
+                <button
+                  class="btn btn-sm btn-outline-secondary mb-2"
+                  type="button"
+                  @click="toggleCollapse(sectionIndex)"
+                >
+                  Toggle Rows
+                </button>
               </div>
-              <button
-                class="btn btn-sm btn-outline-secondary mb-2"
-                type="button"
-                @click="toggleCollapse(sectionIndex)"
-              >
-                Toggle Rows
-              </button>
+              
             </div>
 
-            <h3>Rows</h3>
+           
             <div class="collapse row-list" :id="'rowsCollapse' + sectionIndex">
+              <h3>Rows</h3>
               <draggable
                 v-model="section.rows"
                 :group="'rows' + sectionIndex"
@@ -171,10 +176,11 @@
                   </template>
                 
               </draggable>
+              <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">
+                Add Row
+              </button>
             </div>
-            <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">
-              Add Row
-            </button>
+            
           </div>
         </template>
       </draggable>

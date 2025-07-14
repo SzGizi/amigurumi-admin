@@ -12,9 +12,6 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-gray-800 text-sm font-medium">
-                        {{ __('Dashboard') }}
-                    </a>
                     <a href="{{ route('amigurumi-patterns.index') }}" class="text-gray-600 hover:text-gray-800 text-sm font-medium">
                         {{ __('Amigurumi Manager') }}
                     </a>
