@@ -43,65 +43,131 @@
 
       <!-- Sections -->
       <h4 class="mt-4">Sections</h4>
-      <div ref="sectionContainer">
-      <div
-        v-for="(section, sectionIndex) in pattern.sections"
-        :key="section.uid"
-        class="card mb-3 p-3 section-card"
+      
+      <draggable
+        v-model="pattern.sections"
+        handle=".drag-handle"
+        animation="150"
+        @update="updateSectionOrders"
+        item-key="uid"
+        ref="draggableSections"
       >
-        <span class="drag-handle cursor-move">⠿</span>
-        <input type="hidden" v-model.number="section.order" />
-    
-        <div class="p-2 mb-2 d-flex flex-row  justify-content-between gap-2">
+        <template #item="{element: section, index: sectionIndex}">
+          <div class="card mb-3 p-3 section-card" :key="section.uid">
+            <span class="drag-handle cursor-move">⠿</span>
+            <input type="hidden" v-model.number="section.order" />
+
+            <div class="p-2 mb-2 d-flex flex-row justify-content-between gap-2">
               <div class="mb-2">
                 <label class="form-label">Section Title</label>
-                <input type="text" v-model="section.title" class="form-control" required  />
+                <input type="text" v-model="section.title" class="form-control" required />
               </div>
 
               <div class="align-content-center btn-contanier">
-                
                 <button @click="moveSectionUp(sectionIndex)" :disabled="sectionIndex === 0">⬆️</button>
                 <button @click="moveSectionDown(sectionIndex)" :disabled="sectionIndex === pattern.sections.length - 1">⬇️</button>
 
-                <button type="button" class="btn btn-sm btn-primary align-self-end me-2" @click="duplicateSection(sectionIndex)">⧉</button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary align-self-end me-2"
+                  @click="duplicateSection(sectionIndex)"
+                >
+                  ⧉
+                </button>
 
-                <button type="button" class="btn btn-danger btn-sm align-self-end" @click="confirmDelete('section', sectionIndex)">
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm align-self-end"
+                  @click="confirmDelete('section', sectionIndex)"
+                >
                   &times;
                 </button>
               </div>
-              </div>
-            
-          <h3 class="">Rows</h3>
-          <div class="row-list">
-         
-            <div
-                v-for="(row, rowIndex) in section.rows"
-                :key="row.uid"
-                class="border p-2 mb-2 d-flex flex-row gap-2"
-              >
-              <span class="drag-handle-row" style="cursor: grab; user-select: none; padding: 0 8px;">⠿</span>
-            
-              <input type="hidden" v-model.number="row.order" />
-              <input type="text" v-model="row.row_number" class="form-control" placeholder="Row number" required />
-              <input type="text" v-model="row.instructions" class="form-control" placeholder="Instructions" required />
-              <input type="number" v-model.number="row.stitch_number" class="form-control" placeholder="Stitch number" />
-              <input type="text" v-model="row.comment" class="form-control" placeholder="Comment" />
-
-
-              <button type="button" class="btn btn-sm btn-outline-primary align-self-end" @click="duplicateRow(sectionIndex, rowIndex)">⧉</button>
-
-              <button type="button" class="btn btn-sm btn-outline-danger align-self-end" @click="confirmDelete('row', sectionIndex, rowIndex)">
-                &times;
-              </button>
-  
-              <button @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">⬆️</button>
-              <button @click="moveRowDown(sectionIndex, rowIndex)" :disabled="rowIndex === section.rows.length - 1">⬇️</button>
             </div>
+
+            <h3>Rows</h3>
+            <draggable
+              v-model="section.rows"
+              :group="'rows' + sectionIndex"
+              handle=".drag-handle-row"
+              animation="150"
+              @update="() => updateRowOrders(sectionIndex)"
+              item-key="uid"
+              :ref="'draggableRows' + sectionIndex"
+            >
+              <template #item="{element: row, index: rowIndex}">
+                <div class="border p-2 mb-2 d-flex flex-row gap-2" :key="row.uid">
+                  <span
+                    class="drag-handle-row"
+                    style="cursor: grab; user-select: none; padding: 0 8px;"
+                  >
+                    ⠿
+                  </span>
+
+                  <input type="hidden" v-model.number="row.order" />
+                  <input
+                    type="text"
+                    v-model="row.row_number"
+                    class="form-control"
+                    placeholder="Row number"
+                    required
+                  />
+                  <input
+                    type="text"
+                    v-model="row.instructions"
+                    class="form-control"
+                    placeholder="Instructions"
+                    required
+                  />
+                  <input
+                    type="number"
+                    v-model.number="row.stitch_number"
+                    class="form-control"
+                    placeholder="Stitch number"
+                  />
+                  <input
+                    type="text"
+                    v-model="row.comment"
+                    class="form-control"
+                    placeholder="Comment"
+                  />
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary align-self-end"
+                    @click="duplicateRow(sectionIndex, rowIndex)"
+                  >
+                    ⧉
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger align-self-end"
+                    @click="confirmDelete('row', sectionIndex, rowIndex)"
+                  >
+                    &times;
+                  </button>
+
+                  <button @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">
+                    ⬆️
+                  </button>
+                  <button
+                    @click="moveRowDown(sectionIndex, rowIndex)"
+                    :disabled="rowIndex === section.rows.length - 1"
+                  >
+                    ⬇️
+                  </button>
+                </div>
+              </template>
+            </draggable>
+
+            <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">
+              Add Row
+            </button>
           </div>
-       
-        <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">Add Row</button>
-      </div>
-      </div>
+        </template>
+      </draggable>
+
       <button type="button" class="btn btn-outline-primary my-3" @click="addSection">Add Section</button>
       <button type="submit" class="btn btn-primary" :disabled="isSaving">
         <span v-if="isSaving" class="spinner-border spinner-border-sm me-1"></span>
@@ -114,10 +180,17 @@
 <script>
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Modal } from 'bootstrap';
-import Sortable from 'sortablejs';
+import draggable from 'vuedraggable';
 
 export default {
-  props: ['initialSections', 'initialTitle', 'initialYarnDescription', 'initialToolsDescription', 'updateUrl'],
+  components: { draggable },
+  props: [
+    'initialSections',
+    'initialTitle',
+    'initialYarnDescription',
+    'initialToolsDescription',
+    'updateUrl',
+  ],
   data() {
     return {
       isSaving: false,
@@ -126,19 +199,21 @@ export default {
         title: this.initialTitle,
         yarn_description: this.initialYarnDescription,
         tools_description: this.initialToolsDescription,
-        sections: this.initialSections.map(section => ({
+        sections: this.initialSections.map((section) => ({
           id: section.id,
           title: section.title,
           order: section.order,
-          rows: (section.rows ?? []).map(row => ({
+          rows: (section.rows ?? []).map((row) => ({
             id: row.id ?? null,
             row_number: row.row_number ?? '',
             instructions: row.instructions ?? '',
             stitch_number: row.stitch_number ?? null,
             comment: row.comment ?? '',
             order: row.order ?? 0,
-          }))
-        }))
+            uid: row.uid ?? crypto.randomUUID(),
+          })),
+          uid: section.uid ?? crypto.randomUUID(),
+        })),
       },
       success: null,
       error: null,
@@ -147,39 +222,29 @@ export default {
   },
   mounted() {
     this.modalInstance = new Modal(this.$refs.deleteModal);
-
-    this.$nextTick(() => {
-      Sortable.create(this.$refs.sectionContainer, {
-        handle: '.drag-handle',
-        animation: 150,
-        onEnd: evt => {
-          const moved = this.pattern.sections.splice(evt.oldIndex, 1)[0];
-          this.pattern.sections.splice(evt.newIndex, 0, moved);
-          this.updateSectionOrders();
-        }
-      });
-      this.initSortableRows();
-    });
-
-    
-  },
-  watch: {
-    pattern: {
-      deep: true,
-      handler() {
-        this.$nextTick(this.initSortableRows);
-      }
-    }
   },
   methods: {
+    updateSectionOrders() {
+      this.pattern.sections.forEach((section, index) => {
+        if (section) section.order = index + 1;
+      });
+    },
+    updateRowOrders(sectionIndex) {
+      const section = this.pattern.sections[sectionIndex];
+      if (!section || !Array.isArray(section.rows)) return;
+      section.rows.forEach((row, i) => {
+        if (row) row.order = i + 1;
+      });
+    },
     addSection() {
-      this.pattern.sections.push({ 
-        title: '', 
+      this.pattern.sections.push({
+        title: '',
         id: null,
         uid: crypto.randomUUID(),
         order: this.pattern.sections.length + 1,
-        rows: [] 
+        rows: [],
       });
+      this.updateSectionOrders();
     },
     addRow(sectionIndex) {
       const rows = this.pattern.sections[sectionIndex].rows;
@@ -200,26 +265,28 @@ export default {
         comment: '',
         id: null,
         uid: crypto.randomUUID(),
-        order: rows.length + 1  // Itt adjunk alapértelmezett order értéket
+        order: rows.length + 1,
       });
-      this.updateRowOrders(sectionIndex); // Frissítsd az order-eket utána
+      this.updateRowOrders(sectionIndex);
     },
     duplicateRow(sectionIndex, rowIndex) {
       const row = this.pattern.sections[sectionIndex].rows[rowIndex];
       const newRow = { ...row, row_number: String(row.row_number), order: row.order + 1, uid: crypto.randomUUID() };
       this.pattern.sections[sectionIndex].rows.splice(rowIndex + 1, 0, newRow);
-      this.updateRowOrders(sectionIndex); // Frissítsd az order-eket utána
+      this.updateRowOrders(sectionIndex);
     },
     duplicateSection(sectionIndex) {
-
       const section = this.pattern.sections[sectionIndex];
-      const newSection = { ...section, uid: crypto.randomUUID()};
+      const newSection = {
+        ...section,
+        uid: crypto.randomUUID(),
+        rows: section.rows.map((row) => ({
+          ...row,
+          uid: crypto.randomUUID(),
+        })),
+      };
       this.pattern.sections.splice(sectionIndex + 1, 0, newSection);
-
-      this.pattern.sections[sectionIndex].rows.forEach(row => {
-        const newRow = { ...row};
-        this.pattern.sections[newSection.sectionIndex].rows.splice(newRow.rowIndex + 1, 0, newRow);
-      });
+      this.updateSectionOrders();
     },
     removeSection(index) {
       this.pattern.sections.splice(index, 1);
@@ -256,8 +323,9 @@ export default {
       }
     },
     updateSectionOrders() {
+      if (!Array.isArray(this.pattern.sections)) return;
       this.pattern.sections.forEach((section, index) => {
-        section.order = index + 1;
+        if (section) section.order = index + 1;
       });
     },
     moveRowUp(sectionIndex, rowIndex) {
@@ -276,65 +344,32 @@ export default {
 
       this.updateRowOrders(sectionIndex);
     },
-    
-    initSortableRows() {
-      this.pattern.sections.forEach((section, sectionIndex) => {
-        const sectionEl = this.$refs.sectionContainer.querySelectorAll('.section-card')[sectionIndex];
-        if (!sectionEl) {
-          console.warn(`Section container not found for index ${sectionIndex}`);
-          return;
-        }
-        const rowListContainer = sectionEl.querySelector('.row-list');
-        if (!rowListContainer) {
-          console.warn(`Row list container not found for section index ${sectionIndex}`);
-          return;
-        }
-
-        Sortable.create(rowListContainer, {
-          handle: '.drag-handle-row',
-          animation: 150,
-          onEnd: evt => {
-            const rows = this.pattern.sections[sectionIndex].rows;
-            const movedRow = rows.splice(evt.oldIndex, 1)[0];
-            rows.splice(evt.newIndex, 0, movedRow);
-            this.updateRowOrders(sectionIndex);
-          }
-        });
-      });
-    },
-    updateRowOrders(sectionIndex) {
-      this.pattern.sections[sectionIndex].rows
-      .forEach((row, i) => row.order = i + 1);
-      
-    },
-
-
     submit() {
       this.isSaving = true;
-    
 
-      axios.put(this.updateUrl, this.pattern, {
-        headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(() => {
-        this.success = 'Pattern updated successfully.';
-        this.error = null;
-        setTimeout(() => (this.success = null), 3000);
-      })
-      .catch(error => {
-        this.success = null;
-        if (error.response && error.response.data) {
-          this.error = error.response.data.message || 'An error occurred on the server.';
-        } else {
-          this.error = 'Network error.';
-        }
-        setTimeout(() => (this.error = null), 50000);
-      })
-      .finally(() => (this.isSaving = false));
-    }
-  }
+      axios
+        .put(this.updateUrl, this.pattern, {
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(() => {
+          this.success = 'Pattern updated successfully.';
+          this.error = null;
+          setTimeout(() => (this.success = null), 3000);
+        })
+        .catch((error) => {
+          this.success = null;
+          if (error.response && error.response.data) {
+            this.error = error.response.data.message || 'An error occurred on the server.';
+          } else {
+            this.error = 'Network error.';
+          }
+          setTimeout(() => (this.error = null), 50000);
+        })
+        .finally(() => (this.isSaving = false));
+    },
+  },
 };
 </script>
