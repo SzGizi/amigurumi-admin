@@ -1,5 +1,15 @@
 @extends('layouts.app')
 
+@section('page-title')
+    {{ $amigurumiPattern->title }}
+@endsection
+
+@section('breadcrumbs')
+    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{__('Home')}}</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('amigurumi-patterns.index') }}">{{__('Amigurumi patterns')}}</a></li>
+    <li class="breadcrumb-item active">{{ $amigurumiPattern->title }}</li>
+@endsection
+
 @section('content')
 
 

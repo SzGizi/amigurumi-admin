@@ -1,9 +1,18 @@
 @extends('layouts.app')
 
+@section('page-title')
+    {{__('Amigurumi patterns')}}
+@endsection
+
+@section('breadcrumbs')
+    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{__('Home')}}</a></li>
+    <li class="breadcrumb-item active">{{__('Amigurumi patterns')}}</li>
+@endsection
+
 @section('content')
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Amigurumi Patterns</h2>
+    
         <a href="{{ route('amigurumi-patterns.create') }}" class="btn btn-primary">+ New Pattern</a>
     </div>
 

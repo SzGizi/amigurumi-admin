@@ -29,7 +29,7 @@
 
             <!-- Page Content -->
             <main>
-                {{-- {{ $slot }} --}}
+                @include('layouts.page-header')
                 @yield('content')
             </main>
         </div>
