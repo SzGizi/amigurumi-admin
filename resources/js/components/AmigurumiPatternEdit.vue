@@ -52,44 +52,41 @@
       >
         <template #item="{element: section, index: sectionIndex}">
           <div class="card mb-3 p-3 section-card" :key="section.uid">
-            
 
-            <div class="p-2 mb-2 d-flex flex-row justify-content-between gap-2">
-              <div>
+            <div class="d-flex align-items-center flex-row justify-content-between gap-2">
+               <div class="arrow-btn-container">
                 <span class="drag-handle cursor-move">⠿</span>
                 <input type="hidden" v-model.number="section.order" />
+                <button class="btn" @click="moveSectionUp(sectionIndex)" :disabled="sectionIndex === 0">
+                  <i class="bi bi-arrow-up"></i>
+                </button>
+                <button class="btn" @click="moveSectionDown(sectionIndex)" :disabled="sectionIndex === pattern.sections.length - 1">
+                <i class="bi bi-arrow-down"></i>
+                </button>
               </div>
-              <div class="basic-input">
+              <div class="basic-input flex-fill">
                 <label class="form-label">Section Title</label>
                 <input type="text" v-model="section.title" class="form-control" required />
               </div>
 
-              <div class="align-content-center btn-contanier">
-                <button @click="moveSectionUp(sectionIndex)" :disabled="sectionIndex === 0">⬆️</button>
-                <button @click="moveSectionDown(sectionIndex)" :disabled="sectionIndex === pattern.sections.length - 1">⬇️</button>
-
+              <div class="funtions-btn-container">
+                <button
+                    class="btn btn-sm btn-outline-secondary "
+                    type="button"
+                    @click="toggleCollapse(sectionIndex)"
+                  ><i class="bi bi-list-ol"></i></button>
                 <button
                   type="button"
-                  class="btn btn-sm btn-primary align-self-end me-2"
+                  class="btn btn-sm btn-outline-primary "
                   @click="duplicateSection(sectionIndex)"
-                >
-                  ⧉
-                </button>
+                ><i class="bi bi-copy"></i></button>
 
                 <button
                   type="button"
-                  class="btn btn-danger btn-sm align-self-end"
+                  class="btn btn-sm btn-outline-danger "
                   @click="confirmDelete('section', sectionIndex)"
-                >
-                  &times;
-                </button>
-                <button
-                  class="btn btn-sm btn-outline-secondary mb-2"
-                  type="button"
-                  @click="toggleCollapse(sectionIndex)"
-                >
-                  Toggle Rows
-                </button>
+                ><i class="bi bi-x"></i></button>
+                
               </div>
               
             </div>

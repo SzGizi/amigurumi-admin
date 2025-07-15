@@ -136,7 +136,7 @@ a{
     margin-bottom: 0;
   }
 }
-.drag-handle-row{
+.drag-handle , .drag-handle-row{
     cursor: grab;
     user-select: none;
     padding: 0px 8px;
