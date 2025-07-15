@@ -111,8 +111,8 @@
               
 
               <template #item="{element: row, index: rowIndex}">
-                <div  :key="row.uid">
-                  <div class="mb-3 d-flex flex-row justify-content-between gap-2 ">
+                <div class="border-bottom mb-3" :key="row.uid">
+                  <div class="mb-2 d-flex align-items-center flex-row justify-content-between gap-2 ">
                     <input type="hidden" v-model.number="row.order" />
                     <div class="arrow-btn-container">
                       <span class="drag-handle-row">⠿</span>
@@ -124,13 +124,12 @@
                       </button>
                     </div>
                     
-                    <div class="basic-input ">    
-                      <label class="form-label">Row number</label>
+                    <div class="basic-input max-w-6 ">    
+                      <label class="form-label">Row no.</label>
                       
                       <input type="text"
                       v-model="row.row_number"
                       class="form-control"
-                      placeholder="Row number"
                       required
                       />
                     </div>
@@ -141,64 +140,56 @@
                       type="text"
                       v-model="row.instructions"
                       class="form-control"
-                      placeholder="Instructions"
                       required
                     />
                     </div>
 
-                    <div class="basic-input">    
-                      <label class="form-label">Stitch number</label>
+                    <div class="basic-input max-w-7">    
+                      <label class="form-label">St number</label>
                       <input
                         type="number"
                         v-model.number="row.stitch_number"
                         class="form-control"
-                        placeholder="Stitch number"
                       />
                     </div>
                     
                    
                   
 
-                    <div class="arrow-btn-container">
-                      <div class="form-check align-self-end">
-                        <input
-                          class="form-check-input"
-                          type="checkbox"
-                          :id="'toggleComment' + sectionIndex + '_' + rowIndex"
-                          v-model="row.showComment"
-                        />
-                        <label
-                          class="form-check-label"
-                          :for="'toggleComment' + sectionIndex + '_' + rowIndex"
-                        >
-                          Add Comment
-                        </label>
-                      </div>
+                    <div class="funtions-btn-container">
+                     <input
+                        type="checkbox"
+                        class="btn-check"
+                        :id="'toggleComment' + sectionIndex + '_' + rowIndex"
+                        v-model="row.showComment"
+                      />
+                      <label
+                        class="btn btn-outline-secondary"
+                        :class="{ active: row.showComment }"
+                        :for="'toggleComment' + sectionIndex + '_' + rowIndex"
+                      >
+                        <i class="bi bi-chat-right-text"></i>
+                      </label>
                       <button
                         type="button"
                         class="btn btn-sm btn-outline-primary align-self-end"
                         @click="duplicateRow(sectionIndex, rowIndex)"
-                      >
-                        ⧉
-                      </button>
+                      ><i class="bi bi-copy"></i></button>
 
                       <button
                         type="button"
                         class="btn btn-sm btn-outline-danger align-self-end"
                         @click="confirmDelete('row', sectionIndex, rowIndex)"
-                      >
-                        &times;
-                      </button>
+                      ><i class="bi bi-x"></i></button>
                     </div>
                   </div>
-                   <div class="collapse w-100 mt-3" :class="{ show: row.showComment }">
+                   <div class="collapse w-100 mt-3 mb-3" :class="{ show: row.showComment }">
                     <div class="basic-input">    
                     <label class="form-label">Comment</label>
                     <input
                       type="text"
                       v-model="row.comment"
                       class="form-control"
-                      placeholder="Comment"
                     />
                     </div>
                   </div>

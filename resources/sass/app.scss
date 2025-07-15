@@ -10,6 +10,7 @@ $secondary : #02735E;
 $bg-primary : #ffecf1;
 $border-primary :#d95478;
 $bg: white;
+$text-color-with-primary:white;
 $heading-color: $primary;
 $nav-bg : $bg-primary;
 $default-sapce-paddig: 30px 0 !important;
@@ -48,6 +49,11 @@ a{
       0.2
     );
 
+}
+@for $i from 1 through 15 {
+  .max-w-#{$i} {
+    max-width: #{$i}rem;
+  }
 }
 
 
@@ -113,9 +119,9 @@ a{
   margin-bottom: 1rem;
   label{
     position: absolute;
-    left: 20px;
+    left: 15px;
     top: -10px;
-    padding: 0 2px;
+    padding: 0 1px;
     background-color: $bg;
     color:$primary;
   }
@@ -125,9 +131,40 @@ a{
       border-color:$border-primary;
   }
 }
+.row-list {
+  .basic-input{
+    margin-bottom: 0;
+  }
+}
 .drag-handle-row{
     cursor: grab;
     user-select: none;
     padding: 0px 8px;
-    display: block;
+    background: $primary;
+    color: $text-color-with-primary;
+    padding: 5px 8px;
+    border-radius: 20px;
+}
+.arrow-btn-container{
+  .btn{
+    padding: 0 5px ;
+    border:none;
+  }
+  .btn:disabled, .btn.disabled, fieldset:disabled .btn{
+    color:#cfcfcf;
+  }
+}
+.funtions-btn-container{
+  .btn{
+    padding: 4px 7px;
+    border-radius: 20px;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    margin-left: 3px;
+
+  }
+  label.btn{
+      margin-left: 0;
+    }
 }
