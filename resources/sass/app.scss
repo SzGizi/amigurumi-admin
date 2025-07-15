@@ -1,13 +1,23 @@
-// Bootstrap variables override
-$primary: #02735E;
-$secondary : #D95578;
+
+@import "bootstrap/scss/bootstrap";
+@import url('https://fonts.googleapis.com/css2?family=Twinkle+Star&display=swap');
+
+
+$primary: #d95478;
+$secondary : #02735E;
 $bg-primary : #ffecf1;
 $bg: white;
 $heading-color: $primary;
 $nav-bg : $bg-primary;
+$default-sapce-paddig: 30px 0 !important;
+$default-sapce-margin: 30px 0 !important;
+$header-fontfamily:"Twinkle Star", cursive;
 
-// Import Bootstrap SCSS
-@import "bootstrap/scss/bootstrap";
+:root {
+  --bs-link-color-rgb: #{red($primary)}, #{green($primary)}, #{blue($primary)};
+  --bs-link-hover-color-rgb:#{red($secondary)}, #{green($secondary)}, #{blue($secondary)};
+}
+
 
 body {
   font-family: 'Figtree', sans-serif;
@@ -15,6 +25,19 @@ body {
 h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1{
   color:$heading-color;
 }
+h2, .h2, h1, .h1{
+  font-family: $header-fontfamily;
+  font-weight: 400;
+  font-style: normal;
+}
+a{
+  text-decoration: none;
+}
+
+
+
+
+
 
 .border-curve {
   position: relative;
@@ -64,6 +87,7 @@ h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1{
 .page-header{
   text-align: center;
   background-color: $bg;
+  margin: $default-sapce-margin;
   .breadcrumb{
     justify-content: center;
   }

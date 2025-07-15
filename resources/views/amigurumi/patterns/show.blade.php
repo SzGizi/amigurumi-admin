@@ -16,7 +16,6 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2 class="mb-4">{{ $amigurumiPattern->title }}</h2>
             <p><strong>{{ __('Yarn') }}:</strong> {{ $amigurumiPattern->yarn_description }}</p>
             <p><strong>{{ __('Tools') }}:</strong> {{ $amigurumiPattern->tools_description }}</p>
         </div>

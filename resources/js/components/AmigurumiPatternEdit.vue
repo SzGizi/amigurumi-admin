@@ -1,7 +1,5 @@
 <template>
   <div class="container py-4">
-    <h1 class="mb-4">Edit Amigurumi Pattern</h1>
-
     <div v-if="success" class="alert alert-success">{{ success }}</div>
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
