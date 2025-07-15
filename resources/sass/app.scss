@@ -18,11 +18,17 @@ $default-sapce-margin: 30px 0 !important;
 $header-fontfamily:"Twinkle Star", cursive;
 $text-color:black;
 $text-color-light:rgb(82, 82, 82);
+$border-radius:30px;
 
 :root {
   --bs-link-color-rgb: #{red($primary)}, #{green($primary)}, #{blue($primary)};
   --bs-link-hover-color-rgb:#{red($secondary)}, #{green($secondary)}, #{blue($secondary)};
   --bs-body-color:$text-color;
+  --bs-btn-color:$text-color-with-primary;
+  --bs-btn-bg:$primary;
+  --bs-btn-border-color:$primary;
+  --bs-btn-hover-color:$secondary;
+  --bs-btn-hover-border-color:$secondary;
 }
 
 
@@ -54,6 +60,9 @@ a{
   .max-w-#{$i} {
     max-width: #{$i}rem;
   }
+}
+.btn{
+  border-radius: $border-radius;
 }
 
 
@@ -126,7 +135,7 @@ a{
     color:$primary;
   }
   textarea,input{
-      border-radius: 30px;
+      border-radius: $border-radius;
       padding: 10px 20px;
       border-color:$border-primary;
   }
@@ -143,7 +152,7 @@ a{
     background: $primary;
     color: $text-color-with-primary;
     padding: 5px 8px;
-    border-radius: 20px;
+    border-radius: $border-radius;
 }
 .arrow-btn-container{
   .btn{
@@ -157,7 +166,7 @@ a{
 .funtions-btn-container{
   .btn{
     padding: 4px 7px;
-    border-radius: 20px;
+    border-radius: $border-radius;
     width: 30px;
     height: 30px;
     font-size: 14px;

@@ -64,7 +64,7 @@
                 <i class="bi bi-arrow-down"></i>
                 </button>
               </div>
-              <div class="basic-input flex-fill">
+              <div class="basic-input flex-fill mb-0">
                 <label class="form-label">Section Title</label>
                 <input type="text" v-model="section.title" class="form-control" required />
               </div>
@@ -142,7 +142,7 @@
                     </div>
 
                     <div class="basic-input max-w-7">    
-                      <label class="form-label">St number</label>
+                      <label class="form-label">St no.</label>
                       <input
                         type="number"
                         v-model.number="row.stitch_number"
