@@ -49,6 +49,7 @@ class AmigurumiPatternController extends Controller
             'tools_description',
         ]));
 
+
         // Régiek törlése
         foreach ($amigurumiPattern->amigurumiSections as $section) {
             $section->amigurumiRows()->delete();
@@ -66,12 +67,12 @@ class AmigurumiPatternController extends Controller
             ]);
 
             foreach ($sectionData['rows'] ?? [] as $rowData) {
-                    //Log::info($sectionData['rows']);
+                $hasComment = !empty($rowData['showComment']) && $rowData['showComment'];
                 $section->amigurumiRows()->create([
                     'row_number' => $rowData['row_number'] ?? '',
                     'instructions' => $rowData['instructions'] ?? '',
                     'stitch_number' => $rowData['stitch_number'] ?? null,
-                    'comment' => $rowData['comment'] ?? '',
+                    'comment' => $hasComment ? ($rowData['comment'] ?? '') : '',
                     'order' => $rowData['order'] ?? null,
                     'amigurumi_section_id' => $section->id
                 ]);

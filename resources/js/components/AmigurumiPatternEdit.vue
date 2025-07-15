@@ -24,17 +24,17 @@
 
     <form @submit.prevent="submit">
       <!-- Pattern Info -->
-      <div class="mb-3">
+      <div class="basic-input">
         <label for="title" class="form-label">Title</label>
         <input type="text" id="title" v-model="pattern.title" class="form-control" />
       </div>
 
-      <div class="mb-3">
+      <div class="basic-input">
         <label for="yarn_description" class="form-label">Yarn Description</label>
         <textarea id="yarn_description" v-model="pattern.yarn_description" class="form-control"></textarea>
       </div>
 
-      <div class="mb-3">
+      <div class="basic-input">
         <label for="tools_description" class="form-label">Tools Description</label>
         <textarea id="tools_description" v-model="pattern.tools_description" class="form-control"></textarea>
       </div>
@@ -59,7 +59,7 @@
                 <span class="drag-handle cursor-move">⠿</span>
                 <input type="hidden" v-model.number="section.order" />
               </div>
-              <div class="mb-2">
+              <div class="basic-input">
                 <label class="form-label">Section Title</label>
                 <input type="text" v-model="section.title" class="form-control" required />
               </div>
@@ -97,6 +97,7 @@
            
             <div class="collapse row-list" :id="'rowsCollapse' + sectionIndex">
               <h3>Rows</h3>
+              
               <draggable
                 v-model="section.rows"
                 :group="'rows' + sectionIndex"
@@ -105,46 +106,74 @@
                 @update="() => updateRowOrders(sectionIndex)"
                 item-key="uid"
                 :ref="'draggableRows' + sectionIndex"
+                
               >
               
 
-                  <template #item="{element: row, index: rowIndex}">
-                    <div class="border p-2 mb-2 d-flex flex-row gap-2 " :key="row.uid">
-                      <span
-                        class="drag-handle-row"
-                        style="cursor: grab; user-select: none; padding: 0 8px;"
-                      >
-                        ⠿
-                      </span>
+              <template #item="{element: row, index: rowIndex}">
+                <div  :key="row.uid">
+                  <div class="mb-3 d-flex flex-row justify-content-between gap-2 ">
+                    <input type="hidden" v-model.number="row.order" />
+                    <div class="arrow-btn-container">
+                      <span class="drag-handle-row">⠿</span>
+                      <button class="btn" @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">
+                        <i class="bi bi-arrow-up"></i>
+                      </button>
+                      <button class="btn" @click="moveRowDown(sectionIndex, rowIndex)" :disabled="rowIndex === section.rows.length - 1">
+                      <i class="bi bi-arrow-down"></i>
+                      </button>
+                    </div>
+                    
+                    <div class="basic-input ">    
+                      <label class="form-label">Row number</label>
+                      
+                      <input type="text"
+                      v-model="row.row_number"
+                      class="form-control"
+                      placeholder="Row number"
+                      required
+                      />
+                    </div>
+                  
+                    <div class="basic-input flex-fill">    
+                      <label class="form-label">Instructions</label>
+                      <input
+                      type="text"
+                      v-model="row.instructions"
+                      class="form-control"
+                      placeholder="Instructions"
+                      required
+                    />
+                    </div>
 
-                      <input type="hidden" v-model.number="row.order" />
-                      <input
-                        type="text"
-                        v-model="row.row_number"
-                        class="form-control"
-                        placeholder="Row number"
-                        required
-                      />
-                      <input
-                        type="text"
-                        v-model="row.instructions"
-                        class="form-control"
-                        placeholder="Instructions"
-                        required
-                      />
+                    <div class="basic-input">    
+                      <label class="form-label">Stitch number</label>
                       <input
                         type="number"
                         v-model.number="row.stitch_number"
                         class="form-control"
                         placeholder="Stitch number"
                       />
-                      <input
-                        type="text"
-                        v-model="row.comment"
-                        class="form-control"
-                        placeholder="Comment"
-                      />
+                    </div>
+                    
+                   
+                  
 
+                    <div class="arrow-btn-container">
+                      <div class="form-check align-self-end">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          :id="'toggleComment' + sectionIndex + '_' + rowIndex"
+                          v-model="row.showComment"
+                        />
+                        <label
+                          class="form-check-label"
+                          :for="'toggleComment' + sectionIndex + '_' + rowIndex"
+                        >
+                          Add Comment
+                        </label>
+                      </div>
                       <button
                         type="button"
                         class="btn btn-sm btn-outline-primary align-self-end"
@@ -160,18 +189,21 @@
                       >
                         &times;
                       </button>
-
-                      <button @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">
-                        ⬆️
-                      </button>
-                      <button
-                        @click="moveRowDown(sectionIndex, rowIndex)"
-                        :disabled="rowIndex === section.rows.length - 1"
-                      >
-                        ⬇️
-                      </button>
                     </div>
-                  </template>
+                  </div>
+                   <div class="collapse w-100 mt-3" :class="{ show: row.showComment }">
+                    <div class="basic-input">    
+                    <label class="form-label">Comment</label>
+                    <input
+                      type="text"
+                      v-model="row.comment"
+                      class="form-control"
+                      placeholder="Comment"
+                    />
+                    </div>
+                  </div>
+                </div>
+              </template>
                 
               </draggable>
               <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">
@@ -225,6 +257,7 @@ export default {
             instructions: row.instructions ?? '',
             stitch_number: row.stitch_number ?? null,
             comment: row.comment ?? '',
+            showComment: !!row.comment,
             order: row.order ?? 0,
             uid: row.uid ?? crypto.randomUUID(),
           })),
@@ -282,6 +315,7 @@ export default {
         id: null,
         uid: crypto.randomUUID(),
         order: rows.length + 1,
+        showComment: false,
       });
       this.updateRowOrders(sectionIndex);
     },

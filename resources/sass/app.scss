@@ -1,21 +1,27 @@
 
 @import "bootstrap/scss/bootstrap";
 @import url('https://fonts.googleapis.com/css2?family=Twinkle+Star&display=swap');
+@import "bootstrap-icons/font/bootstrap-icons";
+
 
 
 $primary: #d95478;
 $secondary : #02735E;
 $bg-primary : #ffecf1;
+$border-primary :#d95478;
 $bg: white;
 $heading-color: $primary;
 $nav-bg : $bg-primary;
 $default-sapce-paddig: 30px 0 !important;
 $default-sapce-margin: 30px 0 !important;
 $header-fontfamily:"Twinkle Star", cursive;
+$text-color:black;
+$text-color-light:rgb(82, 82, 82);
 
 :root {
   --bs-link-color-rgb: #{red($primary)}, #{green($primary)}, #{blue($primary)};
   --bs-link-hover-color-rgb:#{red($secondary)}, #{green($secondary)}, #{blue($secondary)};
+  --bs-body-color:$text-color;
 }
 
 
@@ -32,6 +38,16 @@ h2, .h2, h1, .h1{
 }
 a{
   text-decoration: none;
+}
+.form-control:focus{
+  border-color: $border-primary;
+  box-shadow: 0 0 0 0.25rem rgba(
+      red($border-primary),
+      green($border-primary),
+      blue($border-primary),
+      0.2
+    );
+
 }
 
 
@@ -91,4 +107,27 @@ a{
   .breadcrumb{
     justify-content: center;
   }
+}
+.basic-input{
+  position: relative;
+  margin-bottom: 1rem;
+  label{
+    position: absolute;
+    left: 20px;
+    top: -10px;
+    padding: 0 2px;
+    background-color: $bg;
+    color:$primary;
+  }
+  textarea,input{
+      border-radius: 30px;
+      padding: 10px 20px;
+      border-color:$border-primary;
+  }
+}
+.drag-handle-row{
+    cursor: grab;
+    user-select: none;
+    padding: 0px 8px;
+    display: block;
 }
