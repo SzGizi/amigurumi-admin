@@ -22,6 +22,46 @@
       </div>
     </div>
 
+      <div class="modal fade" tabindex="-1" ref="generateRowsModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Generate Rows</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="basic-input">
+              <label class="form-label">Operation</label>
+              <select class="form-select" v-model="rowGen.operation">
+                <option value="inc">Increase</option>
+                <option value="dec">Decrease</option>
+              </select>
+            </div>
+
+            <div class="basic-input">
+              <label class="form-label">Row Count</label>
+              <input type="number" class="form-control" v-model="rowGen.row_count" placeholder="e.g. 10" />
+            </div>
+            <div class="basic-input">
+              <label class="form-label">Stitch Number</label>
+              <input type="number" class="form-control" v-model.number="rowGen.stitch_number" placeholder="e.g. 30" />
+            </div>
+
+            <div class="basic-input">
+              <label class="form-label">Number of Changes (inc/dec)</label>
+              <input type="number" class="form-control" v-model.number="rowGen.change_count" placeholder="e.g. 6" />
+            </div>
+
+            <div v-if="rowGenError" class="alert alert-danger">{{ rowGenError }}</div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn btn-primary" @click="generateRows">Generate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <form @submit.prevent="submit">
       <!-- Pattern Info -->
       <div class="basic-input">
@@ -57,10 +97,10 @@
                <div class="arrow-btn-container">
                 <span class="drag-handle cursor-move">⠿</span>
                 <input type="hidden" v-model.number="section.order" />
-                <button class="btn" @click="moveSectionUp(sectionIndex)" :disabled="sectionIndex === 0">
+                <button  type="button" class="btn" @click="moveSectionUp(sectionIndex)" :disabled="sectionIndex === 0">
                   <i class="bi bi-arrow-up"></i>
                 </button>
-                <button class="btn" @click="moveSectionDown(sectionIndex)" :disabled="sectionIndex === pattern.sections.length - 1">
+                <button type="button" class="btn" @click="moveSectionDown(sectionIndex)" :disabled="sectionIndex === pattern.sections.length - 1">
                 <i class="bi bi-arrow-down"></i>
                 </button>
               </div>
@@ -113,10 +153,10 @@
                     <input type="hidden" v-model.number="row.order" />
                     <div class="arrow-btn-container">
                       <span class="drag-handle-row">⠿</span>
-                      <button class="btn" @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">
+                      <button  type="button" class="btn" @click="moveRowUp(sectionIndex, rowIndex)" :disabled="rowIndex === 0">
                         <i class="bi bi-arrow-up"></i>
                       </button>
-                      <button class="btn" @click="moveRowDown(sectionIndex, rowIndex)" :disabled="rowIndex === section.rows.length - 1">
+                      <button type="button" class="btn" @click="moveRowDown(sectionIndex, rowIndex)" :disabled="rowIndex === section.rows.length - 1">
                       <i class="bi bi-arrow-down"></i>
                       </button>
                     </div>
@@ -197,6 +237,9 @@
               <button type="button" class="btn btn-secondary mt-2" @click="addRow(sectionIndex)">
                 Add Row
               </button>
+              <button type="button" class="btn btn-primary mt-2 ms-2" @click="generateRowsModal(sectionIndex)">
+                Generate Rows
+              </button>
             </div>
             
           </div>
@@ -254,11 +297,20 @@ export default {
       },
       success: null,
       error: null,
-      modalInstance: null,
+      deletemodalInstance: null,
+      generateRowmodalInstance: null,
+      rowGen: {
+        operation: 'inc',       // 'inc' or 'dec'
+        row_count: null,        // how many rows to generate
+        stitch_number: null,    // starting stitch number
+        change_count: null,     // how much to increase/decrease per row
+      },
+      rowGenError: null,
     };
   },
   mounted() {
-    this.modalInstance = new Modal(this.$refs.deleteModal);
+    this.deletemodalInstance = new Modal(this.$refs.deleteModal);
+    this.generateRowmodalInstance = new Modal(this.$refs.generateRowsModal);
   },
   methods: {
     updateSectionOrders() {
@@ -283,37 +335,89 @@ export default {
       });
       this.updateSectionOrders();
     },
-    addRow(sectionIndex) {
+    addRow(sectionIndex, overrideData = {}) {
       const rows = this.pattern.sections[sectionIndex].rows;
       const last = rows[rows.length - 1] || null;
       let nextNum = '';
 
       if (last) {
-          const match = String(last.row_number).match(/(\d+)(?!.*\d)/); // az utolsó szám a string végéről
-          if (match) {
-            const number = parseInt(match[1], 10);
-            nextNum = String(number + 1);
-          }
+        const match = String(last.row_number).match(/(\d+)(?!.*\d)/); // utolsó szám a string végén
+        if (match) {
+          const number = parseInt(match[1], 10);
+          nextNum = String(number + 1);
         }
-      // if (last) {
-      //   const parsed = parseInt(last.row_number, 10);
-      //   if (!isNaN(parsed) && String(parsed) === String(last.row_number)) {
-      //     nextNum = parsed + 1;
-      //   }
-      // }
+      }
 
-      rows.push({
-        row_number: nextNum === '' ? '' : String(nextNum),
-        instructions: '',
-        stitch_number: null,
-        comment: '',
+      const newRow = {
+        row_number: nextNum !== '' ? nextNum : '',
+        instructions: overrideData.instructions ?? '',
+        stitch_number: overrideData.stitch_number ?? null,
+        comment: overrideData.comment ?? '',
         id: null,
         uid: crypto.randomUUID(),
         order: rows.length + 1,
         showComment: false,
-      });
+      };
+
+      rows.push(newRow);
       this.updateRowOrders(sectionIndex);
     },
+   generateInstruction(operation, totalStitches, changeCount) {
+
+      if (totalStitches % changeCount !== 0) return null;
+      const repeatSize = totalStitches / changeCount;
+      const scTotal = repeatSize - (operation === 'inc' ? 1 : 2);
+
+      var before = scTotal;
+      var after = 0;
+
+      if(scTotal%2 == 0){
+        before = scTotal / 2;
+        after = scTotal / 2;
+      }
+
+      const beforeSc = before > 0 ? `${before==1?'':before}sc` : '';
+      const afterSc = after > 0 ? `${after==1?'':after}sc` : '';
+      const change = operation === 'inc' ? 'inc' : 'dec';
+
+      const parts = [beforeSc, change, afterSc].filter(p => p !== '');
+
+      return `*${parts.join(',')}*`;
+    },
+
+    generateRows() {
+      const { operation, row_count, stitch_number, change_count } = this.rowGen;
+
+      if (!row_count || !stitch_number || !change_count) {
+        this.rowGenError = 'Please fill in all fields.';
+        return;
+      }
+
+      const sectionIndex = this.currentSectionIndex;
+      let currentStitches = stitch_number;
+
+      for (let i = 0; i < row_count; i++) {
+        
+        
+        this.addRow(sectionIndex, {
+          instructions:this.generateInstruction(operation, currentStitches, change_count),
+          stitch_number: currentStitches += operation === 'inc' ? change_count : -change_count,
+        });
+
+        
+      }
+
+      this.rowGenError = null;
+      this.rowGen = {
+        operation: 'inc',
+        row_count: null,
+        stitch_number: null,
+        change_count: null,
+      };
+      this.generateRowmodalInstance.hide();
+    },
+  
+
     duplicateRow(sectionIndex, rowIndex) {
       const row = this.pattern.sections[sectionIndex].rows[rowIndex];
       const newRow = { ...row, row_number: String(row.row_number), order: row.order + 1, uid: crypto.randomUUID() };
@@ -341,7 +445,7 @@ export default {
     },
     confirmDelete(type, sectionIndex, rowIndex = null) {
       this.deleteTarget = { type, sectionIndex, rowIndex };
-      this.modalInstance.show();
+      this.deletemodalInstance.show();
     },
     deleteConfirmed() {
       if (!this.deleteTarget) return;
@@ -350,7 +454,7 @@ export default {
       } else if (this.deleteTarget.type === 'row') {
         this.removeRow(this.deleteTarget.sectionIndex, this.deleteTarget.rowIndex);
       }
-      this.modalInstance.hide();
+      this.deletemodalInstance.hide();
       this.deleteTarget = null;
     },
     moveSectionUp(index) {
@@ -396,6 +500,15 @@ export default {
         collapseInstance.toggle();
       }
     },
+    generateRowsModal(sectionIndex) {
+      this.currentSectionIndex = sectionIndex; // Store the current section index
+      this.rowGen = { operation: 'inc', row_number: '', stitch_number: null, change_count: null };
+      this.rowGenError = null;
+      this.generateRowmodalInstance.show();
+    },
+   
+
+
     submit() {
       this.isSaving = true;
 
