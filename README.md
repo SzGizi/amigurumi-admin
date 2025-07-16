@@ -42,6 +42,28 @@ A web-based tool for designing and managing **Amigurumi crochet patterns** with 
 - Node.js + npm
 - MySQL / SQLite
 
+### 🧪 Development Notes
+Vue components are in resources/js/components/
+
+Blade views use Bootstrap 5 classes
+
+API endpoints follow RESTful conventions
+
+Editing uses drag-and-drop via vuedraggable
+
+Pattern data is updated via AJAX PUT requests
+
+### ✅ Planned Improvements
+See the TODO list for upcoming features such as:
+
+Auto-generated rows based on inc / dec logic
+
+Validation for stitch number divisibility
+
+PDF export styling and structure
+
+Image handling and pattern previews
+
 ### Setup Instructions
 
 ```bash
@@ -69,24 +91,3 @@ php artisan serve
 # 8. Run Vite for frontend development
 npm run dev
 
-##🧪 Development Notes
-Vue components are in resources/js/components/
-
-Blade views use Bootstrap 5 classes
-
-API endpoints follow RESTful conventions
-
-Editing uses drag-and-drop via vuedraggable
-
-Pattern data is updated via AJAX PUT requests
-
-##✅ Planned Improvements
-See the TODO list for upcoming features such as:
-
-Auto-generated rows based on inc / dec logic
-
-Validation for stitch number divisibility
-
-PDF export styling and structure
-
-Image handling and pattern previews
