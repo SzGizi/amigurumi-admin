@@ -289,11 +289,18 @@ export default {
       let nextNum = '';
 
       if (last) {
-        const parsed = parseInt(last.row_number, 10);
-        if (!isNaN(parsed) && String(parsed) === String(last.row_number)) {
-          nextNum = parsed + 1;
+          const match = String(last.row_number).match(/(\d+)(?!.*\d)/); // az utolsó szám a string végéről
+          if (match) {
+            const number = parseInt(match[1], 10);
+            nextNum = String(number + 1);
+          }
         }
-      }
+      // if (last) {
+      //   const parsed = parseInt(last.row_number, 10);
+      //   if (!isNaN(parsed) && String(parsed) === String(last.row_number)) {
+      //     nextNum = parsed + 1;
+      //   }
+      // }
 
       rows.push({
         row_number: nextNum === '' ? '' : String(nextNum),
