@@ -9,6 +9,7 @@ use App\Http\Resources\AmigurumiPatternResource;
 use App\Http\Resources\AmigurumiSectionResource;
 use App\Http\Requests\UpdateAmigurumiPatternRequest;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class AmigurumiPatternController extends Controller
@@ -120,5 +121,20 @@ class AmigurumiPatternController extends Controller
             'sectionsJson' => AmigurumiSectionResource::collection($amigurumiPattern->amigurumiSections)->toJson(),
         ]);
         //return view('amigurumi.patterns.edit', compact('amigurumiPattern'));
+    }
+    public function generatePdf(Request $request)
+    {
+        $data = $request->all();
+
+        // opcionális validáció itt
+        // Validator::make($data, [...])->validate();
+
+        $pdf = Pdf::loadView('pdf.pattern', ['pattern' => $data]);
+
+        // PDF fájl letöltésre
+        return $pdf->download('pattern.pdf');
+
+        // Ha base64-ben szeretnéd visszaküldeni:
+        // return response()->json(['pdf' => base64_encode($pdf->output())]);
     }
 }

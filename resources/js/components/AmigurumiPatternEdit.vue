@@ -254,6 +254,7 @@
         <span v-if="isSaving" class="spinner-border spinner-border-sm me-1"></span>
         {{ isSaving ? 'Saving...' : 'Save' }}
       </button>
+      <button type="button" class="btn btn-success" @click="downloadPdf">Download PDF</button>
     </form>
   </div>
 </template>
@@ -558,6 +559,29 @@ export default {
         currentStart = to + 1;
       }
     },
+    downloadPdf() {
+      axios
+        .post('/patterns/generate-pdf', this.pattern, {
+          responseType: 'blob',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          }
+        })
+        .then(response => {
+          const blob = new Blob([response.data], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'pattern.pdf';
+          link.click();
+          URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+          alert('❌ PDF generálás sikertelen');
+          console.error(error);
+        });
+    },
+
     submit() {
       this.isSaving = true;
 
