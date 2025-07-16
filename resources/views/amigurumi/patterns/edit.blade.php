@@ -19,6 +19,7 @@
       
         
         <amigurumi-pattern-edit
+            :initial-pattern-id='@json($amigurumiPattern->id)'
             :initial-title='@json($amigurumiPattern->title)'
             :initial-yarn-description='@json($amigurumiPattern->yarn_description)'
             :initial-tools-description='@json($amigurumiPattern->tools_description)'

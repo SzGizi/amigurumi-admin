@@ -17,5 +17,8 @@ class AmigurumiSection extends Model
     {
         return $this->belongsTo(AmigurumiPattern::class);
     }
-    
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
 }

@@ -79,6 +79,14 @@
         <textarea id="tools_description" v-model="pattern.tools_description" class="form-control"></textarea>
       </div>
 
+      <div class="basic-input">
+        <input type="file" @change="uploadImage($event, 'AmigurumiPattern',pattern.id)" multiple />
+        <div v-for="image in pattern.images" :key="image.id" class="mb-2">
+          <img :src="'/storage/' + image.path" class="img-thumbnail" width="150" />
+        </div>
+      </div>
+  
+
       <!-- Sections -->
       <h4 class="mt-4">Sections</h4>
       
@@ -268,6 +276,7 @@ import { Collapse } from 'bootstrap';
 export default {
   components: { draggable },
   props: [
+    'initialPatternId',
     'initialSections',
     'initialTitle',
     'initialYarnDescription',
@@ -279,9 +288,11 @@ export default {
       isSaving: false,
       deleteTarget: null,
       pattern: {
+        id:this.initialPatternId,
         title: this.initialTitle,
         yarn_description: this.initialYarnDescription,
         tools_description: this.initialToolsDescription,
+        images: [],
         sections: this.initialSections.map((section) => ({
           id: section.id,
           title: section.title,
@@ -315,6 +326,14 @@ export default {
   mounted() {
     this.deletemodalInstance = new Modal(this.$refs.deleteModal);
     this.generateRowmodalInstance = new Modal(this.$refs.generateRowsModal);
+   
+      axios.get(`/api/patterns/${this.initialPatternId}/images`)
+        .then(res => {
+          this.pattern.images = res.data; // ! FONTOS: pattern.images-be mentjük
+        })
+        .catch(error => {
+          console.error('Képek betöltése sikertelen:', error);
+        });
   },
   methods: {
     updateSectionOrders() {
@@ -366,7 +385,7 @@ export default {
       rows.push(newRow);
       this.updateRowOrders(sectionIndex);
     },
-   generateInstruction(operation, totalStitches, changeCount) {
+    generateInstruction(operation, totalStitches, changeCount) {
 
       if (totalStitches % changeCount !== 0) return null;
       const repeatSize = totalStitches / changeCount;
@@ -388,7 +407,6 @@ export default {
 
       return `*${parts.join(',')}*`;
     },
-
     generateRows() {
       const { operation, row_count, stitch_number, change_count } = this.rowGen;
 
@@ -420,8 +438,32 @@ export default {
       };
       this.generateRowmodalInstance.hide();
     },
-  
+    uploadImage(event, modelType, modelId) {
+      const files = event.target.files;
+      if (!files.length) return;
 
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append('image', files[i]);
+        formData.append('model_type', modelType);
+        formData.append('model_id', modelId);
+
+        console.log(formData.get('image'));
+        console.log(formData.get('model_type'));
+        console.log(formData.get('model_id'));
+
+        axios.post('/images/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        .then(res => {
+          this.pattern.images.push(res.data.image); // itt is pattern.images!
+        })
+        .catch(err => {
+          alert('Upload failed');
+          console.error(err);
+        });
+      }
+    },
     duplicateRow(sectionIndex, rowIndex) {
       const row = this.pattern.sections[sectionIndex].rows[rowIndex];
       const newRow = { ...row, row_number: String(row.row_number), order: row.order + 1, uid: crypto.randomUUID() };
@@ -560,6 +602,7 @@ export default {
       }
     },
     downloadPdf() {
+      this.submit(); // Ensure the pattern is saved before generating PDF
       axios
         .post('/patterns/generate-pdf', this.pattern, {
           responseType: 'blob',

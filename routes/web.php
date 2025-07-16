@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AmigurumiPatternController;
 use App\Http\Controllers\AmigurumiSectionController;
 use App\Http\Controllers\AmigurumiRowController;
+use App\Http\Controllers\ImageController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,7 +17,7 @@ Route::get('/dashboard', function () {
 
 
 
-Route::post('/patterns/generate-pdf', [AmigurumiPatternController::class, 'generatePdf']);
+
 
 
 Route::middleware('auth')->group(function () {
@@ -24,11 +25,17 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    //Amigurumi edit 
 
     Route::resource('/amigurumi-patterns', AmigurumiPatternController::class);
     Route::apiResource('amigurumi-patterns.sections', AmigurumiSectionController::class);
     Route::apiResource('amigurumi-patterns.sections.rows', AmigurumiRowController::class);
+
+    Route::post('/patterns/generate-pdf', [AmigurumiPatternController::class, 'generatePdf']);
+    
+    Route::post('/images/upload', [ImageController::class, 'upload'])->name('images.upload');
+    Route::get('/api/patterns/{pattern}/images', [ImageController::class, 'amigurumiPattenIndex']);
+
+
 
 });
 

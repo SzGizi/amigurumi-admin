@@ -12,6 +12,10 @@ class AmigurumiPattern extends Model
     {
         return $this->hasMany(AmigurumiSection::class)->orderBy('order');
     }
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
 
 
 }
