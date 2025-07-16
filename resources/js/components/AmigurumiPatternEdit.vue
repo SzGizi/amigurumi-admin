@@ -43,7 +43,7 @@
               <input type="number" class="form-control" v-model="rowGen.row_count" placeholder="e.g. 10" />
             </div>
             <div class="basic-input">
-              <label class="form-label">Stitch Number</label>
+              <label class="form-label">Current Stitch Number</label>
               <input type="number" class="form-control" v-model.number="rowGen.stitch_number" placeholder="e.g. 30" />
             </div>
 
@@ -239,6 +239,9 @@
               </button>
               <button type="button" class="btn btn-primary mt-2 ms-2" @click="generateRowsModal(sectionIndex)">
                 Generate Rows
+              </button>
+              <button type="button" class="btn btn-outline-info  mt-2 ms-2" @click="regenerateRowNumbers(sectionIndex)">
+                Renumber Rows
               </button>
             </div>
             
@@ -506,9 +509,55 @@ export default {
       this.rowGenError = null;
       this.generateRowmodalInstance.show();
     },
-   
+    regenerateRowNumbers(sectionIndex) {
+      const section = this.pattern.sections[sectionIndex];
+      if (!section) return;
 
+      const rows = section.rows;
+      if (rows.length === 0) return;
 
+      const parseRowNumber = (str) => {
+        const trimmed = String(str).trim();
+        if (/^\d+$/.test(trimmed)) {
+          const value = parseInt(trimmed);
+          return { start: value, end: value };
+        }
+
+        const match = trimmed.match(/^(\d+)\s*-\s*(\d+)$/);
+        if (match) {
+          const a = parseInt(match[1]);
+          const b = parseInt(match[2]);
+          if (b <= a) return null;
+          return { start: a, end: b };
+        }
+
+        return null;
+      };
+
+      // ⛔ Előellenőrzés: hibás mező keresése
+      for (let i = 0; i < rows.length; i++) {
+        const parsed = parseRowNumber(rows[i].row_number);
+        if (!parsed) {
+          alert(`❌ Error in row ${i + 1}: "${rows[i].row_number}" is not a valid format.\nAccepted formats: number or range like "2-5".`);
+          return;
+        }
+      }
+
+      // ✅ Ha minden érvényes, kezdjük az újragenerálást
+      let currentStart;
+      const firstParsed = parseRowNumber(rows[0].row_number);
+      currentStart = firstParsed.start;
+
+      for (let i = 0; i < rows.length; i++) {
+        const parsed = parseRowNumber(rows[i].row_number);
+        const delta = parsed.end - parsed.start;
+        const from = currentStart;
+        const to = from + delta;
+
+        rows[i].row_number = delta === 0 ? `${from}` : `${from}-${to}`;
+        currentStart = to + 1;
+      }
+    },
     submit() {
       this.isSaving = true;
 

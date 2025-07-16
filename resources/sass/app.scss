@@ -134,7 +134,7 @@ a{
     background-color: $bg;
     color:$primary;
   }
-  textarea,input{
+  textarea,input, select{
       border-radius: $border-radius;
       padding: 10px 20px;
       border-color:$border-primary;
