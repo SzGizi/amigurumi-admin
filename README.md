@@ -68,7 +68,8 @@ php artisan serve
 
 # 8. Run Vite for frontend development
 npm run dev
-🧪 Development Notes
+
+##🧪 Development Notes
 Vue components are in resources/js/components/
 
 Blade views use Bootstrap 5 classes
@@ -79,7 +80,7 @@ Editing uses drag-and-drop via vuedraggable
 
 Pattern data is updated via AJAX PUT requests
 
-✅ Planned Improvements
+##✅ Planned Improvements
 See the TODO list for upcoming features such as:
 
 Auto-generated rows based on inc / dec logic
