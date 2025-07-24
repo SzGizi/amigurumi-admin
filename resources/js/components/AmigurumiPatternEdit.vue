@@ -1,5 +1,4 @@
 
-
 <template>
   <div class="container py-4">
     <div v-if="success" class="alert alert-success">{{ success }}</div>
@@ -89,14 +88,10 @@
       
         </div>
          <div class="col-md-12 mb-3">
-           <FileUploader model-type="AmigurumiPattern" :model-id="pattern.id" />
+           <FileUploader model-type="AmigurumiPattern" :model-id="pattern.id"  @updateDeletedImages="onUpdateDeletedImages"/>
           <ImageCropper v-if="selectedImage" :image="selectedImage" @cropped="saveCroppedImage" />
         </div>
       </div>
-     
-
-     
-  
 
       <!-- Sections -->
       <h4 class="mt-4">Sections</h4>
@@ -208,10 +203,6 @@
                         class="form-control"
                       />
                     </div>
-                    
-                   
-                  
-
                     <div class="funtions-btn-container">
                      <input
                         type="checkbox"
@@ -322,6 +313,7 @@ export default {
         yarn_description: this.initialYarnDescription,
         tools_description: this.initialToolsDescription,
         images: [],
+        deleted_image_ids : [],
         sections: this.initialSections.map((section) => ({
           id: section.id,
           title: section.title,
@@ -467,32 +459,7 @@ export default {
       };
       this.generateRowmodalInstance.hide();
     },
-    uploadImage(event, modelType, modelId) {
-      const files = event.target.files;
-      if (!files.length) return;
-
-      for (let i = 0; i < files.length; i++) {
-        const formData = new FormData();
-        formData.append('image', files[i]);
-        formData.append('model_type', modelType);
-        formData.append('model_id', modelId);
-
-        console.log(formData.get('image'));
-        console.log(formData.get('model_type'));
-        console.log(formData.get('model_id'));
-
-        axios.post('/images/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        })
-        .then(res => {
-          this.pattern.images.push(res.data.image); // itt is pattern.images!
-        })
-        .catch(err => {
-          alert('Upload failed');
-          console.error(err);
-        });
-      }
-    },
+   
     duplicateRow(sectionIndex, rowIndex) {
       const row = this.pattern.sections[sectionIndex].rows[rowIndex];
       const newRow = { ...row, row_number: String(row.row_number), order: row.order + 1, uid: crypto.randomUUID() };
@@ -653,12 +620,19 @@ export default {
           console.error(error);
         });
     },
+    onUpdateDeletedImages(ids) {
+      this.deletedImageIds = ids;
+    },
 
     submit() {
       this.isSaving = true;
 
+      
+      this.pattern.deleted_image_ids = this.deletedImageIds != null && this.deletedImageIds.length > 0 ? this.deletedImageIds.join(',') : '';
+      
+
       axios
-        .put(this.updateUrl, this.pattern, {
+        .put(this.updateUrl , this.pattern, {
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             'Content-Type': 'application/json',

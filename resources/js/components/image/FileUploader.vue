@@ -4,13 +4,21 @@ import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
 import FilePondPluginFileRename from 'filepond-plugin-file-rename'
 import { ref, onMounted } from 'vue'
+import { h } from 'vue'
+import { toast } from 'vue3-toastify'
+
 
 import 'filepond/dist/filepond.min.css'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 
+import { defineEmits } from 'vue';
+
+const emit = defineEmits(['updateDeletedImages']);
+
 const props = defineProps({
   modelType: String,
   modelId: Number,
+  name: String
 })
 
 const endpointMap = {
@@ -27,6 +35,7 @@ const FilePond = vueFilePond(
 )
 
 const pondFiles = ref([]) // előtöltött fájlok
+const pendingDeleteIds = ref([]) // törlésre váró fájlok
 
 onMounted(async () => {
   
@@ -37,16 +46,20 @@ onMounted(async () => {
     const images = await res.json()
 
     
-
-    pondFiles.value = images.map(image => ({
-      source: image.url,
-      options: {
-        type: 'local',
-        metadata: {
-          url: image.url,
+    
+    pondFiles.value = images.map(image => {
+  
+      return {
+        source: image.url,
+        options: {
+          type: 'local',
+          metadata: {
+            id: image.id,
+            url: image.url,
+          }
         }
       }
-    }))
+    })
   }
 })
 
@@ -85,10 +98,46 @@ const server = {
       abort: () => controller.abort()
     }
   },
-  revert: null
+  remove: (source, load, error) => {
+    toast(
+      ({ closeToast }) => {
+        const confirm = () => {
+          closeToast()
+          // Törlés megerősítve, itt jelöljük a törlendő képet
+          const fileToDelete = pondFiles.value.find(file => file.source === source)
+          if (fileToDelete) {
+            pendingDeleteIds.value.push(fileToDelete.options.metadata.id)
+            emit('updateDeletedImages', pendingDeleteIds.value); // Esemény küldése
+          } else {
+            console.warn('Remove: file not found for source', source)
+          }
+          load() // jelezzük FilePond-nak, hogy törlés kész
+        }
+        const cancel = () => {
+          closeToast()
+          error('User cancelled deletion') // jelezzük a FilePond-nak, hogy törlés megszakítva
+        }
+
+        return h('div', { style: 'padding: 10px; max-width: 250px;' }, [
+          h('p', 'Are you sure you want to delete this image?'),
+          h('div', { style: 'display: flex; justify-content: space-between;' }, [
+            h('button', { onClick: confirm, class: 'btn btn-sm btn-danger' }, 'Yes'),
+            h('button', { onClick: cancel, class: 'btn btn-sm btn-secondary' }, 'Cancel'),
+          ])
+        ])
+      },
+      {
+        closeOnClick: false,
+        closeButton: false,
+        autoClose: false,
+      }
+    )
+  }
+  
 }
 function loadImage(source, load, error, progress, abort, headers) {
   const controller = new AbortController()
+
 
   fetch(source, {
     method: 'GET',
@@ -102,20 +151,29 @@ function loadImage(source, load, error, progress, abort, headers) {
     abort: () => controller.abort(),
   }
 }
+function onDelete(id) {
+  pendingDeleteIds.value.push(id);
+  emit('updateDeletedImages', pendingDeleteIds.value);
+}
+
 </script>
 
 <template>
  <FilePond
- 
-  name="image"
-  :files="pondFiles"
-  :server="server"
-  allow-multiple
-  accepted-file-types="image/*"
-  label-idle="Drag & Drop your image or Browse"
-  @error="console.error('FilePond error:', $event)"
-
+    name="images"
+    :files="pondFiles"
+    allow-multiple
+    :server="server"
+    :allowRevert="false"
+   
+    
+  
   />  
+    <input
+    type="hidden"
+    name="deleted_image_ids"
+    :value="pendingDeleteIds.join(',')"
+  />
  
 
 

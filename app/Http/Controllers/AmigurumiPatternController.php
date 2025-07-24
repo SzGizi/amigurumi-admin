@@ -10,10 +10,20 @@ use App\Http\Resources\AmigurumiSectionResource;
 use App\Http\Requests\UpdateAmigurumiPatternRequest;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\ImageService;
+use App\Models\Image;
 
 
 class AmigurumiPatternController extends Controller
 {
+
+    protected $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     public function index()
     {
         $patterns = AmigurumiPattern::with('amigurumiSections.amigurumiRows')->orderByDesc('created_at')->get();
@@ -81,6 +91,14 @@ class AmigurumiPatternController extends Controller
           
         }
 
+         $deletedImageIds = explode(',', $request->input('deleted_image_ids', ''));
+
+        foreach ($deletedImageIds as $imageId) {
+            $image = Image::find($imageId);
+            if ($image) {
+                $this->imageService->deleteImage($image);
+            }
+        }
         
        return response()->json([
         'message' => __('Pattern updated successfully.'),

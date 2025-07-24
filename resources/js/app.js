@@ -10,11 +10,15 @@ import axios from 'axios';
 import AmigurumiPatternEdit from './components/AmigurumiPatternEdit.vue';
 
 import Alpine from 'alpinejs';
+import Toast from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+
+
 
 const app = createApp({});
 app.component('amigurumi-pattern-edit', AmigurumiPatternEdit);
 app.mount('#app');
-
+app.use(Toast);
 
 window.Alpine = Alpine;
 Alpine.start();
