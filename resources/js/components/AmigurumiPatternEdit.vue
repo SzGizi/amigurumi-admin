@@ -1,3 +1,5 @@
+
+
 <template>
   <div class="container py-4">
     <div v-if="success" class="alert alert-success">{{ success }}</div>
@@ -63,28 +65,37 @@
     </div>
 
     <form @submit.prevent="submit">
-      <!-- Pattern Info -->
-      <div class="basic-input">
-        <label for="title" class="form-label">Title</label>
-        <input type="text" id="title" v-model="pattern.title" class="form-control" />
-      </div>
+      <div class="row">
+       
+        <div class="col-md-6">
 
-      <div class="basic-input">
-        <label for="yarn_description" class="form-label">Yarn Description</label>
-        <textarea id="yarn_description" v-model="pattern.yarn_description" class="form-control"></textarea>
-      </div>
+          <div class="basic-input">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" id="title" v-model="pattern.title" class="form-control" />
+          </div>
 
-      <div class="basic-input">
-        <label for="tools_description" class="form-label">Tools Description</label>
-        <textarea id="tools_description" v-model="pattern.tools_description" class="form-control"></textarea>
-      </div>
+          <div class="basic-input">
+            <label for="yarn_description" class="form-label">Yarn Description</label>
+            <textarea id="yarn_description" v-model="pattern.yarn_description" class="form-control"></textarea>
+          </div>
 
-      <div class="basic-input">
-        <input type="file" @change="uploadImage($event, 'AmigurumiPattern',pattern.id)" multiple />
-        <div v-for="image in pattern.images" :key="image.id" class="mb-2">
-          <img :src="'/storage/' + image.path" class="img-thumbnail" width="150" />
+         
+        </div>
+        <div class="col-md-6 ">
+          <div class="basic-input">
+            <label for="tools_description" class="form-label">Tools Description</label>
+            <textarea  id="tools_description" v-model="pattern.tools_description" class="form-control"></textarea>
+          </div>
+      
+        </div>
+         <div class="col-md-12 mb-3">
+           <FileUploader model-type="AmigurumiPattern" :model-id="pattern.id" />
+          <ImageCropper v-if="selectedImage" :image="selectedImage" @cropped="saveCroppedImage" />
         </div>
       </div>
+     
+
+     
   
 
       <!-- Sections -->
@@ -266,6 +277,24 @@
     </form>
   </div>
 </template>
+
+<script setup>
+  import FileUploader from '@/components/image/FileUploader.vue'
+  import ImageCropper from '@/components/image/ImageCropper.vue'
+
+  import { ref } from 'vue'
+
+  const selectedImage = ref(null)
+
+  function handleUpload(fileUrl) {
+    selectedImage.value = fileUrl
+  }
+
+  function saveCroppedImage(dataUrl) {
+    console.log('Cropped image as base64:', dataUrl)
+    // Küldd el a szerverre vagy mentsd el
+  }
+</script>
 
 <script>
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';

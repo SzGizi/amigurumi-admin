@@ -24,8 +24,17 @@
         "@vitejs/plugin-vue": "^6.0.0",
         "bootstrap": "^5.3.7",
         "bootstrap-icons": "^1.13.1",
+        "filepond": "^4.32.8",
+        "filepond-plugin-file-rename": "^1.1.8",
+        "filepond-plugin-file-validate-type": "^1.2.9",
+        "filepond-plugin-image-crop": "^2.0.6",
+        "filepond-plugin-image-exif-orientation": "^1.0.11",
+        "filepond-plugin-image-preview": "^4.6.12",
+        "filepond-plugin-image-transform": "^3.8.7",
         "sortablejs": "^1.15.6",
         "vue": "^3.5.17",
+        "vue-advanced-cropper": "^2.8.9",
+        "vue-filepond": "^7.0.4",
         "vuedraggable": "^4.1.0"
     }
 }

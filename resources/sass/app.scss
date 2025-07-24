@@ -3,22 +3,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Twinkle+Star&display=swap');
 @import "bootstrap-icons/font/bootstrap-icons";
 
+@import 'variables';
 
+@import 'mixins';
 
-$primary: #d95478;
-$secondary : #02735E;
-$bg-primary : #ffecf1;
-$border-primary :#d95478;
-$bg: white;
-$text-color-with-primary:white;
-$heading-color: $primary;
-$nav-bg : $bg-primary;
-$default-sapce-paddig: 30px 0 !important;
-$default-sapce-margin: 30px 0 !important;
-$header-fontfamily:"Twinkle Star", cursive;
-$text-color:black;
-$text-color-light:rgb(82, 82, 82);
-$border-radius:30px;
+@import 'pondFiles';
 
 :root {
   --bs-link-color-rgb: #{red($primary)}, #{green($primary)}, #{blue($primary)};
@@ -30,8 +19,6 @@ $border-radius:30px;
   --bs-btn-hover-color:$secondary;
   --bs-btn-hover-border-color:$secondary;
 }
-
-
 body {
   font-family: 'Figtree', sans-serif;
 }

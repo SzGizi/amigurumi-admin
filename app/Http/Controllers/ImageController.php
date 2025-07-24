@@ -32,6 +32,14 @@ class ImageController extends Controller
     public function amigurumiPattenIndex($patternId)
     {
         $pattern = \App\Models\AmigurumiPattern::findOrFail($patternId);
-        return response()->json($pattern->images);
+        return response()->json(
+            $pattern->images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'path' => $image->path,
+                    'url' => asset('storage/' . $image->path), 
+                ];
+            })
+        );
     }
 }
