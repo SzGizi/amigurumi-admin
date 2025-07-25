@@ -88,7 +88,15 @@
       
         </div>
          <div class="col-md-12 mb-3">
-           <FileUploader model-type="AmigurumiPattern" :model-id="pattern.id"  @updateDeletedImages="onUpdateDeletedImages"/>
+         
+           <FileUploader 
+            model-type="AmigurumiPattern" 
+            :model-id="pattern.id" 
+          
+            :pattern-main-image-id="pattern.main_image_id"  
+            @updateDeletedImages="onUpdateDeletedImages"
+            @updateMainImageId="pattern.main_image_id = $event"
+           />
           <ImageCropper v-if="selectedImage" :image="selectedImage" @cropped="saveCroppedImage" />
         </div>
       </div>
@@ -302,6 +310,7 @@ export default {
     'initialYarnDescription',
     'initialToolsDescription',
     'updateUrl',
+    'initialMainImageId'
   ],
   data() {
     return {
@@ -314,6 +323,7 @@ export default {
         tools_description: this.initialToolsDescription,
         images: [],
         deleted_image_ids : [],
+        main_image_id : this.initialMainImageId ?? null,
         sections: this.initialSections.map((section) => ({
           id: section.id,
           title: section.title,
@@ -345,6 +355,7 @@ export default {
     };
   },
   mounted() {
+    
     this.deletemodalInstance = new Modal(this.$refs.deleteModal);
     this.generateRowmodalInstance = new Modal(this.$refs.generateRowsModal);
    
@@ -355,6 +366,7 @@ export default {
         .catch(error => {
           console.error('Képek betöltése sikertelen:', error);
         });
+      
   },
   methods: {
     updateSectionOrders() {
@@ -631,6 +643,7 @@ export default {
       this.pattern.deleted_image_ids = this.deletedImageIds != null && this.deletedImageIds.length > 0 ? this.deletedImageIds.join(',') : '';
       
 
+      console.log('Submitting pattern:', this.pattern);
       axios
         .put(this.updateUrl , this.pattern, {
           headers: {

@@ -3,10 +3,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Twinkle+Star&display=swap');
 @import "bootstrap-icons/font/bootstrap-icons";
 
-@import 'variables';
-
-@import 'mixins';
-
+@import '_variables';
+@import '_mixins';
 @import 'pondFiles';
 
 :root {

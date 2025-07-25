@@ -22,4 +22,18 @@ class ImageService
         // Töröld az adatbázisból
         $image->delete();
     }
+
+    public function setMainImage(Image $image)
+    {
+        // TODO: Törlés csak az aktuális pattern vagy services main képről
+
+        $imageable = $image->imageable;
+
+        // Töröljük a korábbi main képet
+        $imageable->images()->update(['is_main' => false]);
+
+        // Beállítjuk ezt main képnek
+        $image->is_main = true;
+        $image->save();
+    }
 }

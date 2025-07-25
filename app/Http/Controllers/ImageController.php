@@ -53,7 +53,14 @@ class ImageController extends Controller
         $image = new Image(['path' => $path]);
         $model->images()->save($image);
 
-        return response()->json(['message' => 'Image uploaded', 'image' => $image]);
+       
+        return response()->json([
+            'message' => 'Image uploaded',
+            'image' => [
+                'id' => $image->id,
+                'url' => asset('storage/' . $image->path), // <- Ezt a Vue használja
+            ]
+        ]);
     }
     
 
@@ -75,5 +82,19 @@ class ImageController extends Controller
                 ];
             })
         );
+    }
+    
+    /**
+     * Set an image as the main image for its model.
+     *
+     * @param  \App\Models\Image  $image
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function setMain(Image $image)
+    {
+        $this->imageService->setMainImage($image);
+
+        return response()->json(['status' => 'ok', 'message' => 'Main image set.']);
+        
     }
 }

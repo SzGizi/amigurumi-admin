@@ -17,9 +17,10 @@
 
     <div id="app">
       
-        
+       
         <amigurumi-pattern-edit
             :initial-pattern-id='@json($amigurumiPattern->id)'
+            :initial-main-image-id='@json($amigurumiPattern->main_image_id)'
             :initial-title='@json($amigurumiPattern->title)'
             :initial-yarn-description='@json($amigurumiPattern->yarn_description)'
             :initial-tools-description='@json($amigurumiPattern->tools_description)'

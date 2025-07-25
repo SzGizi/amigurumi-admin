@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Image extends Model
 {
-    protected $fillable = ['path'];
+    protected $fillable = ['path', 'order', 'is_main'];
 
     public function imageable()
     {

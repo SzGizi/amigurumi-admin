@@ -16,6 +16,14 @@ class AmigurumiPattern extends Model
     {
         return $this->morphMany(Image::class, 'imageable');
     }
+    public function mainImage()
+    {
+        return $this->morphOne(Image::class, 'imageable')->where('is_main', true);
+    }
+    public function getMainImageIdAttribute()
+    {
+        return optional($this->mainImage)->id;
+    }
 
 
 }

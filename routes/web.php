@@ -34,10 +34,8 @@ Route::middleware('auth')->group(function () {
     
     Route::post('/images/upload', [ImageController::class, 'upload'])->name('images.upload');
     Route::get('/api/patterns/{pattern}/images', [ImageController::class, 'amigurumiPattenIndex']);
-
-
     Route::delete('/images/{image}', [ImageController::class, 'deleteImage']);
-
+    Route::post('/images/{image}/set-main', [ImageController::class, 'setMain']);
 
 
 

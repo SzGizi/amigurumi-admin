@@ -91,7 +91,7 @@ class AmigurumiPatternController extends Controller
           
         }
 
-         $deletedImageIds = explode(',', $request->input('deleted_image_ids', ''));
+        $deletedImageIds = explode(',', $request->input('deleted_image_ids', ''));
 
         foreach ($deletedImageIds as $imageId) {
             $image = Image::find($imageId);
@@ -99,13 +99,21 @@ class AmigurumiPatternController extends Controller
                 $this->imageService->deleteImage($image);
             }
         }
+       
+         Log::info($request->main_image_id);
+        if ($request->main_image_id) {
+            Log::info('Setting main image for pattern ID: ' . $amigurumiPattern->id . ' with image ID: ' . $request->main_image_id);
+            $image = Image::find($request->main_image_id);
+            if ($image && $image->imageable_id == $amigurumiPattern->id) {
+                $this->imageService->setMainImage($image);
+            }
+        }
         
        return response()->json([
-        'message' => __('Pattern updated successfully.'),
-        'pattern' => $amigurumiPattern->load('amigurumiSections.amigurumiRows')
-    ]);
+            'message' => __('Pattern updated successfully.'),
+            'pattern' => $amigurumiPattern->load('amigurumiSections.amigurumiRows')
+        ]);
     }
-
 
     public function destroy($id)
     {

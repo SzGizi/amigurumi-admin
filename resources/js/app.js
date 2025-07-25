@@ -12,6 +12,7 @@ import AmigurumiPatternEdit from './components/AmigurumiPatternEdit.vue';
 import Alpine from 'alpinejs';
 import Toast from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import 'vue-file-agent/dist/vue-file-agent.css'
 
 
 
