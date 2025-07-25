@@ -173,30 +173,39 @@ defineExpose({
   <div>
     <input type="file" multiple @change="onFileChange" :disabled="uploading" />
 
-    <div class="preview-main-buttons mt-3">
+    <div class="fileUploaderContainer row align-items-center">
+
       <div
         v-for="img in images"
         :key="img.id || img.uuid"
-        class="d-flex align-items-center mb-2"
+        class="col-md-3 col-6  mb-2"
       >
-        <img
-          :src="img.url"
-          alt="preview"
-          style="max-width:100px; max-height:100px; object-fit:contain; margin-right:10px"
-        />
-        <button
-          type="button"
-          class="btn btn-sm"
-          :class="mainImageId === img.id ? 'btn-primary' : 'btn-outline-primary'"
-          @click="setMainImage(img)"
-          :disabled="img.isNew"
-        >
-          Set as Main
-        </button>
-        <button type="button" class="btn btn-sm btn-danger ms-2" @click="removeImage(img)">
-          Delete
-        </button>
-        <span v-if="img.isNew" class="text-muted ms-2">(New, must save before set Main)</span>
+        <div class="fileUploaderItem">
+          <img
+            :src="img.url"
+            alt="preview"
+            class="fileUploaderImage"
+          />
+          <div class="fileUploaderActionsContainer">
+            <button
+              type="button"
+              class="btn btn-sm"
+              :class="mainImageId === img.id ? 'btn-primary' : 'btn-dark'"
+              @click="setMainImage(img)"
+              :disabled="img.isNew"
+              title="Set as main image"
+            >
+              <i class="bi bi-layer-forward"></i>
+            </button>
+            <button type="button" 
+            title="Delete image"
+            class="btn btn-sm btn-danger ms-1" @click="removeImage(img)">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+          <span v-if="img.isNew" class=" fileUploaderInfoBar ">(New, must save before set Main)</span>
+        </div>
+        
       </div>
     </div>
 

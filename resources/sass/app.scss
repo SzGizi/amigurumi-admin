@@ -5,7 +5,8 @@
 
 @import '_variables';
 @import '_mixins';
-@import 'pondFiles';
+@import 'fileuploader';
+
 
 :root {
   --bs-link-color-rgb: #{red($primary)}, #{green($primary)}, #{blue($primary)};

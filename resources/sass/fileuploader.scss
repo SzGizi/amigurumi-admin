@@ -1,0 +1,31 @@
+.fileUploaderContainer{
+    .fileUploaderItem{
+        display: block;
+        max-width: fit-content;
+        position: relative;
+
+        .fileUploaderImage{
+            display: block;
+            width: 100%;
+            position: relative;
+            
+        }
+        .fileUploaderActionsContainer{
+            position: absolute;
+            top: 5px;
+            right: 5px;
+
+        }
+        .fileUploaderInfoBar{
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+            font-size: 0.8rem;
+            width: 100%;
+            color: wheat !important;
+            background: black;
+            padding: 3px 10px;
+            border-top: wheat 1px solid;
+        }
+    }
+}
