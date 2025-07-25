@@ -92,12 +92,12 @@
            <FileUploader 
             model-type="AmigurumiPattern" 
             :model-id="pattern.id" 
-          
+            ref="fileUploaderRef"
             :pattern-main-image-id="pattern.main_image_id"  
             @updateDeletedImages="onUpdateDeletedImages"
             @updateMainImageId="pattern.main_image_id = $event"
            />
-          <ImageCropper v-if="selectedImage" :image="selectedImage" @cropped="saveCroppedImage" />
+        
         </div>
       </div>
 
@@ -279,20 +279,9 @@
 
 <script setup>
   import FileUploader from '@/components/image/FileUploader.vue'
-  import ImageCropper from '@/components/image/ImageCropper.vue'
-
   import { ref } from 'vue'
 
-  const selectedImage = ref(null)
 
-  function handleUpload(fileUrl) {
-    selectedImage.value = fileUrl
-  }
-
-  function saveCroppedImage(dataUrl) {
-    console.log('Cropped image as base64:', dataUrl)
-    // Küldd el a szerverre vagy mentsd el
-  }
 </script>
 
 <script>
@@ -300,6 +289,9 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Modal } from 'bootstrap';
 import draggable from 'vuedraggable';
 import { Collapse } from 'bootstrap';
+
+
+const imageUploaderRef = ref()
 
 export default {
   components: { draggable },
@@ -369,6 +361,45 @@ export default {
       
   },
   methods: {
+    submit() {
+      this.isSaving = true;
+
+      
+      this.pattern.deleted_image_ids = this.deletedImageIds != null && this.deletedImageIds.length > 0 ? this.deletedImageIds.join(',') : '';
+      
+
+      console.log('Submitting pattern:', this.pattern);
+       if (!this.$refs.fileUploaderRef) {
+        console.error('ImageUploader ref not found')
+        this.isSaving = false
+        return
+      }
+
+      this.$refs.fileUploaderRef.uploadPendingImages().then(() => {
+        axios
+          .put(this.updateUrl , this.pattern, {
+            headers: {
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+              'Content-Type': 'application/json',
+            },
+          })
+          .then(() => {
+            this.success = 'Pattern updated successfully.';
+            this.error = null;
+            setTimeout(() => (this.success = null), 3000);
+          })
+          .catch((error) => {
+            this.success = null;
+            if (error.response && error.response.data) {
+              this.error = error.response.data.message || 'An error occurred on the server.';
+            } else {
+              this.error = 'Network error.';
+            }
+            setTimeout(() => (this.error = null), 50000);
+          })
+          .finally(() => (this.isSaving = false));
+      });
+    },
     updateSectionOrders() {
       this.pattern.sections.forEach((section, index) => {
         if (section) section.order = index + 1;
@@ -636,37 +667,7 @@ export default {
       this.deletedImageIds = ids;
     },
 
-    submit() {
-      this.isSaving = true;
-
-      
-      this.pattern.deleted_image_ids = this.deletedImageIds != null && this.deletedImageIds.length > 0 ? this.deletedImageIds.join(',') : '';
-      
-
-      console.log('Submitting pattern:', this.pattern);
-      axios
-        .put(this.updateUrl , this.pattern, {
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(() => {
-          this.success = 'Pattern updated successfully.';
-          this.error = null;
-          setTimeout(() => (this.success = null), 3000);
-        })
-        .catch((error) => {
-          this.success = null;
-          if (error.response && error.response.data) {
-            this.error = error.response.data.message || 'An error occurred on the server.';
-          } else {
-            this.error = 'Network error.';
-          }
-          setTimeout(() => (this.error = null), 50000);
-        })
-        .finally(() => (this.isSaving = false));
-    },
+  
   },
 };
 </script>

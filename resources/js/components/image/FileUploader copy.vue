@@ -1,247 +1,186 @@
 <script setup>
-import vueFilePond from 'vue-filepond'
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
-import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
-import FilePondPluginFileRename from 'filepond-plugin-file-rename'
-import { ref, onMounted } from 'vue'
-import { h } from 'vue'
+import { ref, onMounted, defineExpose } from 'vue'
 import { toast } from 'vue3-toastify'
-
-
-import 'filepond/dist/filepond.min.css'
-import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
-
-import { defineEmits } from 'vue';
-
-const emit = defineEmits(['updateDeletedImages','updateMainImageId']);
+import { h } from 'vue'
 
 const props = defineProps({
   modelType: String,
   modelId: Number,
-  name: String,
   patternMainImageId: Number,
 })
+
+const emit = defineEmits(['updateDeletedImages', 'updateMainImageId'])
 
 const endpointMap = {
   AmigurumiPattern: `/api/patterns/${props.modelId}/images`,
   AmigurumiSection: `/api/sections/${props.modelId}/images`,
-  
 }
 const endpoint = endpointMap[props.modelType]
 
-const FilePond = vueFilePond(
-  FilePondPluginImagePreview,
-  FilePondPluginFileValidateType,
-  FilePondPluginFileRename
-)
-
-const pondFiles = ref([]) // előtöltött fájlok
-const pendingDeleteIds = ref([]) // törlésre váró fájlok
-const mainImageId = props.patternMainImageId // fő kép ID
-
+const images = ref([])               // Már feltöltött képek {id, url}
+const newImages = ref([])            // Új, feltöltésre váró fájlok (File objektumok)
+const previewUrls = ref([])          // Új képek preview URL-jei
+const pendingDeleteIds = ref([])
+const mainImageId = ref(props.patternMainImageId || null)
+const uploading = ref(false)
 
 onMounted(async () => {
-  
   if (!endpoint) {
     console.error('Unknown modelType:', props.modelType)
-  } else {
-    const res = await fetch(endpoint)
-    const images = await res.json()
-     console.log('Fetched images:', images)
+    return
+  }
 
-    pondFiles.value = images
-      .filter(image => image && image.id && image.url)
-      .map(image => ({
-        source: image.url,
-        options: {
-          type: 'local',
-          metadata: {
-            id: image.id,
-            url: image.url,
-          }
-        }
-      }))
-    
-  
+  try {
+    const res = await fetch(endpoint)
+    const data = await res.json()
+    images.value = data
+
+    // Ha nincs mainImageId beállítva, akkor az első legyen
+    if (!mainImageId.value && data.length) {
+      mainImageId.value = data[0].id
+      emit('updateMainImageId', data[0].id)
+    }
+  } catch (err) {
+    console.error('Failed to fetch images:', err)
   }
 })
 
-const server = {
-  fetch: loadImage,
-  load: loadImage, // optional fallback
-  process: (fieldName, file, metadata, load, error, progress, abort) => {
-  const formData = new FormData()
-  formData.append('image', file)
-  formData.append('model_type', props.modelType)
-  formData.append('model_id', props.modelId)
+function onFileChange(event) {
+  const files = Array.from(event.target.files)
+  if (!files.length) return
 
-  const controller = new AbortController()
+  files.forEach(file => {
+    newImages.value.push(file)
 
-  fetch('/images/upload', {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-    },
-    signal: controller.signal,
-  })
-  .then((res) => res.json())
-  .then((res) => {
-    if (res.image) {
-      load(res.image.url)  // itt fontos: load hívás a feltöltött kép azonosítójával
-    } else {
-      error('Upload failed')
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      previewUrls.value.push(e.target.result)
     }
-  })
-  .catch(() => {
-    error('Upload error')
+    reader.readAsDataURL(file)
   })
 
-  return {
-    abort: () => controller.abort()
+  event.target.value = null
+}
+
+/**
+ * Feltölti az újonnan kiválasztott képeket.
+ * Ezt a külső form submit eseményén kell meghívni.
+ */
+async function uploadPendingImages() {
+  if (!newImages.value.length) return
+
+  uploading.value = true
+
+  for (let i = 0; i < newImages.value.length; i++) {
+    const file = newImages.value[i]
+    const formData = new FormData()
+    formData.append('image', file)
+    formData.append('model_type', props.modelType)
+    formData.append('model_id', props.modelId)
+
+    try {
+      const res = await fetch('/images/upload', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: formData,
+      })
+
+      const data = await res.json()
+
+      if (res.ok && data.image && data.image.id && data.image.url) {
+        images.value.push({ id: data.image.id, url: data.image.url })
+
+        if (!mainImageId.value) {
+          mainImageId.value = data.image.id
+          emit('updateMainImageId', data.image.id)
+        }
+      } else {
+        toast.error(data.message || 'Upload failed')
+        console.error('Upload failed:', data)
+      }
+    } catch (err) {
+      toast.error('Upload error')
+      console.error(err)
+    }
   }
-},
 
-  remove: (source, load, error) => {
-    toast(
-      ({ closeToast }) => {
-        const confirm = () => {
-          closeToast()
-          // Törlés megerősítve, itt jelöljük a törlendő képet
-          const fileToDelete = pondFiles.value.find(file => file.source === source)
-          if (fileToDelete) {
-            pendingDeleteIds.value.push(fileToDelete.options.metadata.id)
-            emit('updateDeletedImages', pendingDeleteIds.value); // Esemény küldése
-          } else {
-            console.warn('Remove: file not found for source', source)
-          }
-          load() // jelezzük FilePond-nak, hogy törlés kész
-        }
-        const cancel = () => {
-          closeToast()
-          error('User cancelled deletion') // jelezzük a FilePond-nak, hogy törlés megszakítva
-        }
+  newImages.value = []
+  previewUrls.value = []
+  uploading.value = false
+}
 
-        return h('div', { style: 'padding: 10px; max-width: 250px;' }, [
-          h('p', 'Are you sure you want to delete this image?'),
-          h('div', { style: 'display: flex; justify-content: space-between;' }, [
-            h('button', { onClick: confirm, class: 'btn btn-sm btn-danger' }, 'Yes'),
-            h('button', { onClick: cancel, class: 'btn btn-sm btn-secondary' }, 'Cancel'),
-          ])
+function removeImage(id) {
+  toast(
+    ({ closeToast }) => {
+      const confirmDelete = () => {
+        closeToast()
+        pendingDeleteIds.value.push(id)
+        images.value = images.value.filter(img => img.id !== id)
+        emit('updateDeletedImages', pendingDeleteIds.value)
+      }
+      const cancelDelete = () => {
+        closeToast()
+      }
+
+      return h('div', { style: 'padding:10px; max-width:250px;' }, [
+        h('p', 'Are you sure you want to delete this image?'),
+        h('div', { style: 'display:flex; justify-content:space-between;' }, [
+          h('button', { class: 'btn btn-sm btn-danger', onClick: confirmDelete }, 'Yes'),
+          h('button', { class: 'btn btn-sm btn-secondary', onClick: cancelDelete }, 'Cancel'),
         ])
-      },
-      {
-        closeOnClick: false,
-        closeButton: false,
-        autoClose: false,
-      }
-    )
-  }
-  
-}
-function loadImage(source, load, error, progress, abort, headers) {
-  const controller = new AbortController()
-
-
-  fetch(source, {
-    method: 'GET',
-    signal: controller.signal,
-  })
-    .then((res) => res.blob())
-    .then(load)
-    .catch(error)
-
-  return {
-    abort: () => controller.abort(),
-  }
-}
-function onDelete(id) {
-  pendingDeleteIds.value.push(id);
-  emit('updateDeletedImages', pendingDeleteIds.value);
+      ])
+    },
+    { closeOnClick: false, closeButton: false, autoClose: false }
+  )
 }
 
-function handleProcessFile(error, file) {
-  if (error) {
-    console.error('File upload error:', error);
-    return;
-  }
-  
-  // Feltételezem, hogy a szerver response-ban visszakapjuk az új kép URL-jét és id-jét
-  const imageId = file.serverId; // ez amit a server.process 'load(res.image.id)' -ben adsz meg
-  const imageUrl = file.getMetadata('url'); // vagy máshonnan kell megszerezni
-
-  // Ha nem áll rendelkezésre a url, akkor lehet, hogy az 'file.file' objektumot használjuk blob-ként, de ez nem url
-  // ezért inkább dinamikusan adjuk hozzá az új képet az URL-lel amit a szerver küld vissza
-
-  // Erre jobb megoldás, hogy a process függvényedben a feltöltés után kapott URL-t is visszaadod metadata-ként
-  // Ehhez a process metódusodban a load hívásakor add át a teljes adatot (id+url), pl:
-  // load({ id: res.image.id, url: res.image.url })
-
-  // Itt a file.serverId helyett inkább ezt használd
-
-  const newFileMetadata = file.getMetadata(); // ha átadtál url-t a metadata-ban
-
-  if (!newFileMetadata.url) {
-    console.warn('No image URL available for new file');
-    return;
-  }
-
-  // Új kép hozzáadása pondFiles-hoz
-  pondFiles.value.push({
-    source: newFileMetadata.url,
-    options: {
-      type: 'local',
-      metadata: {
-        id: imageId,
-        url: newFileMetadata.url,
-      }
-    }
-  })
+function setMainImage(id) {
+  mainImageId.value = id
+  emit('updateMainImageId', id)
 }
 
-
-
+defineExpose({
+  uploadPendingImages,
+})
 </script>
 
 <template>
- <FilePond
-    name="images"
-    :files="pondFiles"
-    allow-multiple
-    :server="server"
-    :allowRevert="false"
-    @processfile="handleProcessFile"
-  />  
-  <div class="preview-main-buttons">
-    <div v-for="file in pondFiles" :key="file.options.metadata.id" class="mt-2 d-flex align-items-center">
-      <img :src="file.options.metadata.url" class="preview-image">
-      <button
-      type="button"
-        class="btn btn-sm"
-        :class="{'btn-primary': mainImageId === file.options.metadata.id, 'btn-outline-primary': mainImageId !== file.options.metadata.id}"
-        @click="
-        mainImageId = file.options.metadata.id; 
-        emit('updateMainImageId', mainImageId);"
-      >
-        Set as Main
-      </button>
-    </div> 
+  <div>
+    <input type="file" multiple @change="onFileChange" :disabled="uploading" />
+
+    <div class="preview-main-buttons mt-3">
+      <!-- Meglévő képek -->
+      <div v-for="img in images" :key="'img-' + img.id" class="d-flex align-items-center mb-2">
+        <img
+          :src="img.url"
+          alt="preview"
+          style="max-width:100px; max-height:100px; object-fit:contain; margin-right:10px"
+        />
+        <button
+          type="button"
+          class="btn btn-sm"
+          :class="mainImageId === img.id ? 'btn-primary' : 'btn-outline-primary'"
+          @click="setMainImage(img.id)"
+        >
+          Set as Main
+        </button>
+        <button type="button" class="btn btn-sm btn-danger ms-2" @click="removeImage(img.id)">Delete</button>
+      </div>
+
+      <!-- Új képek előnézete -->
+      <div v-for="(url, index) in previewUrls" :key="'preview-' + index" class="d-flex align-items-center mb-2">
+        <img
+          :src="url"
+          alt="new preview"
+          style="max-width:100px; max-height:100px; object-fit:contain; margin-right:10px"
+        />
+        <span class="text-muted ms-2">(New)</span>
+      </div>
+    </div>
+
+    <input type="hidden" name="deleted_image_ids" :value="pendingDeleteIds.join(',')" />
+    <input type="hidden" name="main_image_id" :value="mainImageId" />
   </div>
-
-
-  
-
-    <input
-    type="hidden"
-    name="deleted_image_ids"
-    :value="pendingDeleteIds.join(',')"
-    />
-    <input
-    type="hidden"
-    name="main_image_id"
-    :value="mainImageId"
-  />
- 
-
-
 </template>
