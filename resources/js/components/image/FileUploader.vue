@@ -2,6 +2,7 @@
 import { ref, onMounted, defineExpose } from 'vue'
 import { toast } from 'vue3-toastify'
 import { h } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 
 const props = defineProps({
   modelType: String,
@@ -17,28 +18,22 @@ const endpointMap = {
 }
 const endpoint = endpointMap[props.modelType]
 
-const images = ref([])               // Már feltöltött képek {id, url}
-const newImages = ref([])            // Új, feltöltésre váró fájlok (File objektumok)
-const previewUrls = ref([])          // Új képek preview URL-jei
+const images = ref([]) // [{ id, url, isNew, file, uuid }]
 const pendingDeleteIds = ref([])
 const mainImageId = ref(props.patternMainImageId || null)
 const uploading = ref(false)
 
 onMounted(async () => {
-  if (!endpoint) {
-    console.error('Unknown modelType:', props.modelType)
-    return
-  }
+  if (!endpoint) return console.error('Unknown modelType:', props.modelType)
 
   try {
     const res = await fetch(endpoint)
     const data = await res.json()
-    images.value = data
+    images.value = data.map(img => ({ ...img, isNew: false }))
 
-    // Ha nincs mainImageId beállítva, akkor az első legyen
-    if (!mainImageId.value && data.length) {
-      mainImageId.value = data[0].id
-      emit('updateMainImageId', data[0].id)
+    if (!mainImageId.value && images.value.length) {
+      mainImageId.value = images.value[0].id
+      emit('updateMainImageId', images.value[0].id)
     }
   } catch (err) {
     console.error('Failed to fetch images:', err)
@@ -50,11 +45,14 @@ function onFileChange(event) {
   if (!files.length) return
 
   files.forEach(file => {
-    newImages.value.push(file)
-
     const reader = new FileReader()
     reader.onload = (e) => {
-      previewUrls.value.push(e.target.result)
+      images.value.push({
+        uuid: uuidv4(),
+        isNew: true,
+        file,
+        url: e.target.result,
+      })
     }
     reader.readAsDataURL(file)
   })
@@ -62,19 +60,71 @@ function onFileChange(event) {
   event.target.value = null
 }
 
-/**
- * Feltölti az újonnan kiválasztott képeket.
- * Ezt a külső form submit eseményén kell meghívni.
- */
-async function uploadPendingImages() {
-  if (!newImages.value.length) return
+function removeImage(img) {
+  if (img.isNew) {
+    toast(
+      ({ closeToast }) => {
+        const confirmDelete = () => {
+          closeToast()
+          // új, még nem feltöltött képet törlünk
+          images.value = images.value.filter(i => i.uuid !== img.uuid)
+        }
+        const cancelDelete = () => closeToast()
 
+        return h('div', { style: 'padding:10px; max-width:250px;' }, [
+          h('p', 'Are you sure you want to delete this image?'),
+          h('div', { style: 'display:flex; justify-content:space-between;' }, [
+            h('button', { class: 'btn btn-sm btn-danger', onClick: confirmDelete }, 'Yes'),
+            h('button', { class: 'btn btn-sm btn-secondary', onClick: cancelDelete }, 'Cancel'),
+          ])
+        ])
+      },
+      { closeOnClick: false, closeButton: false, autoClose: false }
+    )
+    
+  } else {
+    // meglévő képet törlünk
+    toast(
+      ({ closeToast }) => {
+        const confirmDelete = () => {
+          closeToast()
+          pendingDeleteIds.value.push(img.id)
+          images.value = images.value.filter(i => i.id !== img.id)
+          emit('updateDeletedImages', pendingDeleteIds.value)
+        }
+        const cancelDelete = () => closeToast()
+
+        return h('div', { style: 'padding:10px; max-width:250px;' }, [
+          h('p', 'Are you sure you want to delete this image?'),
+          h('div', { style: 'display:flex; justify-content:space-between;' }, [
+            h('button', { class: 'btn btn-sm btn-danger', onClick: confirmDelete }, 'Yes'),
+            h('button', { class: 'btn btn-sm btn-secondary', onClick: cancelDelete }, 'Cancel'),
+          ])
+        ])
+      },
+      { closeOnClick: false, closeButton: false, autoClose: false }
+    )
+  }
+}
+
+function setMainImage(img) {
+  if (img.isNew) {
+    toast.warn('You can only set uploaded images as main.')
+    return
+  }
+  mainImageId.value = img.id
+  emit('updateMainImageId', img.id)
+}
+
+async function uploadPendingImages() {
+  const newImages = images.value.filter(i => i.isNew)
+
+  if (!newImages.length) return
   uploading.value = true
 
-  for (let i = 0; i < newImages.value.length; i++) {
-    const file = newImages.value[i]
+  for (const img of newImages) {
     const formData = new FormData()
-    formData.append('image', file)
+    formData.append('image', img.file)
     formData.append('model_type', props.modelType)
     formData.append('model_id', props.modelId)
 
@@ -89,8 +139,13 @@ async function uploadPendingImages() {
 
       const data = await res.json()
 
-      if (res.ok && data.image && data.image.id && data.image.url) {
-        images.value.push({ id: data.image.id, url: data.image.url })
+      if (res.ok && data.image?.id && data.image?.url) {
+        // Frissítjük az új képet a szerver válaszával
+        img.id = data.image.id
+        img.url = data.image.url
+        img.isNew = false
+        delete img.file
+        delete img.uuid
 
         if (!mainImageId.value) {
           mainImageId.value = data.image.id
@@ -106,39 +161,7 @@ async function uploadPendingImages() {
     }
   }
 
-  newImages.value = []
-  previewUrls.value = []
   uploading.value = false
-}
-
-function removeImage(id) {
-  toast(
-    ({ closeToast }) => {
-      const confirmDelete = () => {
-        closeToast()
-        pendingDeleteIds.value.push(id)
-        images.value = images.value.filter(img => img.id !== id)
-        emit('updateDeletedImages', pendingDeleteIds.value)
-      }
-      const cancelDelete = () => {
-        closeToast()
-      }
-
-      return h('div', { style: 'padding:10px; max-width:250px;' }, [
-        h('p', 'Are you sure you want to delete this image?'),
-        h('div', { style: 'display:flex; justify-content:space-between;' }, [
-          h('button', { class: 'btn btn-sm btn-danger', onClick: confirmDelete }, 'Yes'),
-          h('button', { class: 'btn btn-sm btn-secondary', onClick: cancelDelete }, 'Cancel'),
-        ])
-      ])
-    },
-    { closeOnClick: false, closeButton: false, autoClose: false }
-  )
-}
-
-function setMainImage(id) {
-  mainImageId.value = id
-  emit('updateMainImageId', id)
 }
 
 defineExpose({
@@ -151,8 +174,11 @@ defineExpose({
     <input type="file" multiple @change="onFileChange" :disabled="uploading" />
 
     <div class="preview-main-buttons mt-3">
-      <!-- Meglévő képek -->
-      <div v-for="img in images" :key="'img-' + img.id" class="d-flex align-items-center mb-2">
+      <div
+        v-for="img in images"
+        :key="img.id || img.uuid"
+        class="d-flex align-items-center mb-2"
+      >
         <img
           :src="img.url"
           alt="preview"
@@ -162,21 +188,15 @@ defineExpose({
           type="button"
           class="btn btn-sm"
           :class="mainImageId === img.id ? 'btn-primary' : 'btn-outline-primary'"
-          @click="setMainImage(img.id)"
+          @click="setMainImage(img)"
+          :disabled="img.isNew"
         >
           Set as Main
         </button>
-        <button type="button" class="btn btn-sm btn-danger ms-2" @click="removeImage(img.id)">Delete</button>
-      </div>
-
-      <!-- Új képek előnézete -->
-      <div v-for="(url, index) in previewUrls" :key="'preview-' + index" class="d-flex align-items-center mb-2">
-        <img
-          :src="url"
-          alt="new preview"
-          style="max-width:100px; max-height:100px; object-fit:contain; margin-right:10px"
-        />
-        <span class="text-muted ms-2">(New)</span>
+        <button type="button" class="btn btn-sm btn-danger ms-2" @click="removeImage(img)">
+          Delete
+        </button>
+        <span v-if="img.isNew" class="text-muted ms-2">(New, must save before set Main)</span>
       </div>
     </div>
 
