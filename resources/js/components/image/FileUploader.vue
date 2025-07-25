@@ -22,6 +22,12 @@ const images = ref([]) // [{ id, url, isNew, file, uuid }]
 const pendingDeleteIds = ref([])
 const mainImageId = ref(props.patternMainImageId || null)
 const uploading = ref(false)
+const fileInput = ref(null)
+
+
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
 
 onMounted(async () => {
   if (!endpoint) return console.error('Unknown modelType:', props.modelType)
@@ -169,9 +175,16 @@ defineExpose({
 })
 </script>
 
+
 <template>
   <div>
-    <input type="file" multiple @change="onFileChange" :disabled="uploading" />
+    
+
+    <div class="dropzone" @click="triggerFileInput">
+      <p>Drag image here or</p>
+      <button type="button">Click to upload</button>
+      <input type="file" ref="fileInput" multiple @change="onFileChange" :disabled="uploading" />
+    </div>
 
     <div class="fileUploaderContainer row align-items-center">
 
