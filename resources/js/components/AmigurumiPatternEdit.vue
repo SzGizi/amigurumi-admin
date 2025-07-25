@@ -616,23 +616,28 @@ export default {
         return null;
       };
 
-      // ⛔ Előellenőrzés: hibás mező keresése
+      // ⛔ Előellenőrzés: hibás értékek kiszűrése (de üres engedélyezett)
       for (let i = 0; i < rows.length; i++) {
-        const parsed = parseRowNumber(rows[i].row_number);
+        const val = rows[i].row_number;
+        if (val === '') continue; // üres sor engedélyezett
+        const parsed = parseRowNumber(val);
         if (!parsed) {
-          alert(`❌ Error in row ${i + 1}: "${rows[i].row_number}" is not a valid format.\nAccepted formats: number or range like "2-5".`);
+          alert(`❌ Error in row ${i + 1}: "${val}" is not a valid format.\nAccepted formats: number or range like "2-5".`);
           return;
         }
       }
 
-      // ✅ Ha minden érvényes, kezdjük az újragenerálást
-      let currentStart;
+      // 🔢 Induló érték beállítása
+      let currentStart = 1;
       const firstParsed = parseRowNumber(rows[0].row_number);
-      currentStart = firstParsed.start;
+      if (firstParsed) {
+        currentStart = firstParsed.start;
+      }
 
+      // ✅ Újragenerálás
       for (let i = 0; i < rows.length; i++) {
         const parsed = parseRowNumber(rows[i].row_number);
-        const delta = parsed.end - parsed.start;
+        const delta = parsed ? parsed.end - parsed.start : 0;
         const from = currentStart;
         const to = from + delta;
 
