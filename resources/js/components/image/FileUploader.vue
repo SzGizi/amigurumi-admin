@@ -3,6 +3,8 @@ import { ref, onMounted, defineExpose } from 'vue'
 import { toast } from 'vue3-toastify'
 import { h } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
+import draggable from 'vuedraggable';
+
 
 const props = defineProps({
   modelType: String,
@@ -118,6 +120,12 @@ function setMainImage(img) {
   mainImageId.value = img.id
   emit('updateMainImageId', img.id)
 }
+function updateImagesOrders() {
+  images.value.forEach((img, index) => {
+    img.order = index + 1
+  })
+  console.log('Images reordered:', images.value);
+}
 
 async function uploadPendingImages() {
   const newImages = images.value.filter(i => i.isNew)
@@ -180,20 +188,25 @@ defineExpose({
     <button type="button">Click to upload</button>
     <input type="file" ref="fileInput" multiple @change="onFileChange" :disabled="uploading" />
   </div>
-  <div class="fileUploaderContainer">
-    <div class=" row align-items-center">
-      <div
-        v-for="img in images"
-        :key="img.id || img.uuid"
-        class="col-md-3 col-6  mb-2"
-      >
-        <div class="fileUploaderItem">
-          <img
-            :src="img.url"
-            alt="preview"
-            class="fileUploaderImage"
-          />
+
+    <draggable
+    v-model="images"
+    handle=".drag-handle"
+    animation="150"
+    item-key="img => img.id || img.uuid"
+    ref="draggableImages"
+    tag="div"
+    @update="updateImagesOrders"
+    class="fileUploaderContainer  row align-items-center"
+    
+    >
+      <template  #item="{ element: img }">
+        <div class="fileUploaderItem col-md-3 col-6 mb-2">
+          <img :src="img.url" alt="preview" class="fileUploaderImage" />
+
           <div class="fileUploaderActionsContainer">
+            <span class="drag-handle btn btn-sm" title="Set order">⠿</span>
+
             <button
               type="button"
               class="btn btn-sm"
@@ -203,18 +216,21 @@ defineExpose({
             >
               <i class="bi bi-layer-forward"></i>
             </button>
-            <button type="button" 
-            title="Delete image"
-            class="btn btn-sm btn-danger ms-1" @click="removeImage(img)">
+
+            <button
+              type="button"
+              title="Delete image"
+              class="btn btn-sm btn-danger ms-1"
+              @click="removeImage(img)"
+            >
               <i class="bi bi-x"></i>
             </button>
           </div>
-          <span v-if="img.isNew" class=" fileUploaderInfoBar ">(New, must save before set Main)</span>
         </div>
-        
-      </div>
-    </div>
-  </div>
+      </template>
+    </draggable>
+
+
   
 
   <input type="hidden" name="deleted_image_ids" :value="pendingDeleteIds.join(',')" />

@@ -50,7 +50,7 @@ class ImageController extends Controller
 
         $path = $request->file('image')->store('uploads/images', 'public');
 
-        $image = new Image(['path' => $path]);
+        $image = new Image(['order'=>$request->order, 'path' => $path]);
 
         $model->images()->save($image);
 
