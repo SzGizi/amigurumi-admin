@@ -363,12 +363,10 @@ export default {
   methods: {
     submit() {
       this.isSaving = true;
-
       
       this.pattern.deleted_image_ids = this.deletedImageIds != null && this.deletedImageIds.length > 0 ? this.deletedImageIds.join(',') : '';
-      
 
-      console.log('Submitting pattern:', this.pattern);
+    
        if (!this.$refs.fileUploaderRef) {
         console.error('ImageUploader ref not found')
         this.isSaving = false
@@ -556,12 +554,7 @@ export default {
         this.updateSectionOrders();
       }
     },
-    updateSectionOrders() {
-      if (!Array.isArray(this.pattern.sections)) return;
-      this.pattern.sections.forEach((section, index) => {
-        if (section) section.order = index + 1;
-      });
-    },
+
     moveRowUp(sectionIndex, rowIndex) {
       if (rowIndex === 0) return;
       const rows = this.pattern.sections[sectionIndex].rows;

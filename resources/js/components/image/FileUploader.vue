@@ -129,10 +129,10 @@ async function uploadPendingImages() {
   uploading.value = true
 
   for (const img of newImages) {
-    const formData = new FormData()
-    formData.append('image', img.file)
-    formData.append('model_type', props.modelType)
-    formData.append('model_id', props.modelId)
+    const formData = new FormData();
+    formData.append('image', img.file);
+    formData.append('model_type', props.modelType);
+    formData.append('model_id', props.modelId);
 
     try {
       const res = await fetch('/images/upload', {
@@ -143,10 +143,9 @@ async function uploadPendingImages() {
         body: formData,
       })
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (res.ok && data.image?.id && data.image?.url) {
-        // Frissítjük az új képet a szerver válaszával
         img.id = data.image.id
         img.url = data.image.url
         img.isNew = false
@@ -158,16 +157,16 @@ async function uploadPendingImages() {
           emit('updateMainImageId', data.image.id)
         }
       } else {
-        toast.error(data.message || 'Upload failed')
-        console.error('Upload failed:', data)
+        toast.error(data.message || 'Upload failed');
+        console.error('Upload failed:', data);
       }
     } catch (err) {
-      toast.error('Upload error')
-      console.error(err)
+      toast.error('Upload error');
+      console.error(err);
     }
   }
 
-  uploading.value = false
+  uploading.value = false;
 }
 
 defineExpose({
@@ -177,17 +176,13 @@ defineExpose({
 
 
 <template>
-  <div>
-    
-
-    <div class="dropzone" @click="triggerFileInput">
-      <p>Drag image here or</p>
-      <button type="button">Click to upload</button>
-      <input type="file" ref="fileInput" multiple @change="onFileChange" :disabled="uploading" />
-    </div>
-
-    <div class="fileUploaderContainer row align-items-center">
-
+  <div class="dropzone" @click="triggerFileInput">
+    <p>Drag image here or</p>
+    <button type="button">Click to upload</button>
+    <input type="file" ref="fileInput" multiple @change="onFileChange" :disabled="uploading" />
+  </div>
+  <div class="fileUploaderContainer">
+    <div class=" row align-items-center">
       <div
         v-for="img in images"
         :key="img.id || img.uuid"
@@ -221,8 +216,9 @@ defineExpose({
         
       </div>
     </div>
-
-    <input type="hidden" name="deleted_image_ids" :value="pendingDeleteIds.join(',')" />
-    <input type="hidden" name="main_image_id" :value="mainImageId" />
   </div>
+  
+
+  <input type="hidden" name="deleted_image_ids" :value="pendingDeleteIds.join(',')" />
+  <input type="hidden" name="main_image_id" :value="mainImageId" />
 </template>
