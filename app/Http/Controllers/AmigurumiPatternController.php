@@ -100,9 +100,8 @@ class AmigurumiPatternController extends Controller
             }
         }
        
-         Log::info($request->main_image_id);
+        // Új képek feltöltése
         if ($request->main_image_id) {
-            Log::info('Setting main image for pattern ID: ' . $amigurumiPattern->id . ' with image ID: ' . $request->main_image_id);
             $image = Image::find($request->main_image_id);
             if ($image && $image->imageable_id == $amigurumiPattern->id) {
                 $this->imageService->setMainImage($image);

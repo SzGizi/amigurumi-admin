@@ -51,8 +51,14 @@ class ImageController extends Controller
         $path = $request->file('image')->store('uploads/images', 'public');
 
         $image = new Image(['path' => $path]);
+
         $model->images()->save($image);
 
+      
+
+        if($this->imageService->setMainImage($image)){
+            $this->imageService->setMainImage($image);
+        }
        
         return response()->json([
             'message' => 'Image uploaded',
@@ -78,6 +84,9 @@ class ImageController extends Controller
                 return [
                     'id' => $image->id,
                     'path' => $image->path,
+                    'order' => $image->order,
+                    'is_main' => $image->is_main,
+                    
                     'url' => asset('storage/' . $image->path), 
                 ];
             })

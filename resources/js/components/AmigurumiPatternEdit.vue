@@ -354,6 +354,7 @@ export default {
       axios.get(`/api/patterns/${this.initialPatternId}/images`)
         .then(res => {
           this.pattern.images = res.data; // ! FONTOS: pattern.images-be mentjük
+          console.log('Képek betöltve:', this.pattern.images);
         })
         .catch(error => {
           console.error('Képek betöltése sikertelen:', error);

@@ -114,10 +114,7 @@ function removeImage(img) {
 }
 
 function setMainImage(img) {
-  if (img.isNew) {
-    toast.warn('You can only set uploaded images as main.')
-    return
-  }
+
   mainImageId.value = img.id
   emit('updateMainImageId', img.id)
 }
@@ -131,6 +128,8 @@ async function uploadPendingImages() {
   for (const img of newImages) {
     const formData = new FormData();
     formData.append('image', img.file);
+    formData.append('order', img.order);
+    formData.append('is_main', img.id === mainImageId.value ? 1 : 0);
     formData.append('model_type', props.modelType);
     formData.append('model_id', props.modelId);
 
@@ -200,7 +199,6 @@ defineExpose({
               class="btn btn-sm"
               :class="mainImageId === img.id ? 'btn-primary' : 'btn-dark'"
               @click="setMainImage(img)"
-              :disabled="img.isNew"
               title="Set as main image"
             >
               <i class="bi bi-layer-forward"></i>
