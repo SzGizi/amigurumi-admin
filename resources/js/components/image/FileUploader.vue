@@ -222,7 +222,7 @@ defineExpose({
     
     >
       <template  #item="{ element: img }">
-        <div class="fileUploaderItem col-md-3 col-6 mb-2">
+        <div class="fileUploaderItem col-md-2 col-6 mb-2">
           <img :src="img.url" alt="preview" class="fileUploaderImage" />
 
           <div class="fileUploaderActionsContainer">
