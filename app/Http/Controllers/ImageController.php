@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Image;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ImageService;
+use Illuminate\Support\Facades\Log;
 
 class ImageController extends Controller
 {
@@ -43,12 +44,15 @@ class ImageController extends Controller
             'model_id' => 'required|integer',
         ]);
 
+        
+        
         $modelClass = '\\App\\Models\\' . $request->model_type;
         if (!class_exists($modelClass)) return response()->json(['error' => 'Model not found'], 404);
 
         $model = $modelClass::findOrFail($request->model_id);
 
         $path = $request->file('image')->store('uploads/images', 'public');
+        
 
         $image = new Image(['order'=>$request->order, 'path' => $path]);
 
@@ -105,5 +109,18 @@ class ImageController extends Controller
 
         return response()->json(['status' => 'ok', 'message' => 'Main image set.']);
         
+    }
+
+    public function reorder(Request $request)
+    {
+        $images = $request->input('images');
+
+        foreach ($images as $imgData) {
+            \App\Models\Image::where('id', $imgData['id'])->update([
+                'order' => $imgData['order'],
+            ]);
+        }
+
+        return response()->json(['status' => 'ok']);
     }
 }

@@ -120,12 +120,33 @@ function setMainImage(img) {
   mainImageId.value = img.id
   emit('updateMainImageId', img.id)
 }
-function updateImagesOrders() {
+async function updateImagesOrders() {
   images.value.forEach((img, index) => {
     img.order = index + 1
   })
-  console.log('Images reordered:', images.value);
+
+  const reordered = images.value
+    .filter(img => !img.isNew) // csak a meglévő képeket küldjük
+    .map(img => ({
+      id: img.id,
+      order: img.order
+    }))
+
+  try {
+    await fetch('/images/reorder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      },
+      body: JSON.stringify({ images: reordered }),
+    })
+  } catch (err) {
+    toast.error('Failed to update image order')
+    console.error('Reorder error:', err)
+  }
 }
+
 
 async function uploadPendingImages() {
   const newImages = images.value.filter(i => i.isNew)
