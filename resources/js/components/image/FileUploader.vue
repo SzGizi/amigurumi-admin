@@ -161,6 +161,7 @@ async function uploadPendingImages() {
       .filter(i => !i.isNew)
       .map(i => i.order || 0)
   )
+  
 
  for (let index = 0; index < newImages.length; index++) {
     const img = newImages[index]
