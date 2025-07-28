@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/images/{image}', [ImageController::class, 'deleteImage']);
     Route::post('/images/{image}/set-main', [ImageController::class, 'setMain']);
     Route::post('/images/reorder', [ImageController::class, 'reorder']);
+    Route::post('/images/{image}/replace', [ImageController::class, 'replace'])->name('images.replace');
+
 
 
 

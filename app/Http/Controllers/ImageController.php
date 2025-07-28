@@ -38,7 +38,7 @@ class ImageController extends Controller
      */
     public function upload(Request $request)
     {
-        Log::info('ImageController@upload called with request: ', $request->all());
+        
       $request->validate([
         'image' => 'required|image|max:2048',
         'model_type' => 'required|string',
@@ -127,4 +127,33 @@ class ImageController extends Controller
 
         return response()->json(['status' => 'ok']);
     }
+
+    public function replace(Request $request, Image $image)
+    {
+        
+        $request->validate([
+            'image' => 'required|image|max:2048',
+        ]);
+
+        // Töröljük a régi fájlt
+        if (Storage::disk('public')->exists($image->path)) {
+            Storage::disk('public')->delete($image->path);
+        }
+
+        // Feltöltjük az újat
+        $path = $request->file('image')->store('uploads/images', 'public');
+
+        // Frissítjük az adatbázisban az elérési utat
+        $image->path = $path;
+        $image->save();
+
+        return response()->json([
+            'message' => 'Image replaced',
+            'image' => [
+                'id' => $image->id,
+                'url' => asset('storage/' . $path),
+            ]
+        ]);
+    }
+
 }

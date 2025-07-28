@@ -150,14 +150,26 @@ async function updateImagesOrders() {
 
 async function uploadPendingImages() {
   const newImages = images.value.filter(i => i.isNew)
+  
 
   if (!newImages.length) return
   uploading.value = true
 
-  for (const img of newImages) {
+  const maxOrder = Math.max(
+    0,
+    ...images.value
+      .filter(i => !i.isNew)
+      .map(i => i.order || 0)
+  )
+  
+
+ for (let index = 0; index < newImages.length; index++) {
+    const img = newImages[index]
+
     const formData = new FormData();
     formData.append('image', img.file);
-    formData.append('order', img.order ?  img.order  : newImages.length);
+    //TODO javítani az ordert hogy az utolsó legyen 
+    formData.append('order', img.order ?  img.order  : maxOrder + index + 1);
     formData.append('is_main', img.id === mainImageId.value ? 1 : 0);
     formData.append('model_type', props.modelType);
     formData.append('model_id', props.modelId);
@@ -197,8 +209,103 @@ async function uploadPendingImages() {
   uploading.value = false;
 }
 
+function rotateImage(img) {
+  const image = new Image();
+  image.crossOrigin = 'anonymous'; // biztonsági okból, ha később szerverről jön
+  image.src = img.url;
+
+  image.onload = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const angle = 90;
+    const radians = (angle * Math.PI) / 180;
+
+    if (angle % 180 !== 0) {
+      canvas.width = image.height;
+      canvas.height = image.width;
+    } else {
+      canvas.width = image.width;
+      canvas.height = image.height;
+    }
+
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(radians);
+    ctx.drawImage(image, -image.width / 2, -image.height / 2);
+
+    canvas.toBlob(blob => {
+      if (blob) {
+        const fileName = img.file?.name || `rotated_${Date.now()}.jpg`;
+        const mimeType = img.file?.type || 'image/jpeg';
+
+        const file = new File([blob], fileName, {
+          type: mimeType,
+          lastModified: Date.now(),
+        });
+
+        // Frissítjük a képet, mintha új lenne
+        img.file = file;
+        img.toBeReplaced = img.isNew ? false : true; // csak ha nem új, akkor jelöljük meg cserére
+       
+
+        // Generálunk új base64 URL-t a preview-hoz
+        const reader = new FileReader();
+        reader.onload = e => {
+          img.url = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }, 'image/jpeg');
+   
+  };
+
+  image.onerror = () => {
+    toast.error('A kép betöltése forgatáshoz nem sikerült.');
+  };
+}
+async function replaceModifiedExistingImages() {
+  const imagesToReplace = images.value.filter(i => i.toBeReplaced);
+  if (!imagesToReplace.length) return;
+
+  uploading.value = true;
+
+  for (const img of imagesToReplace) {
+    const formData = new FormData();
+    formData.append('image', img.file);
+
+    try {
+      const res = await fetch(`/images/${img.id}/replace`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.image?.url) {
+        img.url = data.image.url;
+        img.toBeReplaced = false;
+        delete img.file;
+      } else {
+        toast.error(data.message || 'Image replace failed');
+        console.error('Replace error:', data);
+      }
+    } catch (err) {
+      toast.error('Replace error');
+      console.error(err);
+    }
+  }
+
+  uploading.value = false;
+}
+
+
+
+
 defineExpose({
-  uploadPendingImages,
+  uploadPendingImages, replaceModifiedExistingImages
 })
 </script>
 
@@ -236,6 +343,15 @@ defineExpose({
               title="Set as main image"
             >
               <i class="bi bi-layer-forward"></i>
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-sm btn-warning ms-1"
+              @click="rotateImage(img)"
+              title="Rotate 90°"
+            >
+              <i class="bi bi-arrow-clockwise"></i>
             </button>
 
             <button
