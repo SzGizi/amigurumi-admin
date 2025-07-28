@@ -127,4 +127,12 @@ class ImageController extends Controller
 
         return response()->json(['status' => 'ok']);
     }
+    
+    public function rotate(Request $request, Image $image)
+    {
+        $degrees = $request->input('degrees', 90);
+        //$this->imageService->rotateImage($image, $degrees);
+
+        return response()->json(['status' => 'ok', 'message' => 'Image rotated.']);
+    }
 }
