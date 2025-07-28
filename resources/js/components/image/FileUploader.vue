@@ -230,7 +230,7 @@ defineExpose({
 
             <button
               type="button"
-              class="btn btn-sm"
+              class="btn btn-sm ms-1"
               :class="mainImageId === img.id ? 'btn-primary' : 'btn-dark'"
               @click="setMainImage(img)"
               title="Set as main image"

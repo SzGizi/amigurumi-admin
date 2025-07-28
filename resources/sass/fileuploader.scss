@@ -19,7 +19,12 @@
         .fileUploaderActionsContainer{
             position: absolute;
             top: 5px;
-            right: 5px;
+            right: 15px;
+            .btn{
+              padding: 2px 4px !important;
+              font-size: 11px;
+              width: 23px;
+            }
 
         }
         .fileUploaderInfoBar{
