@@ -374,29 +374,31 @@ export default {
         return
       }
 
-      this.$refs.fileUploaderRef.uploadPendingImages().then(() => {
-        axios
-          .put(this.updateUrl , this.pattern, {
-            headers: {
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-              'Content-Type': 'application/json',
-            },
-          })
-          .then(() => {
-            this.success = 'Pattern updated successfully.';
-            this.error = null;
-            setTimeout(() => (this.success = null), 3000);
-          })
-          .catch((error) => {
-            this.success = null;
-            if (error.response && error.response.data) {
-              this.error = error.response.data.message || 'An error occurred on the server.';
-            } else {
-              this.error = 'Network error.';
-            }
-            setTimeout(() => (this.error = null), 50000);
-          })
-          .finally(() => (this.isSaving = false));
+      this.$refs.fileUploaderRef.replaceModifiedExistingImages().then(() => {
+        this.$refs.fileUploaderRef.uploadPendingImages().then(() => {
+          axios
+            .put(this.updateUrl , this.pattern, {
+              headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+              },
+            })
+            .then(() => {
+              this.success = 'Pattern updated successfully.';
+              this.error = null;
+              setTimeout(() => (this.success = null), 3000);
+            })
+            .catch((error) => {
+              this.success = null;
+              if (error.response && error.response.data) {
+                this.error = error.response.data.message || 'An error occurred on the server.';
+              } else {
+                this.error = 'Network error.';
+              }
+              setTimeout(() => (this.error = null), 50000);
+            })
+            .finally(() => (this.isSaving = false));
+        });
       });
     },
     updateSectionOrders() {
