@@ -155,11 +155,20 @@ async function uploadPendingImages() {
   if (!newImages.length) return
   uploading.value = true
 
-  for (const img of newImages) {
+  const maxOrder = Math.max(
+    0,
+    ...images.value
+      .filter(i => !i.isNew)
+      .map(i => i.order || 0)
+  )
+
+ for (let index = 0; index < newImages.length; index++) {
+    const img = newImages[index]
+
     const formData = new FormData();
     formData.append('image', img.file);
     //TODO javítani az ordert hogy az utolsó legyen 
-    formData.append('order', img.order ?  img.order  : newImages.length);
+    formData.append('order', img.order ?  img.order  : maxOrder + index + 1);
     formData.append('is_main', img.id === mainImageId.value ? 1 : 0);
     formData.append('model_type', props.modelType);
     formData.append('model_id', props.modelId);
