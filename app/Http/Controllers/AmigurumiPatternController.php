@@ -49,7 +49,7 @@ class AmigurumiPatternController extends Controller
     public function update(UpdateAmigurumiPatternRequest $request, AmigurumiPattern $amigurumiPattern)
     {
     
-        Log::info('Beérkezett PUT kérés', $request->all());
+        //Log::info('Beérkezett PUT kérés', $request->all());
         //Log::info('Sections:', $request->input('sections'));
     
         

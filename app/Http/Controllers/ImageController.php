@@ -38,9 +38,7 @@ class ImageController extends Controller
      */
     public function upload(Request $request)
     {
-        Log::info('ImageController@upload ', [
-            $request()->all(),
-        ]);
+        Log::info('Beérkezett  kérés', $request->all());
     
 
       $request->validate([
@@ -62,7 +60,7 @@ class ImageController extends Controller
         $path = $request->file('image')->store('uploads/images', 'public');
         
 
-        $image = new Image(['is_main'=>$request->is_main,'order'=>$request->order, 'path' => $path]);
+        $image = new Image(['is_main'=>$request->is_main, 'caption'=>$request->caption, 'order'=>$request->order, 'path' => $path]);
 
         $model->images()->save($image);
 
