@@ -157,7 +157,7 @@ async function uploadPendingImages() {
   for (const img of newImages) {
     const formData = new FormData();
     formData.append('image', img.file);
-    formData.append('order', img.order);
+    formData.append('order', img.order ?  img.order  : newImages.length);
     formData.append('is_main', img.id === mainImageId.value ? 1 : 0);
     formData.append('model_type', props.modelType);
     formData.append('model_id', props.modelId);

@@ -38,11 +38,14 @@ class ImageController extends Controller
      */
     public function upload(Request $request)
     {
-        $request->validate([
-            'image' => 'required|image|max:2048',
-            'model_type' => 'required|string',
-            'model_id' => 'required|integer',
-        ]);
+        Log::info('ImageController@upload called with request: ', $request->all());
+      $request->validate([
+        'image' => 'required|image|max:2048',
+        'model_type' => 'required|string',
+        'model_id' => 'required|integer',
+        'order' => 'nullable|integer',
+        'is_main' => 'nullable|integer|between:0,1',
+    ]);
 
         
         
@@ -54,7 +57,7 @@ class ImageController extends Controller
         $path = $request->file('image')->store('uploads/images', 'public');
         
 
-        $image = new Image(['order'=>$request->order, 'path' => $path]);
+        $image = new Image(['is_main'=>$request->is_main,'order'=>$request->order, 'path' => $path]);
 
         $model->images()->save($image);
 
