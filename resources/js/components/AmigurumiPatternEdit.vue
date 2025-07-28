@@ -354,7 +354,7 @@ export default {
       axios.get(`/api/patterns/${this.initialPatternId}/images`)
         .then(res => {
           this.pattern.images = res.data; // ! FONTOS: pattern.images-be mentjük
-          console.log('Képek betöltve:', this.pattern.images);
+          //console.log('Képek betöltve:', this.pattern.images);
         })
         .catch(error => {
           console.error('Képek betöltése sikertelen:', error);
@@ -373,31 +373,34 @@ export default {
         this.isSaving = false
         return
       }
+      
 
-      this.$refs.fileUploaderRef.replaceModifiedExistingImages().then(() => {
-        this.$refs.fileUploaderRef.uploadPendingImages().then(() => {
-          axios
-            .put(this.updateUrl , this.pattern, {
-              headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
-              },
-            })
-            .then(() => {
-              this.success = 'Pattern updated successfully.';
-              this.error = null;
-              setTimeout(() => (this.success = null), 3000);
-            })
-            .catch((error) => {
-              this.success = null;
-              if (error.response && error.response.data) {
-                this.error = error.response.data.message || 'An error occurred on the server.';
-              } else {
-                this.error = 'Network error.';
-              }
-              setTimeout(() => (this.error = null), 50000);
-            })
-            .finally(() => (this.isSaving = false));
+      this.$refs.fileUploaderRef.saveModifiedCaptions().then(() => {
+        this.$refs.fileUploaderRef.replaceModifiedExistingImages().then(() => {
+          this.$refs.fileUploaderRef.uploadPendingImages().then(() => {
+            axios
+              .put(this.updateUrl , this.pattern, {
+                headers: {
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                  'Content-Type': 'application/json',
+                },
+              })
+              .then(() => {
+                this.success = 'Pattern updated successfully.';
+                this.error = null;
+                setTimeout(() => (this.success = null), 3000);
+              })
+              .catch((error) => {
+                this.success = null;
+                if (error.response && error.response.data) {
+                  this.error = error.response.data.message || 'An error occurred on the server.';
+                } else {
+                  this.error = 'Network error.';
+                }
+                setTimeout(() => (this.error = null), 50000);
+              })
+              .finally(() => (this.isSaving = false));
+          });
         });
       });
     },

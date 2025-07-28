@@ -31,6 +31,10 @@ const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
+const captionModalVisible = ref(false)
+const currentCaptionImage = ref(null)
+const captionDraft = ref('')
+
 onMounted(async () => {
   if (!endpoint) return console.error('Unknown modelType:', props.modelType)
 
@@ -58,6 +62,8 @@ function onFileChange(event) {
       images.value.push({
         uuid: uuidv4(),
         isNew: true,
+        order: images.value.length + 1, // új képek az utolsó helyre kerülnek
+        caption:  '',
         file,
         url: e.target.result,
       })
@@ -169,7 +175,8 @@ async function uploadPendingImages() {
     const formData = new FormData();
     formData.append('image', img.file);
     //TODO javítani az ordert hogy az utolsó legyen 
-    formData.append('order', img.order ?  img.order  : maxOrder + index + 1);
+    formData.append('order', img.order );
+    formData.append('caption', img.caption || ''); // ha van caption, küldjük
     formData.append('is_main', img.id === mainImageId.value ? 1 : 0);
     formData.append('model_type', props.modelType);
     formData.append('model_id', props.modelId);
@@ -301,11 +308,66 @@ async function replaceModifiedExistingImages() {
   uploading.value = false;
 }
 
+function openCaptionModal(img) {
+  currentCaptionImage.value = img
+  captionDraft.value = img.caption || ''
+  captionModalVisible.value = true
+}
+
+function closeCaptionModal() {
+  captionModalVisible.value = false
+  currentCaptionImage.value = null
+  captionDraft.value = ''
+}
+
+function saveCaption() {
+  const img = currentCaptionImage.value
+  if (!img) return
+
+  img.caption = captionDraft.value
+
+  // Jelöljük, hogy meglévő képhez később menteni kell
+  if (!img.isNew) {
+    img.captionChanged = true
+  }
+  console.log('Caption saved:', img.caption);
+
+  toast.success('Caption updated')
+  closeCaptionModal()
+}
+
+async function saveModifiedCaptions() {
+  const changed = images.value.filter(img => img.captionChanged && !img.isNew)
+
+  for (const img of changed) {
+    try {
+      const res = await fetch(`/images/${img.id}/caption`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: JSON.stringify({ caption: img.caption }),
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        img.captionChanged = false // reset
+      } else {
+        toast.error(data.message || 'Caption save failed')
+      }
+    } catch (err) {
+      toast.error('Caption save error')
+      console.error(err)
+    }
+  }
+}
+
 
 
 
 defineExpose({
-  uploadPendingImages, replaceModifiedExistingImages
+  uploadPendingImages, replaceModifiedExistingImages, saveModifiedCaptions
 })
 </script>
 
@@ -356,6 +418,15 @@ defineExpose({
 
             <button
               type="button"
+              class="btn btn-sm btn-secondary ms-1"
+              @click="openCaptionModal(img)"
+              title="Edit caption"
+            >
+              <i class="bi bi-chat-text"></i>
+            </button>
+
+            <button
+              type="button"
               title="Delete image"
               class="btn btn-sm btn-danger ms-1"
               @click="removeImage(img)"
@@ -372,4 +443,25 @@ defineExpose({
 
   <input type="hidden" name="deleted_image_ids" :value="pendingDeleteIds.join(',')" />
   <input type="hidden" name="main_image_id" :value="mainImageId" />
+
+  <teleport to="body">
+  <div v-if="captionModalVisible" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Caption</h5>
+          <button type="button" class="btn-close" @click="closeCaptionModal"></button>
+        </div>
+        <div class="modal-body">
+          <input v-model="captionDraft" type="text" class="form-control" placeholder="Add caption..." />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="closeCaptionModal">Cancel</button>
+          <button class="btn btn-primary" @click="saveCaption">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</teleport>
+
 </template>

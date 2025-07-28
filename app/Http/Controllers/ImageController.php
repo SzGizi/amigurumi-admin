@@ -38,14 +38,19 @@ class ImageController extends Controller
      */
     public function upload(Request $request)
     {
-        
+        Log::info('ImageController@upload ', [
+            $request()->all(),
+        ]);
+    
+
       $request->validate([
         'image' => 'required|image|max:2048',
         'model_type' => 'required|string',
         'model_id' => 'required|integer',
         'order' => 'nullable|integer',
         'is_main' => 'nullable|integer|between:0,1',
-    ]);
+        'caption' => 'nullable|string',
+        ]);
 
         
         
@@ -94,6 +99,7 @@ class ImageController extends Controller
                     'path' => $image->path,
                     'order' => $image->order,
                     'is_main' => $image->is_main,
+                    'caption' => $image->caption, 
                     
                     'url' => asset('storage/' . $image->path), 
                 ];
@@ -128,6 +134,13 @@ class ImageController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
+    /**
+     * Replace an existing image with a new one.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Image  $image
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function replace(Request $request, Image $image)
     {
         
@@ -155,5 +168,24 @@ class ImageController extends Controller
             ]
         ]);
     }
+    /**
+     * Update the caption of an image.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Image  $image
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateCaption(Request $request, Image $image)
+{
+    $request->validate([
+        'caption' => 'nullable|string|max:255',
+    ]);
+
+    $image->caption = $request->caption;
+    $image->save();
+
+    return response()->json(['status' => 'ok', 'message' => 'Caption updated']);
+}
+
 
 }

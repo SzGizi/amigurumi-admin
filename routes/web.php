@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/images/{image}/set-main', [ImageController::class, 'setMain']);
     Route::post('/images/reorder', [ImageController::class, 'reorder']);
     Route::post('/images/{image}/replace', [ImageController::class, 'replace'])->name('images.replace');
+    Route::post('/images/{image}/caption', [ImageController::class, 'updateCaption']);
+
 
 
 
