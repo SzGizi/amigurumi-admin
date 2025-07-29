@@ -150,10 +150,8 @@
                 ><i class="bi bi-x"></i></button>
                 
               </div>
-              
             </div>
-
-           
+            
             <div class="collapse row-list" :id="'rowsCollapse' + sectionIndex">
               <h3>Rows</h3>
               
