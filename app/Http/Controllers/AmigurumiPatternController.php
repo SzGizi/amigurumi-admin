@@ -50,7 +50,7 @@ class AmigurumiPatternController extends Controller
 
     public function update(UpdateAmigurumiPatternRequest $request, AmigurumiPattern $amigurumiPattern)
     {
-          //Log::info('Beérkezett PUT kérés: ' . var_export($request->all(), true));
+          Log::info('Beérkezett PUT kérés: ' . var_export($request->all(), true));
         //Log::info('Sections:', $request->input('sections'));
         $amigurumiPattern->update($request->only([
             'title',
@@ -187,11 +187,10 @@ class AmigurumiPatternController extends Controller
         ]);
         //return view('amigurumi.patterns.edit', compact('amigurumiPattern'));
     }
-  public function generatePdf(Request $request)
-{
+  public function generatePdf(Request $request){
     
     $data = $request->all();
-    Log::info('PDF generálás kérése:', $data);
+    //Log::info('PDF generálás kérése:', $data);
 
     $baseUrl = url('/');
 
@@ -199,7 +198,7 @@ class AmigurumiPatternController extends Controller
         $relativePath = str_replace($baseUrl, '', $url);
         $relativePath = ltrim($relativePath, '/');
         $fullPath = public_path($relativePath);
-        Log::info("Resolving URL to path", ['url' => $url, 'path' => $fullPath]);
+        //Log::info("Resolving URL to path", ['url' => $url, 'path' => $fullPath]);
         return $fullPath;
     };
 

@@ -404,11 +404,7 @@ export default {
       }
 
       try {
-        for (const uploaderRef of uploaders) {
-          await uploaderRef.saveModifiedCaptions();
-          await uploaderRef.replaceModifiedExistingImages();
-          await uploaderRef.uploadPendingImages();
-        }
+        
 
         await axios.put(this.updateUrl, this.pattern, {
           headers: {
@@ -419,6 +415,12 @@ export default {
 
         this.success = 'Pattern updated successfully.';
         this.error = null;
+
+        for (const uploaderRef of uploaders) {
+          await uploaderRef.saveModifiedCaptions();
+          await uploaderRef.replaceModifiedExistingImages();
+          await uploaderRef.uploadPendingImages();
+        }
 
         await this.loadImages(); // képek újratöltése
       } catch (error) {
