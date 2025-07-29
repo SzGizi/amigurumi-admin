@@ -174,7 +174,6 @@ async function uploadPendingImages() {
 
     const formData = new FormData();
     formData.append('image', img.file);
-    //TODO javítani az ordert hogy az utolsó legyen 
     formData.append('order', img.order );
     formData.append('caption', img.caption || ''); // ha van caption, küldjük
     formData.append('is_main', img.id === mainImageId.value ? 1 : 0);
