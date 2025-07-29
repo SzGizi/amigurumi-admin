@@ -212,23 +212,7 @@ class AmigurumiPatternController extends Controller
 
         $mime = mime_content_type($localPath);
 
-        // PNG konverzió JPG-re (ha kell)
-        if ($mime === 'image/png') {
-            try {
-                $image = \imagecreatefrompng($localPath); // ide kerüljön a backslash
-                ob_start();
-                \imagejpeg($image, null, 90); // és itt is
-                $imageData = ob_get_clean();
-                \imagedestroy($image); // és itt is
-                $base64 = base64_encode($imageData);
-                return "data:image/jpeg;base64,$base64";
-            } catch (\Exception $e) {
-                Log::error("PNG átalakítás hibája: " . $e->getMessage());
-                return null;
-            }
-        }
-
-        // Nem PNG, hagyjuk változatlanul
+    
         $base64 = base64_encode(file_get_contents($localPath));
         return "data:$mime;base64,$base64";
     };

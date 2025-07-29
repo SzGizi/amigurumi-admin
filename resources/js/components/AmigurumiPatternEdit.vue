@@ -371,111 +371,89 @@ export default {
     
     this.deletemodalInstance = new Modal(this.$refs.deleteModal);
     this.generateRowmodalInstance = new Modal(this.$refs.generateRowsModal);
-   
-   
 
-    axios.get(`/api/patterns/${this.pattern.id}/images`)
-      .then(patternImagesResponse => {
-        this.pattern.images = patternImagesResponse.data;
-        console.log('Képek betöltve:', this.pattern.images);
-        
-        const mainImage = this.pattern.images.find(img => img.id === this.pattern.main_image_id);
-        this.pattern.main_image_url = mainImage ? mainImage.url : null;
+    this.loadImages();
 
-        console.log('Main image URL:', this.pattern.main_image_url);
-        // Ezután betöltjük a section képeket Promise.all-al
-        const sectionImagePromises = this.pattern.sections.map(section => {
-          return axios.get(`/api/sections/${section.id}/images`)
-            .then(sectionImagesResponse => {
-              section.images = sectionImagesResponse.data;
-            });
-        });
-
-        return Promise.all(sectionImagePromises);
-      })
-      .catch(error => {
-        console.error('Képek betöltése sikertelen:', error);
-      });
-      
   },
   methods: {
-    submit() {
+    async submit() {
       this.isSaving = true;
-      
-      this.pattern.deleted_image_ids = this.deletedImageIds != null && this.deletedImageIds.length > 0 ? this.deletedImageIds.join(',') : '';
 
-    
-       let uploaders = [];
+      this.pattern.deleted_image_ids =
+        this.deletedImageIds && this.deletedImageIds.length > 0
+          ? this.deletedImageIds.join(',')
+          : '';
 
-        // Pattern uploader
-        if (this.$refs.patternUploader) {
-          uploaders.push(this.$refs.patternUploader);
+      let uploaders = [];
+
+      if (this.$refs.patternUploader) {
+        uploaders.push(this.$refs.patternUploader);
+      }
+
+      this.pattern.sections.forEach((section, index) => {
+        const refName = `sectionUploader${index}`;
+        if (this.$refs[refName]) {
+          uploaders.push(this.$refs[refName]);
         }
+      });
 
-        // Section uploaderek összegyűjtése index alapján
-        this.pattern.sections.forEach((section, index) => {
-          const refName = `sectionUploader${index}`;
-          if (this.$refs[refName]) {
-            uploaders.push(this.$refs[refName]);
-          }
-        });
-       
-
-      if (!uploaders || (Array.isArray(uploaders) && uploaders.length === 0)) {
+      if (!uploaders.length) {
         console.error('ImageUploader ref not found');
         this.isSaving = false;
         return;
       }
 
-      if (!Array.isArray(uploaders)) {
-        uploaders = [uploaders]; // ha csak egy elem, akkor tömbbé alakítjuk
-      }
+      try {
+        for (const uploaderRef of uploaders) {
+          await uploaderRef.saveModifiedCaptions();
+          await uploaderRef.replaceModifiedExistingImages();
+          await uploaderRef.uploadPendingImages();
+        }
 
-      let chain = Promise.resolve();
-
-      // saveModifiedCaptions végig mindenen
-      for (const uploaderRef of uploaders) {
-        chain = chain.then(() => uploaderRef.saveModifiedCaptions());
-      }
-
-      // replaceModifiedExistingImages végig mindenen
-      for (const uploaderRef of uploaders) {
-        chain = chain.then(() => uploaderRef.replaceModifiedExistingImages());
-      }
-
-      // uploadPendingImages végig mindenen
-      for (const uploaderRef of uploaders) {
-        chain = chain.then(() => uploaderRef.uploadPendingImages());
-      }
-
-      // majd végül a szerver felé az axios PUT
-      chain = chain.then(() => {
-        return axios.put(this.updateUrl, this.pattern, {
+        await axios.put(this.updateUrl, this.pattern, {
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             'Content-Type': 'application/json',
           },
         });
-      });
 
-      chain
-        .then(() => {
-          this.success = 'Pattern updated successfully.';
-          this.error = null;
-        })
-        .catch((error) => {
-          this.success = null;
-          if (error.response && error.response.data) {
-            this.error = error.response.data.message || 'An error occurred on the server.';
-          } else {
-            this.error = 'Network error.';
-          }
-        })
-        .finally(() => {
-          this.isSaving = false;
-        });
+        this.success = 'Pattern updated successfully.';
+        this.error = null;
+
+        await this.loadImages(); // képek újratöltése
+      } catch (error) {
+        this.success = null;
+        this.error =
+          error.response?.data?.message || 'Hiba történt mentés közben.';
+        console.error(error);
+      } finally {
+        this.isSaving = false;
+      }
     },
-  
+
+    async loadImages() {
+      try {
+        // Főminta képek
+        const patternImagesResponse = await axios.get(`/api/patterns/${this.pattern.id}/images`);
+        this.pattern.images = patternImagesResponse.data;
+
+        const mainImage = this.pattern.images.find(img => img.id === this.pattern.main_image_id);
+        this.pattern.main_image_url = mainImage ? mainImage.url : null;
+
+        // Szekció képek
+        const sectionImagePromises = this.pattern.sections.map(section =>
+          axios.get(`/api/sections/${section.id}/images`).then(response => {
+            section.images = response.data;
+          })
+        );
+
+        await Promise.all(sectionImagePromises);
+
+        console.log('Minden kép frissítve!');
+      } catch (error) {
+        console.error('Képek frissítése sikertelen:', error);
+      }
+    },
     updateSectionOrders() {
       this.pattern.sections.forEach((section, index) => {
         if (section) section.order = index + 1;
@@ -716,8 +694,8 @@ export default {
         currentStart = to + 1;
       }
     },
-    downloadPdf() {
-      this.submit(); // Ensure the pattern is saved before generating PDF
+    async  downloadPdf() {
+      await this.submit(); // Ensure the pattern is saved before generating PDF
       axios
         .post('/patterns/generate-pdf', this.pattern, {
           responseType: 'blob',
