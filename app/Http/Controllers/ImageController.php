@@ -107,8 +107,8 @@ class ImageController extends Controller
     public function amigurumiSectionIndex($sectionId)
     {
         $section = \App\Models\AmigurumiSection::findOrFail($sectionId);
-        Log::info('AmigurumiSectionIndex called for section ID: ' . $sectionId);
-        Log::info('Section images:', $section->images->toArray());
+        //Log::info('AmigurumiSectionIndex called for section ID: ' . $sectionId);
+        //Log::info('Section images:', $section->images->toArray());
         $images = $section->images->sortBy('order')->values();
         return response()->json(
             $images->map(function ($image) {

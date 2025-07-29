@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\ImageService;
 use App\Models\Image;
+use Illuminate\Support\Facades\File;
 
 
 class AmigurumiPatternController extends Controller
@@ -189,16 +190,46 @@ class AmigurumiPatternController extends Controller
     public function generatePdf(Request $request)
     {
         $data = $request->all();
+        Log::info('PDF generálás kérése:', $data);
 
-        // opcionális validáció itt
-        // Validator::make($data, [...])->validate();
+        // Base64 képek beépítése
+        if (!empty($data['main_image_url'])) {
+            $localPath = public_path(str_replace(url('/'), '', $data['main_image_url']));
+            if (file_exists($localPath)) {
+                $mime = mime_content_type($localPath);
+                $base64 = base64_encode(file_get_contents($localPath));
+                $data['main_image_base64'] = "data:$mime;base64,$base64";
+            }
+        }
 
-        $pdf = Pdf::loadView('pdf.pattern', ['pattern' => $data]);
+        // Többi kép
+        foreach ($data['images'] as &$image) {
+            $localPath = public_path(str_replace(url('/'), '', $image['url']));
+            if (file_exists($localPath)) {
+                $mime = mime_content_type($localPath);
+                $base64 = base64_encode(file_get_contents($localPath));
+                $image['base64'] = "data:$mime;base64,$base64";
+            }
+        }
 
-        // PDF fájl letöltésre
+        // Section képek
+        foreach ($data['sections'] as &$section) {
+            foreach ($section['images'] as &$image) {
+                $localPath = public_path(str_replace(url('/'), '', $image['url']));
+                if (file_exists($localPath)) {
+                    $mime = mime_content_type($localPath);
+                    $base64 = base64_encode(file_get_contents($localPath));
+                    $image['base64'] = "data:$mime;base64,$base64";
+                }
+            }
+        }
+
+        // PDF létrehozás
+        $pdf = Pdf::setOptions([
+            'isRemoteEnabled' => false, // már nem kell remote
+        ])->loadView('pdf.pattern', ['pattern' => $data]);
+
         return $pdf->download('pattern.pdf');
-
-        // Ha base64-ben szeretnéd visszaküldeni:
-        // return response()->json(['pdf' => base64_encode($pdf->output())]);
     }
+
 }

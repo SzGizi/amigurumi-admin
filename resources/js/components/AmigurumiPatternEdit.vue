@@ -334,6 +334,8 @@ export default {
         tools_description: this.initialToolsDescription,
         deleted_image_ids : [],
         main_image_id : this.initialMainImageId ?? null,
+        main_image_url: null, 
+        images: [],
         sections: this.initialSections.map((section) => ({
           id: section.id,
           title: section.title,
@@ -349,6 +351,7 @@ export default {
             uid: row.uid ?? crypto.randomUUID(),
           })),
           uid: section.uid ?? crypto.randomUUID(),
+          images: [],
         })),
       },
       success: null,
@@ -369,11 +372,34 @@ export default {
     this.deletemodalInstance = new Modal(this.$refs.deleteModal);
     this.generateRowmodalInstance = new Modal(this.$refs.generateRowsModal);
    
-     
+   
+
+    axios.get(`/api/patterns/${this.pattern.id}/images`)
+      .then(patternImagesResponse => {
+        this.pattern.images = patternImagesResponse.data;
+        console.log('Képek betöltve:', this.pattern.images);
+        
+        const mainImage = this.pattern.images.find(img => img.id === this.pattern.main_image_id);
+        this.pattern.main_image_url = mainImage ? mainImage.url : null;
+
+        console.log('Main image URL:', this.pattern.main_image_url);
+        // Ezután betöltjük a section képeket Promise.all-al
+        const sectionImagePromises = this.pattern.sections.map(section => {
+          return axios.get(`/api/sections/${section.id}/images`)
+            .then(sectionImagesResponse => {
+              section.images = sectionImagesResponse.data;
+            });
+        });
+
+        return Promise.all(sectionImagePromises);
+      })
+      .catch(error => {
+        console.error('Képek betöltése sikertelen:', error);
+      });
       
   },
   methods: {
-     submit() {
+    submit() {
       this.isSaving = true;
       
       this.pattern.deleted_image_ids = this.deletedImageIds != null && this.deletedImageIds.length > 0 ? this.deletedImageIds.join(',') : '';
@@ -448,39 +474,8 @@ export default {
         .finally(() => {
           this.isSaving = false;
         });
-
-      
-
-      // this.$refs.fileUploaderRef.saveModifiedCaptions().then(() => {
-      //   this.$refs.fileUploaderRef.replaceModifiedExistingImages().then(() => {
-      //     this.$refs.fileUploaderRef.uploadPendingImages().then(() => {
-      //       axios
-      //         .put(this.updateUrl , this.pattern, {
-      //           headers: {
-      //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-      //             'Content-Type': 'application/json',
-      //           },
-      //         })
-      //         .then(() => {
-      //           this.success = 'Pattern updated successfully.';
-      //           this.error = null;
-      //           setTimeout(() => (this.success = null), 3000);
-      //         })
-      //         .catch((error) => {
-      //           this.success = null;
-      //           if (error.response && error.response.data) {
-      //             this.error = error.response.data.message || 'An error occurred on the server.';
-      //           } else {
-      //             this.error = 'Network error.';
-      //           }
-      //           setTimeout(() => (this.error = null), 50000);
-      //         })
-      //         .finally(() => (this.isSaving = false));
-      //     });
-      //   });
-      // });
     },
-    
+  
     updateSectionOrders() {
       this.pattern.sections.forEach((section, index) => {
         if (section) section.order = index + 1;
