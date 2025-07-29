@@ -11,6 +11,10 @@ const props = defineProps({
   modelType: String,
   modelId: Number,
   patternMainImageId: Number,
+  hasMainImage: {
+    type: Boolean,
+    default: true  // alapból van main image, csak sectionnál false
+  }
 })
 
 const emit = defineEmits(['updateDeletedImages', 'updateMainImageId'])
@@ -23,7 +27,7 @@ const endpoint = endpointMap[props.modelType]
 
 const images = ref([]) // [{ id, url, isNew, file, uuid }]
 const pendingDeleteIds = ref([])
-const mainImageId = ref(props.patternMainImageId || null)
+const mainImageId = ref(props.hasMainImage ? props.patternMainImageId || null : null)
 const uploading = ref(false)
 const fileInput = ref(null)
 
@@ -44,6 +48,7 @@ const selectedAspectRatio = ref(null)
 
 
 onMounted(async () => {
+  
   if (!endpoint) return console.error('Unknown modelType:', props.modelType)
 
   try {
@@ -62,7 +67,12 @@ onMounted(async () => {
 
 function onFileChange(event) {
   const files = Array.from(event.target.files)
+  
   if (!files.length) return
+
+  console.log('Selected files:', files);
+  console.log('Current images:', images.value);
+  
 
   files.forEach(file => {
     const reader = new FileReader()
@@ -79,6 +89,7 @@ function onFileChange(event) {
     reader.readAsDataURL(file)
   })
 
+  console.log('Updated images:', images.value);
   event.target.value = null
 }
 
@@ -131,6 +142,7 @@ function removeImage(img) {
 
 function setMainImage(img) {
 
+  if (!props.hasMainImage) return
   mainImageId.value = img.id
   emit('updateMainImageId', img.id)
 }
@@ -165,7 +177,6 @@ async function updateImagesOrders() {
 async function uploadPendingImages() {
   const newImages = images.value.filter(i => i.isNew)
   
-
   if (!newImages.length) return
   uploading.value = true
 
@@ -184,10 +195,12 @@ async function uploadPendingImages() {
     formData.append('image', img.file);
     formData.append('order', img.order );
     formData.append('caption', img.caption || ''); // ha van caption, küldjük
-    formData.append('is_main', img.id === mainImageId.value ? 1 : 0);
+    formData.append('is_main', props.hasMainImage && img.id === mainImageId.value ? 1 : 0);
     formData.append('model_type', props.modelType);
     formData.append('model_id', props.modelId);
 
+    console.log(formData.get('model_type'), 'is being uploaded');
+    
     try {
       const res = await fetch('/images/upload', {
         method: 'POST',
@@ -337,7 +350,7 @@ function saveCaption() {
   if (!img.isNew) {
     img.captionChanged = true
   }
-  console.log('Caption saved:', img.caption);
+  
 
   toast.success('Caption updated')
   closeCaptionModal()
@@ -447,6 +460,7 @@ defineExpose({
             <span class="drag-handle btn btn-sm" title="Set order">⠿</span>
 
             <button
+              v-if="hasMainImage"
               type="button"
               class="btn btn-sm ms-1"
               :class="mainImageId === img.id ? 'btn-primary' : 'btn-dark'"
@@ -500,7 +514,7 @@ defineExpose({
   
 
   <input type="hidden" name="deleted_image_ids" :value="pendingDeleteIds.join(',')" />
-  <input type="hidden" name="main_image_id" :value="mainImageId" />
+  <input v-if="hasMainImage" type="hidden" name="main_image_id" :value="mainImageId" />
 
   <teleport to="body">
   <div v-if="captionModalVisible" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">

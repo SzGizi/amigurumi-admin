@@ -92,7 +92,7 @@
            <FileUploader 
             model-type="AmigurumiPattern" 
             :model-id="pattern.id" 
-            ref="fileUploaderRef"
+            ref="patternUploader"
             :pattern-main-image-id="pattern.main_image_id"  
             @updateDeletedImages="onUpdateDeletedImages"
             @updateMainImageId="pattern.main_image_id = $event"
@@ -112,7 +112,7 @@
         item-key="uid"
         ref="draggableSections"
       >
-        <template #item="{element: section, index: sectionIndex}">
+        <template #item="{element: section, index: sectionIndex}" >
           <div class="card mb-3 p-3 section-card" :key="section.uid">
 
             <div class="d-flex align-items-center flex-row justify-content-between gap-2">
@@ -135,8 +135,15 @@
                 <button
                     class="btn btn-sm btn-outline-secondary "
                     type="button"
-                    @click="toggleCollapse(sectionIndex)"
+                    @click="toggleCollapse('rowsCollapse' + sectionIndex)"
+                    title="Toggle Rows"
                   ><i class="bi bi-list-ol"></i></button>
+                  <button
+                    class="btn btn-sm btn-outline-info "
+                    type="button"
+                    @click="toggleCollapse('sectionImageCollapse' +sectionIndex)"
+                    title="Toggle Images"
+                  ><i class="bi bi-images"></i></button>
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-primary "
@@ -151,7 +158,21 @@
                 
               </div>
             </div>
-            
+             <div class="collapse row-list" :id="'sectionImageCollapse' + sectionIndex" >  
+              <div class="col-md-12 mb-2 mt-3">
+               
+                 <FileUploader 
+                model-type="AmigurumiSection" 
+                :model-id="section.id" 
+                :ref="`sectionUploader${sectionIndex}`"
+                @updateDeletedImages="onUpdateDeletedImages"
+                :has-main-image="false"
+              />
+
+              </div>
+             
+             </div>
+
             <div class="collapse row-list" :id="'rowsCollapse' + sectionIndex">
               <h3>Rows</h3>
               
@@ -311,7 +332,6 @@ export default {
         title: this.initialTitle,
         yarn_description: this.initialYarnDescription,
         tools_description: this.initialToolsDescription,
-        images: [],
         deleted_image_ids : [],
         main_image_id : this.initialMainImageId ?? null,
         sections: this.initialSections.map((section) => ({
@@ -349,59 +369,118 @@ export default {
     this.deletemodalInstance = new Modal(this.$refs.deleteModal);
     this.generateRowmodalInstance = new Modal(this.$refs.generateRowsModal);
    
-      axios.get(`/api/patterns/${this.initialPatternId}/images`)
-        .then(res => {
-          this.pattern.images = res.data; // ! FONTOS: pattern.images-be mentjük
-          //console.log('Képek betöltve:', this.pattern.images);
-        })
-        .catch(error => {
-          console.error('Képek betöltése sikertelen:', error);
-        });
+     
       
   },
   methods: {
-    submit() {
+     submit() {
       this.isSaving = true;
       
       this.pattern.deleted_image_ids = this.deletedImageIds != null && this.deletedImageIds.length > 0 ? this.deletedImageIds.join(',') : '';
 
     
-       if (!this.$refs.fileUploaderRef) {
-        console.error('ImageUploader ref not found')
-        this.isSaving = false
-        return
-      }
-      
+       let uploaders = [];
 
-      this.$refs.fileUploaderRef.saveModifiedCaptions().then(() => {
-        this.$refs.fileUploaderRef.replaceModifiedExistingImages().then(() => {
-          this.$refs.fileUploaderRef.uploadPendingImages().then(() => {
-            axios
-              .put(this.updateUrl , this.pattern, {
-                headers: {
-                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                  'Content-Type': 'application/json',
-                },
-              })
-              .then(() => {
-                this.success = 'Pattern updated successfully.';
-                this.error = null;
-                setTimeout(() => (this.success = null), 3000);
-              })
-              .catch((error) => {
-                this.success = null;
-                if (error.response && error.response.data) {
-                  this.error = error.response.data.message || 'An error occurred on the server.';
-                } else {
-                  this.error = 'Network error.';
-                }
-                setTimeout(() => (this.error = null), 50000);
-              })
-              .finally(() => (this.isSaving = false));
-          });
+        // Pattern uploader
+        if (this.$refs.patternUploader) {
+          uploaders.push(this.$refs.patternUploader);
+        }
+
+        // Section uploaderek összegyűjtése index alapján
+        this.pattern.sections.forEach((section, index) => {
+          const refName = `sectionUploader${index}`;
+          if (this.$refs[refName]) {
+            uploaders.push(this.$refs[refName]);
+          }
+        });
+       
+
+      if (!uploaders || (Array.isArray(uploaders) && uploaders.length === 0)) {
+        console.error('ImageUploader ref not found');
+        this.isSaving = false;
+        return;
+      }
+
+      if (!Array.isArray(uploaders)) {
+        uploaders = [uploaders]; // ha csak egy elem, akkor tömbbé alakítjuk
+      }
+
+      let chain = Promise.resolve();
+
+      // saveModifiedCaptions végig mindenen
+      for (const uploaderRef of uploaders) {
+        chain = chain.then(() => uploaderRef.saveModifiedCaptions());
+      }
+
+      // replaceModifiedExistingImages végig mindenen
+      for (const uploaderRef of uploaders) {
+        chain = chain.then(() => uploaderRef.replaceModifiedExistingImages());
+      }
+
+      // uploadPendingImages végig mindenen
+      for (const uploaderRef of uploaders) {
+        chain = chain.then(() => uploaderRef.uploadPendingImages());
+      }
+
+      // majd végül a szerver felé az axios PUT
+      chain = chain.then(() => {
+        return axios.put(this.updateUrl, this.pattern, {
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+          },
         });
       });
+
+      chain
+        .then(() => {
+          this.success = 'Pattern updated successfully.';
+          this.error = null;
+        })
+        .catch((error) => {
+          this.success = null;
+          if (error.response && error.response.data) {
+            this.error = error.response.data.message || 'An error occurred on the server.';
+          } else {
+            this.error = 'Network error.';
+          }
+        })
+        .finally(() => {
+          this.isSaving = false;
+        });
+
+      
+
+      // this.$refs.fileUploaderRef.saveModifiedCaptions().then(() => {
+      //   this.$refs.fileUploaderRef.replaceModifiedExistingImages().then(() => {
+      //     this.$refs.fileUploaderRef.uploadPendingImages().then(() => {
+      //       axios
+      //         .put(this.updateUrl , this.pattern, {
+      //           headers: {
+      //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      //             'Content-Type': 'application/json',
+      //           },
+      //         })
+      //         .then(() => {
+      //           this.success = 'Pattern updated successfully.';
+      //           this.error = null;
+      //           setTimeout(() => (this.success = null), 3000);
+      //         })
+      //         .catch((error) => {
+      //           this.success = null;
+      //           if (error.response && error.response.data) {
+      //             this.error = error.response.data.message || 'An error occurred on the server.';
+      //           } else {
+      //             this.error = 'Network error.';
+      //           }
+      //           setTimeout(() => (this.error = null), 50000);
+      //         })
+      //         .finally(() => (this.isSaving = false));
+      //     });
+      //   });
+      // });
     },
+    
     updateSectionOrders() {
       this.pattern.sections.forEach((section, index) => {
         if (section) section.order = index + 1;
@@ -576,7 +655,7 @@ export default {
       this.updateRowOrders(sectionIndex);
     },
     toggleCollapse(index) {
-      const collapseEl = document.getElementById('rowsCollapse' + index);
+      const collapseEl = document.getElementById(index);
       if (collapseEl) {
         const collapseInstance = Collapse.getOrCreateInstance(collapseEl);
         collapseInstance.toggle();

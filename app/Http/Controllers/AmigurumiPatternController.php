@@ -43,54 +43,92 @@ class AmigurumiPatternController extends Controller
         // Visszairányítás a minták listájára flash üzenettel
         return redirect()->route('amigurumi-patterns.index')
                      ->with('success', __('Pattern created successfully.'));
+                   
     
     }
 
     public function update(UpdateAmigurumiPatternRequest $request, AmigurumiPattern $amigurumiPattern)
     {
-    
-        //Log::info('Beérkezett PUT kérés', $request->all());
+          //Log::info('Beérkezett PUT kérés: ' . var_export($request->all(), true));
         //Log::info('Sections:', $request->input('sections'));
-    
-        
-
         $amigurumiPattern->update($request->only([
             'title',
             'yarn_description',
             'tools_description',
         ]));
 
-
-        // Régiek törlése
-        foreach ($amigurumiPattern->amigurumiSections as $section) {
-            $section->amigurumiRows()->delete();
-            $section->delete();
-        }
-
-        // Újak mentése
         $sections = $request->input('sections', []);
 
-        foreach ($sections as $sectionData) {
-            $section = $amigurumiPattern->amigurumiSections()->create([
-                'title' => $sectionData['title'] ?? '',
-                'order' => $sectionData['order'] ?? 0,
-                'amigurumi_pattern_id' => $amigurumiPattern->id
-            ]);
+        $existingSectionIds = [];
+        $existingRowIds = [];
 
-            foreach ($sectionData['rows'] ?? [] as $rowData) {
-                $hasComment = !empty($rowData['showComment']) && $rowData['showComment'];
-                $section->amigurumiRows()->create([
-                    'row_number' => $rowData['row_number'] ?? '',
-                    'instructions' => $rowData['instructions'] ?? '',
-                    'stitch_number' => $rowData['stitch_number'] ?? null,
-                    'comment' => $hasComment ? ($rowData['comment'] ?? '') : '',
-                    'order' => $rowData['order'] ?? null,
-                    'amigurumi_section_id' => $section->id
+        foreach ($sections as $sectionData) {
+            // Ha van section id → frissítünk, egyébként létrehozunk
+            if (!empty($sectionData['id'])) {
+                $section = $amigurumiPattern->amigurumiSections()->find($sectionData['id']);
+
+                if ($section) {
+                    $section->update([
+                        'title' => $sectionData['title'] ?? '',
+                        'order' => $sectionData['order'] ?? 0,
+                    ]);
+                    $existingSectionIds[] = $section->id;
+                } else {
+                    continue; // ha nem található a section ID, nem csinálunk semmit
+                }
+            } else {
+                $section = $amigurumiPattern->amigurumiSections()->create([
+                    'title' => $sectionData['title'] ?? '',
+                    'order' => $sectionData['order'] ?? 0,
                 ]);
+                $existingSectionIds[] = $section->id;
             }
-          
+
+            // Rows kezelése
+            $rows = $sectionData['rows'] ?? [];
+            foreach ($rows as $rowData) {
+                $hasComment = !empty($rowData['showComment']) && $rowData['showComment'];
+
+                if (!empty($rowData['id'])) {
+                    $row = $section->amigurumiRows()->find($rowData['id']);
+                    if ($row) {
+                        $row->update([
+                            'row_number' => $rowData['row_number'] ?? '',
+                            'instructions' => $rowData['instructions'] ?? '',
+                            'stitch_number' => $rowData['stitch_number'] ?? null,
+                            'comment' => $hasComment ? ($rowData['comment'] ?? '') : '',
+                            'order' => $rowData['order'] ?? null,
+                        ]);
+                        $existingRowIds[] = $row->id;
+                    }
+                } else {
+                    $newRow = $section->amigurumiRows()->create([
+                        'row_number' => $rowData['row_number'] ?? '',
+                        'instructions' => $rowData['instructions'] ?? '',
+                        'stitch_number' => $rowData['stitch_number'] ?? null,
+                        'comment' => $hasComment ? ($rowData['comment'] ?? '') : '',
+                        'order' => $rowData['order'] ?? null,
+                    ]);
+                    $existingRowIds[] = $newRow->id;
+                }
+            }
         }
 
+        // ✳️ Opcionális: nem szereplő section-ök és row-k törlése (ha kell)
+        $amigurumiPattern->amigurumiSections()
+            ->whereNotIn('id', $existingSectionIds)
+            ->each(function ($section) {
+                $section->amigurumiRows()->delete();
+                $section->delete();
+            });
+
+        foreach ($amigurumiPattern->amigurumiSections as $section) {
+            $section->amigurumiRows()
+                ->whereNotIn('id', $existingRowIds)
+                ->delete();
+        }
+
+        // Képek törlése
         $deletedImageIds = explode(',', $request->input('deleted_image_ids', ''));
 
         foreach ($deletedImageIds as $imageId) {
@@ -99,20 +137,21 @@ class AmigurumiPatternController extends Controller
                 $this->imageService->deleteImage($image);
             }
         }
-       
-        // Új képek feltöltése
+
+        // Main image beállítása
         if ($request->main_image_id) {
             $image = Image::find($request->main_image_id);
             if ($image && $image->imageable_id == $amigurumiPattern->id) {
                 $this->imageService->setMainImage($image);
             }
         }
-        
-       return response()->json([
+
+        return response()->json([
             'message' => __('Pattern updated successfully.'),
             'pattern' => $amigurumiPattern->load('amigurumiSections.amigurumiRows')
         ]);
     }
+
 
     public function destroy($id)
     {

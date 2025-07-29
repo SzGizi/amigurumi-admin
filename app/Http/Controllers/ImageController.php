@@ -104,6 +104,25 @@ class ImageController extends Controller
             })
         );
     }
+    public function amigurumiSectionIndex($sectionId)
+    {
+        $section = \App\Models\AmigurumiSection::findOrFail($sectionId);
+        Log::info('AmigurumiSectionIndex called for section ID: ' . $sectionId);
+        Log::info('Section images:', $section->images->toArray());
+        $images = $section->images->sortBy('order')->values();
+        return response()->json(
+            $images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'path' => $image->path,
+                    'order' => $image->order,
+                    'is_main' => $image->is_main,
+                    'caption' => $image->caption, 
+                    'url' => asset('storage/' . $image->path), 
+                ];
+            })
+        );
+    }
     
     /**
      * Set an image as the main image for its model.
