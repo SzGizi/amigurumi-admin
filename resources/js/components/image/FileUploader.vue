@@ -187,12 +187,20 @@ async function uploadPendingImages() {
       .map(i => i.order || 0)
   )
   
+ 
 
- for (let index = 0; index < newImages.length; index++) {
+  for (let index = 0; index < newImages.length; index++) {
     const img = newImages[index]
 
+    let uploadFile = img.file;
+    try {
+      uploadFile = await convertPngFileToJpgBlob(img.file);
+    } catch (e) {
+      console.warn('PNG konverzió sikertelen, eredeti fájl használva.', e);
+    }
+
     const formData = new FormData();
-    formData.append('image', img.file);
+    formData.append('image', uploadFile, img.file.name.replace(/\.png$/i, '.jpg'));
     formData.append('order', img.order );
     formData.append('caption', img.caption || ''); // ha van caption, küldjük
     formData.append('is_main', props.hasMainImage && img.id === mainImageId.value ? 1 : 0);
@@ -235,6 +243,41 @@ async function uploadPendingImages() {
 
   uploading.value = false;
 }
+async function convertPngFileToJpgBlob(file, quality = 0.9) {
+  if (file.type !== 'image/png') return file; // Csak PNG-t alakítunk át
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; // fehér háttér az átlátszó helyekhez
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Blob konverzió sikertelen'));
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 
 function rotateImage(img) {
   const image = new Image();

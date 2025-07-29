@@ -187,49 +187,87 @@ class AmigurumiPatternController extends Controller
         ]);
         //return view('amigurumi.patterns.edit', compact('amigurumiPattern'));
     }
-    public function generatePdf(Request $request)
-    {
-        $data = $request->all();
-        Log::info('PDF generálás kérése:', $data);
+  public function generatePdf(Request $request)
+{
+    
+    $data = $request->all();
+    Log::info('PDF generálás kérése:', $data);
 
-        // Base64 képek beépítése
-        if (!empty($data['main_image_url'])) {
-            $localPath = public_path(str_replace(url('/'), '', $data['main_image_url']));
-            if (file_exists($localPath)) {
-                $mime = mime_content_type($localPath);
-                $base64 = base64_encode(file_get_contents($localPath));
-                $data['main_image_base64'] = "data:$mime;base64,$base64";
+    $baseUrl = url('/');
+
+    $getLocalPath = function ($url) use ($baseUrl) {
+        $relativePath = str_replace($baseUrl, '', $url);
+        $relativePath = ltrim($relativePath, '/');
+        $fullPath = public_path($relativePath);
+        Log::info("Resolving URL to path", ['url' => $url, 'path' => $fullPath]);
+        return $fullPath;
+    };
+
+    $encodeBase64 = function ($url) use ($getLocalPath) {
+        $localPath = $getLocalPath($url);
+        if (!file_exists($localPath)) {
+            Log::error("File not found for base64 encode", ['url' => $url, 'path' => $localPath]);
+            return null;
+        }
+
+        $mime = mime_content_type($localPath);
+
+        // PNG konverzió JPG-re (ha kell)
+        if ($mime === 'image/png') {
+            try {
+                $image = \imagecreatefrompng($localPath); // ide kerüljön a backslash
+                ob_start();
+                \imagejpeg($image, null, 90); // és itt is
+                $imageData = ob_get_clean();
+                \imagedestroy($image); // és itt is
+                $base64 = base64_encode($imageData);
+                return "data:image/jpeg;base64,$base64";
+            } catch (\Exception $e) {
+                Log::error("PNG átalakítás hibája: " . $e->getMessage());
+                return null;
             }
         }
 
-        // Többi kép
+        // Nem PNG, hagyjuk változatlanul
+        $base64 = base64_encode(file_get_contents($localPath));
+        return "data:$mime;base64,$base64";
+    };
+
+    // Főkép
+    if (!empty($data['main_image_url'])) {
+        $data['main_image_base64'] = $encodeBase64($data['main_image_url']);
+    }
+
+    // Egyéb képek
+    if (!empty($data['images']) && is_array($data['images'])) {
         foreach ($data['images'] as &$image) {
-            $localPath = public_path(str_replace(url('/'), '', $image['url']));
-            if (file_exists($localPath)) {
-                $mime = mime_content_type($localPath);
-                $base64 = base64_encode(file_get_contents($localPath));
-                $image['base64'] = "data:$mime;base64,$base64";
+            if (!empty($image['url'])) {
+                $image['base64'] = $encodeBase64($image['url']);
             }
         }
+    }
 
-        // Section képek
+    // Szekció képek
+    if (!empty($data['sections']) && is_array($data['sections'])) {
         foreach ($data['sections'] as &$section) {
-            foreach ($section['images'] as &$image) {
-                $localPath = public_path(str_replace(url('/'), '', $image['url']));
-                if (file_exists($localPath)) {
-                    $mime = mime_content_type($localPath);
-                    $base64 = base64_encode(file_get_contents($localPath));
-                    $image['base64'] = "data:$mime;base64,$base64";
+            if (!empty($section['images']) && is_array($section['images'])) {
+                foreach ($section['images'] as &$image) {
+                    if (!empty($image['url'])) {
+                        $image['base64'] = $encodeBase64($image['url']);
+                    }
                 }
             }
         }
-
-        // PDF létrehozás
-        $pdf = Pdf::setOptions([
-            'isRemoteEnabled' => false, // már nem kell remote
-        ])->loadView('pdf.pattern', ['pattern' => $data]);
-
-        return $pdf->download('pattern.pdf');
     }
+
+    $pdf = Pdf::setOptions([
+        'isRemoteEnabled' => false,
+    ])->loadView('pdf.pattern', ['pattern' => $data]);
+
+    return $pdf->download('pattern.pdf');
+}
+
+
+
 
 }

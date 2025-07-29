@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::resource('/amigurumi-patterns', AmigurumiPatternController::class);
+
     Route::apiResource('amigurumi-patterns.sections', AmigurumiSectionController::class);
     Route::apiResource('amigurumi-patterns.sections.rows', AmigurumiRowController::class);
 
