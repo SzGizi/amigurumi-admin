@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted, defineExpose } from 'vue'
+import { ref, onMounted, defineExpose, computed  } from 'vue'
 import { toast } from 'vue3-toastify'
 import { h } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import draggable from 'vuedraggable';
+import { Cropper } from 'vue-advanced-cropper'
 
 
 const props = defineProps({
@@ -34,6 +35,13 @@ const triggerFileInput = () => {
 const captionModalVisible = ref(false)
 const currentCaptionImage = ref(null)
 const captionDraft = ref('')
+
+const croppingImage = ref(null)
+const cropModalVisible = ref(false)
+const cropperRef = ref(null)
+const selectedAspectRatio = ref(null)
+
+
 
 onMounted(async () => {
   if (!endpoint) return console.error('Unknown modelType:', props.modelType)
@@ -362,6 +370,48 @@ async function saveModifiedCaptions() {
   }
 }
 
+function openCropModal(img) {
+  croppingImage.value = img
+  cropModalVisible.value = true
+}
+
+function closeCropModal() {
+  cropModalVisible.value = false
+  croppingImage.value = null
+}
+
+function applyCrop() {
+  const result = cropperRef.value.getResult();
+
+  if (!result.canvas) {
+    toast.error('Failed to crop image')
+    return
+  }
+
+  result.canvas.toBlob(blob => {
+    if (!blob) return
+
+    const img = croppingImage.value
+    const file = new File([blob], `cropped_${Date.now()}.jpg`, {
+      type: blob.type,
+      lastModified: Date.now(),
+    })
+
+    img.file = file
+    img.url = URL.createObjectURL(blob)
+
+    // Csak meglévő képeknél jelöljük cserére
+    if (!img.isNew) {
+      img.toBeReplaced = true
+    }
+
+    closeCropModal()
+    toast.success('Image cropped successfully')
+  }, 'image/jpeg')
+}
+const computedAspectRatio = computed(() => {
+  return selectedAspectRatio.value === null ? undefined : selectedAspectRatio.value
+})
 
 
 
@@ -423,6 +473,15 @@ defineExpose({
             >
               <i class="bi bi-chat-text"></i>
             </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-warning ms-1"
+              title="Crop image"
+              @click="openCropModal(img)"
+            >
+             <i class="bi bi-crop"></i>
+            </button>
+
 
             <button
               type="button"
@@ -461,6 +520,48 @@ defineExpose({
       </div>
     </div>
   </div>
-</teleport>
+  </teleport>
+  <teleport to="body">
+    <div v-if="cropModalVisible" class="modal-backdrop">
+      <div class="modal-window">
+        <Cropper
+          :src="croppingImage?.url"
+          :stencil-props="{ aspectRatio: selectedAspectRatio }"
+          :auto-zoom="true"
+          class="cropper"
+          ref="cropperRef"
+        />
+       <div class="mt-2 mb-2">
+        <label class="me-2">Crop ratio:</label>
+
+        <label class="me-2">
+          <input type="radio" v-model="selectedAspectRatio" :value="null" />
+          Free
+        </label>
+
+        <label class="me-2">
+          <input type="radio" v-model="selectedAspectRatio" :value="1" />
+          1:1
+        </label>
+
+        <label class="me-2">
+          <input type="radio" v-model="selectedAspectRatio" :value="16 / 9" />
+          16:9
+        </label>
+
+        <label class="me-2">
+          <input type="radio" v-model="selectedAspectRatio" :value="4 / 3" />
+          4:3
+        </label>
+      </div>
+
+        <div class="mt-2 d-flex justify-content-end">
+          <button class="btn btn-secondary me-2" @click="closeCropModal">Cancel</button>
+          <button class="btn btn-primary" @click="applyCrop">Save</button>
+        </div>
+      </div>
+    </div>
+  </teleport>
+
 
 </template>

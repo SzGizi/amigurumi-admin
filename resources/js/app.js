@@ -12,6 +12,9 @@ import AmigurumiPatternEdit from './components/AmigurumiPatternEdit.vue';
 import Alpine from 'alpinejs';
 import Toast from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+// main.js vagy setup fájlban
+import 'vue-advanced-cropper/dist/style.css';
+
 
 
 
