@@ -19,6 +19,10 @@
 @foreach($pattern['images'] as $image)
   @if(!empty($image['base64']))
     <img src="{{ $image['base64'] }}" alt="Pattern image" style="max-width: 150px;" />
+    @if(!empty($image['caption']))
+      <span>{{ $image['caption'] }}</span>
+    @endif
+    
   @endif
 @endforeach
 
@@ -31,6 +35,9 @@
     @foreach($section['images'] as $img)
       @if(!empty($img['base64']))
         <img src="{{ $img['base64'] }}" alt="Section image" style="max-width: 120px;" />
+         @if(!empty($img['caption']))
+          <span>{{ $img['caption'] }}</span>
+        @endif
       @endif
     @endforeach
   @endif
