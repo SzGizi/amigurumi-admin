@@ -12,8 +12,8 @@
 </head>
 <body>
 
-
-  {{-- 🟣 Első oldal: csak cím és főkép --}}
+  <div class="contanier">
+{{-- 🟣 Első oldal: csak cím és főkép --}}
   <h1>{{ $pattern['title'] }}</h1>
   <div>
     @if(!empty($pattern['main_image_base64']))
@@ -52,39 +52,47 @@
   @endif
 
   {{-- 📦 Szekciók --}}
-  @foreach($pattern['sections'] as $section)
-    <h2 class="section-title">{{ $section['title'] }}</h2>
+  <div class="row"> 
+    @foreach($pattern['sections'] as $section)
+    <div class="col-md-6 col-6 col-lg-6 col-xl-6">
+      <h2 class="section-title">{{ $section['title'] }}</h2>
 
-    {{-- Szekció képei --}}
-    @if(!empty($section['images']))
-      <div class="image-gallery">
-        @foreach($section['images'] as $img)
-          @if(!empty($img['base64']))
-            <img src="{!! $img['base64'] !!}" alt="Section image">
-            @if(!empty($img['caption']))
-              <span class="caption">{{ $img['caption'] }}</span>
+      {{-- Szekció képei --}}
+      @if(!empty($section['images']))
+        <div class="image-gallery">
+          @foreach($section['images'] as $img)
+            @if(!empty($img['base64']))
+              <img src="{!! $img['base64'] !!}" alt="Section image">
+              @if(!empty($img['caption']))
+                <span class="caption">{{ $img['caption'] }}</span>
+              @endif
             @endif
-          @endif
-        @endforeach
-      </div>
-    @endif
+          @endforeach
+        </div>
+      @endif
 
-    {{-- Sorok listája --}}
-    <ul class="rows">
-      @foreach($section['rows'] as $row)
-        <li>
-          <strong>{{ $row['row_number'] }}:</strong>
-          {{ $row['instructions'] }}
-          @if(!empty($row['stitch_number']))
-            <em> ({{ $row['stitch_number'] }})</em>
-          @endif
-          @if(!empty($row['comment']))
-            | <em>{{ $row['comment'] }}</em>
-          @endif
-        </li>
-      @endforeach
-    </ul>
+      {{-- Sorok listája --}}
+      <ul class="rows">
+        @foreach($section['rows'] as $row)
+          <li>
+            <strong>{{ $row['row_number'] }}:</strong>
+            {{ $row['instructions'] }}
+            @if(!empty($row['stitch_number']))
+              <em> ({{ $row['stitch_number'] }})</em>
+            @endif
+            @if(!empty($row['comment']))
+              | <em>{{ $row['comment'] }}</em>
+            @endif
+          </li>
+        @endforeach
+      </ul>
+    </div>
      @endforeach
+  </div>
+  
+  </div>
+
+  
  
 </body>
 </html>
