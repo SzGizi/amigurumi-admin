@@ -13,6 +13,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\ImageService;
 use App\Models\Image;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
+
 
 
 class AmigurumiPatternController extends Controller
@@ -27,7 +29,11 @@ class AmigurumiPatternController extends Controller
 
     public function index()
     {
-        $patterns = AmigurumiPattern::with('amigurumiSections.amigurumiRows')->orderByDesc('created_at')->get();
+        
+       $patterns = AmigurumiPattern::where('user_id', Auth::id())
+            ->with('amigurumiSections.amigurumiRows')
+            ->latest()
+            ->get();
         return view('amigurumi.patterns.index', compact('patterns'));
     }
 
@@ -38,9 +44,16 @@ class AmigurumiPatternController extends Controller
             'image_path' => 'nullable|string|max:255',
             'yarn_description' => 'required|string',
             'tools_description' => 'required|string',
-        ]);
+        ]); 
 
-        $pattern = AmigurumiPattern::create($validated);
+        //$pattern = AmigurumiPattern::create($validated);
+        $pattern = new AmigurumiPattern($validated);
+   
+       
+      
+        $pattern->user_id = Auth::id();
+
+        $pattern->save();
         // Visszairányítás a minták listájára flash üzenettel
         return redirect()->route('amigurumi-patterns.index')
                      ->with('success', __('Pattern created successfully.'));
@@ -52,6 +65,10 @@ class AmigurumiPatternController extends Controller
     {
           //Log::info('Beérkezett PUT kérés: ' . var_export($request->all(), true));
         //Log::info('Sections:', $request->input('sections'));
+        if ($amigurumiPattern->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $amigurumiPattern->update($request->only([
             'title',
             'yarn_description',
@@ -169,8 +186,12 @@ class AmigurumiPatternController extends Controller
     public function destroy($id)
     {
         $pattern = AmigurumiPattern::find($id);
+        
         if (!$pattern) {
             return response()->json(['message' => 'Pattern not found'], 404);
+        }
+        if ($pattern->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
         }
 
         $pattern->delete();
@@ -184,6 +205,9 @@ class AmigurumiPatternController extends Controller
     }
     public function show(AmigurumiPattern $amigurumiPattern)
     {
+        if ($amigurumiPattern->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
         $amigurumiPattern->load('amigurumiSections.amigurumiRows');
 
         return view('amigurumi.patterns.show', compact('amigurumiPattern'));
@@ -191,6 +215,9 @@ class AmigurumiPatternController extends Controller
    
     public function edit(AmigurumiPattern $amigurumiPattern)
     {
+        if ($amigurumiPattern->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
         $amigurumiPattern->load('amigurumiSections.amigurumiRows');
 
         return view('amigurumi.patterns.edit', [

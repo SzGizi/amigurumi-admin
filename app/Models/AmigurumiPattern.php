@@ -24,6 +24,10 @@ class AmigurumiPattern extends Model
     {
         return optional($this->mainImage)->id;
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 
 }

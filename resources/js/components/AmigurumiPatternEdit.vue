@@ -1,8 +1,8 @@
 
 <template>
   <div class="container py-4">
-    <div v-if="success" class="alert alert-success">{{ success }}</div>
-    <div v-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-if="success" class="alert alert-success info-box-alert">{{ success }}</div>
+    <div v-if="error" class="alert alert-danger info-box-alert">{{ error }}</div>
 
     <!-- Confirm Deletion Modal -->
     <div class="modal fade" tabindex="-1" ref="deleteModal">
