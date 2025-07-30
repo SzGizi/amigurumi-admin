@@ -298,9 +298,20 @@ class AmigurumiPatternController extends Controller
         }
     }
 
+    // CSS fájlok betöltése
+    $cssFiles = [
+        'css/bootsrap-minimal.css',
+        'css/pdf-pattern.css',
+        
+    ];
+    
+    $data['css_content'] = $this->loadCssFiles($cssFiles);
+
+
+
     // PDF generálás HELYES módszerrel
     $pdf = Pdf::setOptions([
-        'isRemoteEnabled' => false,
+        'isRemoteEnabled' => true,
         'isHtml5ParserEnabled' => true,
         'isPhpEnabled' => true, // FONTOS!
     ])->loadView('pdf.pattern', ['pattern' => $data]);
@@ -315,7 +326,7 @@ class AmigurumiPatternController extends Controller
     $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
         $font = $fontMetrics->getFont('Helvetica', 'normal');
         $size = 10;
-        $text = "Oldal $pageNumber / $pageCount";
+        $text = "$pageNumber ";
         
         // Szöveg szélessége a központosításhoz
         $textWidth = $fontMetrics->getTextWidth($text, $font, $size);
@@ -325,7 +336,7 @@ class AmigurumiPatternController extends Controller
         $y = $canvas->get_height() - 20; // 20px az oldal aljától
         
         // Szöveg rajzolása
-        $canvas->text($x, $y, $text, $font, $size, [0, 0, 0]);
+        $canvas->text($x, $y, $text, $font, $size, [0, 0, 0 ]);
     });
     
    
@@ -333,7 +344,32 @@ class AmigurumiPatternController extends Controller
         return $pdf->download('pattern.pdf');
     }
 
-
+    private function loadCssFiles($cssFiles)
+    {
+        $allCssContent = '';
+        $loadedFiles = [];
+        $missingFiles = [];
+        
+        foreach ($cssFiles as $cssFile) {
+            $cssPath = public_path($cssFile);
+            if (file_exists($cssPath)) {
+                $cssContent = file_get_contents($cssPath);
+                $allCssContent .= "\n/* === " . basename($cssFile) . " === */\n";
+                $allCssContent .= $cssContent . "\n";
+                $loadedFiles[] = $cssFile;
+            } else {
+                $missingFiles[] = $cssFile;
+            }
+        }
+        
+        Log::info('CSS loading summary:', [
+            'loaded' => $loadedFiles,
+            'missing' => $missingFiles,
+            'total_size' => strlen($allCssContent)
+        ]);
+        
+        return $allCssContent;
+    }
 
 
 }
