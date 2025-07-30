@@ -46,6 +46,7 @@ const croppingImage = ref(null)
 const cropModalVisible = ref(false)
 const cropperRef = ref(null)
 const selectedAspectRatio = ref(null)
+const mainImageUuid = ref(null);
 
 
 
@@ -148,11 +149,19 @@ function removeImage(img) {
 }
 
 function setMainImage(img) {
+  if (!props.hasMainImage) return;
 
-  if (!props.hasMainImage) return
-  mainImageId.value = img.id
-  emit('updateMainImageId', img.id)
+  if (img.id) {
+    mainImageId.value = img.id;
+    mainImageUuid.value = null;
+    emit('updateMainImageId', img.id);
+  } else if (img.uuid) {
+    mainImageUuid.value = img.uuid;
+    mainImageId.value = null;
+    emit('updateMainImageId', null); // még nincs ID, csak később lesz
+  }
 }
+
 async function updateImagesOrders() {
   images.value.forEach((img, index) => {
     img.order = index + 1
@@ -217,7 +226,12 @@ async function uploadImagesTo(imagesToUpload, endpoint, modelId) {
     formData.append('image', uploadFile, img.file.name.replace(/\.png$/i, '.jpg'));
     formData.append('order', img.order);
     formData.append('caption', img.caption || '');
-    formData.append('is_main', props.hasMainImage && img.id === mainImageId.value ? 1 : 0);
+    formData.append('is_main',
+      props.hasMainImage &&
+        (
+          (img.id && img.id === mainImageId.value) ||
+          (img.uuid && img.uuid === mainImageUuid.value)
+        ) ? 1 : 0);
     formData.append('model_type', props.modelType);
     formData.append('model_id', modelId);
 
@@ -479,6 +493,13 @@ function applyCrop() {
     toast.success('Image cropped successfully')
   }, 'image/jpeg')
 }
+
+function isMainImage(img) {
+  return (
+    (img.id && img.id === mainImageId.value) ||
+    (img.uuid && img.uuid === mainImageUuid.value)
+  );
+}
 const computedAspectRatio = computed(() => {
   return selectedAspectRatio.value === null ? undefined : selectedAspectRatio.value
 })
@@ -520,7 +541,7 @@ defineExpose({
               v-if="hasMainImage"
               type="button"
               class="btn btn-sm ms-1"
-              :class="mainImageId === img.id ? 'btn-primary' : 'btn-dark'"
+              :class="isMainImage(img) ? 'btn-primary' : 'btn-dark'"
               @click="setMainImage(img)"
               title="Set as main image"
             >
