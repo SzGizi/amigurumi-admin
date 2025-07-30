@@ -148,6 +148,7 @@
                   type="button"
                   class="btn btn-sm btn-outline-primary "
                   @click="duplicateSection(sectionIndex)"
+                  title="Duplicate Section without images"
                 ><i class="bi bi-copy"></i></button>
 
                 <button
@@ -587,19 +588,67 @@ export default {
       this.pattern.sections[sectionIndex].rows.splice(rowIndex + 1, 0, newRow);
       this.updateRowOrders(sectionIndex);
     },
+
+    
     duplicateSection(sectionIndex) {
-      const section = this.pattern.sections[sectionIndex];
-      const newSection = {
-        ...section,
-        uid: crypto.randomUUID(),
-        rows: section.rows.map((row) => ({
-          ...row,
-          uid: crypto.randomUUID(),
-        })),
-      };
-      this.pattern.sections.splice(sectionIndex + 1, 0, newSection);
-      this.updateSectionOrders();
+        const section = this.pattern.sections[sectionIndex];
+        console.log('Original section:', this.pattern.sections[sectionIndex]);
+        
+        // Deep clone a section-t és az összes nested objektumot
+        const duplicatedSection = this.deepClone(section);
+        
+        // Új egyedi azonosítók generálása
+        duplicatedSection.uid = crypto.randomUUID();
+        duplicatedSection.id = null; // Új section lesz
+        
+        
+        // Rows deep clone-ja és új uid-k generálása
+        if (duplicatedSection.rows && duplicatedSection.rows.length > 0) {
+            duplicatedSection.rows = duplicatedSection.rows.map(row => {
+                const clonedRow = this.deepClone(row);
+                clonedRow.uid = crypto.randomUUID();
+                clonedRow.id = null; // Új row lesz
+                return clonedRow;
+            });
+        }
+        
+        // Order beállítása
+        duplicatedSection.order = this.pattern.sections.length;
+        
+        // Hozzáadás a sections tömbhöz
+        this.pattern.sections.splice(sectionIndex + 1, 0, duplicatedSection);
+        
+        // Orders újraszámolása
+        this.updateSectionOrders();
+         console.log('Duplicated section:', duplicatedSection);
+    console.log('All sections after duplication:', this.pattern.sections);
     },
+    
+    deepClone(obj) {
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+        
+        if (obj instanceof Date) {
+            return new Date(obj.getTime());
+        }
+        
+        if (Array.isArray(obj)) {
+            return obj.map(item => this.deepClone(item));
+        }
+        
+        const cloned = {};
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                cloned[key] = this.deepClone(obj[key]);
+            }
+        }
+        
+        return cloned;
+    },
+
+
+    
     removeSection(index) {
       this.pattern.sections.splice(index, 1);
     },
