@@ -38,7 +38,7 @@ class ImageController extends Controller
      */
     public function upload(Request $request)
     {
-        Log::info('Beérkezett  kérés', $request->all());
+        //Log::info('Beérkezett  kérés', $request->all());
     
 
       $request->validate([

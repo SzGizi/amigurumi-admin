@@ -194,6 +194,13 @@ class AmigurumiPatternController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $pattern->amigurumiSections()
+            ->get() 
+            ->each(function ($section) {
+                $section->amigurumiRows()->delete();
+                $section->delete(); 
+            });
+
         $pattern->delete();
         return redirect()->route('amigurumi-patterns.index')
                      ->with('success', __('Pattern deleted successfully.'));
