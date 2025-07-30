@@ -63,6 +63,9 @@ class AmigurumiPatternController extends Controller
         $existingSectionIds = [];
         $existingRowIds = [];
 
+        $createdSectionMap = []; // uid => new_id
+        $createdRowMap = [];     // uid => new_id
+
         foreach ($sections as $sectionData) {
             // Ha van section id → frissítünk, egyébként létrehozunk
             if (!empty($sectionData['id'])) {
@@ -83,6 +86,10 @@ class AmigurumiPatternController extends Controller
                     'order' => $sectionData['order'] ?? 0,
                 ]);
                 $existingSectionIds[] = $section->id;
+
+                if (!empty($sectionData['uid'])) {
+                    $createdSectionMap[$sectionData['uid']] = $section->id;
+                }
             }
 
             // Rows kezelése
@@ -111,6 +118,9 @@ class AmigurumiPatternController extends Controller
                         'order' => $rowData['order'] ?? null,
                     ]);
                     $existingRowIds[] = $newRow->id;
+                       if (!empty($rowData['uid'])) {
+                            $createdRowMap[$rowData['uid']] = $newRow->id;
+                        }
                 }
             }
         }
@@ -149,7 +159,9 @@ class AmigurumiPatternController extends Controller
 
         return response()->json([
             'message' => __('Pattern updated successfully.'),
-            'pattern' => $amigurumiPattern->load('amigurumiSections.amigurumiRows')
+            'pattern' => $amigurumiPattern->load('amigurumiSections.amigurumiRows'),
+            'created_section_ids' => $createdSectionMap,
+            'created_row_ids' => $createdRowMap,
         ]);
     }
 
@@ -185,7 +197,8 @@ class AmigurumiPatternController extends Controller
             'amigurumiPattern' => $amigurumiPattern,
             'sectionsJson' => AmigurumiSectionResource::collection($amigurumiPattern->amigurumiSections)->toJson(),
         ]);
-        //return view('amigurumi.patterns.edit', compact('amigurumiPattern'));
+
+        
     }
   public function generatePdf(Request $request){
     

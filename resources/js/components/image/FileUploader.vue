@@ -10,6 +10,8 @@ import { Cropper } from 'vue-advanced-cropper'
 const props = defineProps({
   modelType: String,
   modelId: Number,
+  modelUid: String,
+  getSectionIdByUid: Function, 
   patternMainImageId: Number,
   hasMainImage: {
     type: Boolean,
@@ -49,20 +51,25 @@ const selectedAspectRatio = ref(null)
 
 onMounted(async () => {
   
-  if (!endpoint) return console.error('Unknown modelType:', props.modelType)
+  if(props.modelId == null){
+    return ;
+  } else {
+    if (!endpoint) return console.error('Unknown modelType:', props.modelType)
 
-  try {
-    const res = await fetch(endpoint)
-    const data = await res.json()
-    images.value = data.map(img => ({ ...img, isNew: false }))
+      try {
+        const res = await fetch(endpoint)
+        const data = await res.json()
+        images.value = data.map(img => ({ ...img, isNew: false }))
 
-    if (!mainImageId.value && images.value.length) {
-      mainImageId.value = images.value[0].id
-      emit('updateMainImageId', images.value[0].id)
-    }
-  } catch (err) {
-    console.error('Failed to fetch images:', err)
+        if (!mainImageId.value && images.value.length) {
+          mainImageId.value = images.value[0].id
+          emit('updateMainImageId', images.value[0].id)
+        }
+      } catch (err) {
+        console.error('Failed to fetch images:', err)
+      }
   }
+  
 })
 
 function onFileChange(event) {
@@ -175,23 +182,30 @@ async function updateImagesOrders() {
 
 
 async function uploadPendingImages() {
-  const newImages = images.value.filter(i => i.isNew)
-  
-  if (!newImages.length) return
-  uploading.value = true
+  const newImages = images.value.filter(i => i.isNew);
+  if (!newImages.length) return;
 
-  const maxOrder = Math.max(
-    0,
-    ...images.value
-      .filter(i => !i.isNew)
-      .map(i => i.order || 0)
-  )
-  
- 
+  uploading.value = true;
 
-  for (let index = 0; index < newImages.length; index++) {
-    const img = newImages[index]
+  // Ha section és nincs még ID, próbáljuk UID alapján kinyerni
+  if (!props.modelId && props.modelType === 'AmigurumiSection' && props.modelUid && typeof props.getSectionIdByUid === 'function') {
+    const newId = props.getSectionIdByUid(props.modelUid);
+    if (newId) {
+      const fixedEndpoint = `/api/sections/${newId}/images`;
+      console.log('Frissített endpoint section-nek:', fixedEndpoint);
+      await uploadImagesTo(newImages, fixedEndpoint, newId);
+    } else {
+      console.error('Nem található ID a megadott UID alapján:', props.modelUid);
+    }
+  } else {
+    const endpoint = endpointMap[props.modelType];
+    await uploadImagesTo(newImages, endpoint, props.modelId);
+  }
 
+  uploading.value = false;
+}
+async function uploadImagesTo(imagesToUpload, endpoint, modelId) {
+  for (let img of imagesToUpload) {
     let uploadFile = img.file;
     try {
       uploadFile = await convertPngFileToJpgBlob(img.file);
@@ -201,14 +215,12 @@ async function uploadPendingImages() {
 
     const formData = new FormData();
     formData.append('image', uploadFile, img.file.name.replace(/\.png$/i, '.jpg'));
-    formData.append('order', img.order );
-    formData.append('caption', img.caption || ''); // ha van caption, küldjük
+    formData.append('order', img.order);
+    formData.append('caption', img.caption || '');
     formData.append('is_main', props.hasMainImage && img.id === mainImageId.value ? 1 : 0);
     formData.append('model_type', props.modelType);
-    formData.append('model_id', props.modelId);
+    formData.append('model_id', modelId);
 
-    console.log(formData.get('model_type'), 'is being uploaded');
-    
     try {
       const res = await fetch('/images/upload', {
         method: 'POST',
@@ -216,20 +228,20 @@ async function uploadPendingImages() {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
         },
         body: formData,
-      })
+      });
 
       const data = await res.json();
 
       if (res.ok && data.image?.id && data.image?.url) {
-        img.id = data.image.id
-        img.url = data.image.url
-        img.isNew = false
-        delete img.file
-        delete img.uuid
+        img.id = data.image.id;
+        img.url = data.image.url;
+        img.isNew = false;
+        delete img.file;
+        delete img.uuid;
 
         if (!mainImageId.value) {
-          mainImageId.value = data.image.id
-          emit('updateMainImageId', data.image.id)
+          mainImageId.value = data.image.id;
+          emit('updateMainImageId', data.image.id);
         }
       } else {
         toast.error(data.message || 'Upload failed');
@@ -240,9 +252,10 @@ async function uploadPendingImages() {
       console.error(err);
     }
   }
-
-  uploading.value = false;
 }
+
+
+
 async function convertPngFileToJpgBlob(file, quality = 0.9) {
   if (file.type !== 'image/png') return file; // Csak PNG-t alakítunk át
 
@@ -277,6 +290,7 @@ async function convertPngFileToJpgBlob(file, quality = 0.9) {
     reader.readAsDataURL(file);
   });
 }
+
 
 
 function rotateImage(img) {

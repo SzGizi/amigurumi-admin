@@ -166,6 +166,7 @@
                 :model-id="section.id" 
                 :ref="`sectionUploader${sectionIndex}`"
                 @updateDeletedImages="onUpdateDeletedImages"
+                :get-section-id-by-uid="getSectionIdByUid"
                 :has-main-image="false"
               />
 
@@ -404,9 +405,8 @@ export default {
       }
 
       try {
-        
 
-        await axios.put(this.updateUrl, this.pattern, {
+        const response = await axios.put(this.updateUrl, this.pattern, {
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             'Content-Type': 'application/json',
@@ -415,6 +415,24 @@ export default {
 
         this.success = 'Pattern updated successfully.';
         this.error = null;
+
+        // 🔁 Frissítsd a section id-ket uid alapján
+        const createdSectionIds = response.data.created_section_ids || {};
+        const createdRowIds = response.data.created_row_ids || {};
+
+        this.pattern.sections.forEach(section => {
+          if (!section.id && section.uid && createdSectionIds[section.uid]) {
+            section.id = createdSectionIds[section.uid];
+          }
+
+          section.rows.forEach(row => {
+            if (!row.id && row.uid && createdRowIds[row.uid]) {
+              row.id = createdRowIds[row.uid];
+            }
+          });
+        });
+
+        
 
         for (const uploaderRef of uploaders) {
           await uploaderRef.saveModifiedCaptions();
@@ -431,6 +449,10 @@ export default {
       } finally {
         this.isSaving = false;
       }
+    },
+    getSectionIdByUid(uid) {
+      const found = pattern.sections.find(s => s.uid === uid);
+      return found?.id || null;
     },
 
     async loadImages() {
