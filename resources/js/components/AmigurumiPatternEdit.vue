@@ -473,7 +473,7 @@ export default {
 
         await Promise.all(sectionImagePromises);
 
-        console.log('Minden kép frissítve!');
+        
       } catch (error) {
         console.error('Képek frissítése sikertelen:', error);
       }
