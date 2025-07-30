@@ -268,6 +268,14 @@ class AmigurumiPatternController extends Controller
         $data['main_image_base64'] = $encodeBase64($data['main_image_url']);
     }
 
+    // Szűrd ki a főkép URL-jét a többi kép közül
+    if (!empty($data['main_image_url']) && !empty($data['images']) && is_array($data['images'])) {
+        $data['images'] = array_filter($data['images'], function ($img) use ($data) {
+            return $img['url'] !== $data['main_image_url'];
+        });
+        $data['images'] = array_values($data['images']);
+    }
+
     // Egyéb képek
     if (!empty($data['images']) && is_array($data['images'])) {
         foreach ($data['images'] as &$image) {
@@ -290,12 +298,40 @@ class AmigurumiPatternController extends Controller
         }
     }
 
+    // PDF generálás HELYES módszerrel
     $pdf = Pdf::setOptions([
         'isRemoteEnabled' => false,
+        'isHtml5ParserEnabled' => true,
+        'isPhpEnabled' => true, // FONTOS!
     ])->loadView('pdf.pattern', ['pattern' => $data]);
+    
+    // PDF renderelés
+    $pdf->render();
+    
+    // Canvas megszerzése és oldalszámozás hozzáadása
+    $canvas = $pdf->getDomPDF()->getCanvas();
+    $fontMetrics = $pdf->getDomPDF()->getFontMetrics();
+       // Oldalszámozás minden oldalra
+    $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+        $size = 10;
+        $text = "Oldal $pageNumber / $pageCount";
+        
+        // Szöveg szélessége a központosításhoz
+        $textWidth = $fontMetrics->getTextWidth($text, $font, $size);
+        
+        // Pozíció számítása (középre, alulra)
+        $x = ($canvas->get_width() - $textWidth) / 2;
+        $y = $canvas->get_height() - 20; // 20px az oldal aljától
+        
+        // Szöveg rajzolása
+        $canvas->text($x, $y, $text, $font, $size, [0, 0, 0]);
+    });
+    
+   
 
-    return $pdf->download('pattern.pdf');
-}
+        return $pdf->download('pattern.pdf');
+    }
 
 
 
