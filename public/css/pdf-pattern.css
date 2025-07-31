@@ -1,207 +1,387 @@
- @page {
-      margin: 25mm 20mm;
-      
-      }
+@page { margin: 20mm 15mm 20mm 15mm; }
+
 
 
 body {
     font-family: 'DejaVu Sans', sans-serif;
     color: #333;
-    font-size: 12.5px;
-    line-height: 1.6;
+    font-size: 11px;
+    line-height: 1.4;
     background-color: #fff;
-  }
+    margin: 0;
+    padding: 0;
+}
 
-  h1, h2, h3 {
-    color: #d95478;
-    margin-top: 0;
-    margin-bottom: 12px;
-    font-weight: normal;
-  }
-
-  h1 {
-    text-align: center;
-    font-size: 28px;
-    margin-top: 80px;
-  }
-
-  h2 {
-    font-size: 20px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 4px;
-    margin-top: 30px;
-  }
-
-  h3 {
-    font-size: 16px;
-    margin-top: 20px;
-  }
-
-  p {
-    margin-bottom: 10px;
-  }
-
-  .main-image {
-    display: block;
-    position: relative;
-    margin: 30px auto 0;
-    max-width: 320px;
-    border: 3px solid #f6dbe1;
-    padding: 4px;
-    border-radius: 6px;
-  }
-
-
-
-  .image-gallery {
-    
-    margin-top: 10px;
-  }
-
-  .image-gallery img {
-    max-width: 140px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-
-  .caption {
-    text-align: center;
-    font-size: 11px;
-    color: #666;
-    margin-top: 3px;
-    margin-bottom: 10px;
-  }
-
-  .page-break {
-    page-break-before: always !important;
-  }
-
-  ul.rows {
-    list-style-type: none;
-    padding-left: 0;
-    margin-top: 10px;
-  }
-
-  ul.rows li {
-    padding: 6px 10px;
-    border-bottom: 1px dotted #ddd;
-    margin-bottom: 3px;
-  }
-
-  ul.rows li strong {
-    color: #000;
-  }
-
-  em {
-    font-style: italic;
-    color: #666;
-  }
-
-  .footer {
+.fullpage-background {
     position: fixed;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 10px;
-    color: #aaa;
-  }
+    top: -15mm;
+    left: -20mm;
+    width: 100% ;
+    height: 100%;
 
-  .title-page {
-    text-align: center;
-    padding-top: 50px;
-  }
+    background-size: 100%;
+    background-position: center;
 
-    .section {
-    margin-bottom: 30px;
-  }
-  .section-title {
-    margin-top: 0;
-    margin-bottom: 10px;
-    page-break-after: avoid;
-  }
-   .images-row {
-    font-size: 0;
+    /*z-index: -9999;*/
+}
+
+.pdf-wrapper { width: 100%; position: relative; }
+
+/* VÁLTAKOZÓ SZÍNES NÉGYZETEK - MINDEN OLDALON */
+.page {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* HÁTTÉR ELEMEK BODY SZINTEN */
+
+
+/* CÍMOLDAL */
+.title-page {
     text-align: center;
+    padding: 60px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.main-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #d95478;
     margin-bottom: 15px;
-  }
-  .image-container {
-    font-size: 12px;
-    display: inline-block;
-    width: 33.33%;
-    vertical-align: top;
-  }
-  .image-container img {
-    max-width: 100%;
-    margin-bottom: 5px;
-  }
-  .image-caption {
-    font-size: 11px;
-    color: #777;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    font-size: 18px;
+    color: #ca4275;
     margin-bottom: 10px;
-  }
-  ul.rows-list {
-    padding-left: 16px;
+    font-weight: 600;
+}
+
+.author {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 40px;
+    font-style: italic;
+}
+
+.cover-image {
+    max-width: 300px;
+    border: 4px solid #f6dbe1;
+    border-radius: 15px;
+    padding: 8px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(217, 84, 120, 0.2);
+}
+
+/* BEVEZETŐ OLDAL */
+.intro-page {
+    padding: 20px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.thank-you-box {
+    background: linear-gradient(135deg, #faf6f8 0%, #f8d6e1 100%);
+    border: 2px solid #f6dbe1;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.thank-you-box h2 {
+    color: #d95478;
+    font-size: 20px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.info-box {
+    background: #fff;
+    border: 2px solid #efd5db;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.info-box h3 {
+    color: #ca4275;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f6dbe1;
+    padding-bottom: 5px;
+}
+
+.contact-info {
+    text-align: right;
+    margin-top: 30px;
+}
+
+.contact-box {
+    background: #f8d6e1;
+    border-radius: 8px;
+    padding: 15px;
+    display: inline-block;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* GRID RENDSZER */
+.row {
+    width: 100%;
+    overflow: hidden;
+    clear: both;
+    margin-bottom: 20px;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.col-6 {
+    float: left;
+    width: 48%;
+    padding: 0 1%;
+    box-sizing: border-box;
+}
+
+/* SZAKASZ CÍMEK */
+.section-heading {
+    font-size: 16px;
+    font-weight: bold;
+    color: #d95478;
+    margin-bottom: 15px;
     margin-top: 0;
-  }
-  ul.rows-list li {
-    margin-bottom: 5px;
-    page-break-inside: avoid;
-  }
-
-
-/* Általános alapok */
-* {
-  box-sizing: border-box;
-}
-
-.container {
-  width: 100%;
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  color: #333;
-}
-
-.section {
-  margin-bottom: 20px;
-  overflow: hidden; /* lebegő elemek tisztításához */
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .section-title {
-  font-weight: bold;
-  margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #d95478;
+    margin: 20px 0 10px 0;
+    border-bottom: 3px solid #f6dbe1;
+    padding-bottom: 8px;
 }
 
-/* Két oszlop float-tal */
-.section-columns {
-  overflow: hidden; /* tartalmazza a floatokat */
+.section-subtitle {
+    font-size: 14px;
+    color: #888;
+    font-style: italic;
+    margin-bottom: 20px;
 }
 
-.section-columns .left-col {
-  float: left;
-  width: 48%; /* vagy 49%, hogy maradjon hely a margónak */
-  margin-right: 4%;
+/* ANYAGOK ÉS ESZKÖZÖK */
+.materials-page {
+    position: relative;
+    z-index: 1;
 }
 
-.section-columns .right-col {
-  float: left;
-  width: 48%;
+.materials-box, .tools-box {
+    background: #faf6f8;
+    border-left: 4px solid #d95478;
+    padding: 15px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 15px;
 }
 
-/* Képek egymás alatt */
-.left-col img {
-  display: block;
-  max-width: 100%;
-  margin-bottom: 10px;
+.abbreviations-box {
+    background: #fff;
+    border: 2px solid #f6dbe1;
+    border-radius: 8px;
+    padding: 15px;
 }
 
-/* Listák stílusa */
-.right-col ul {
-  padding-left: 20px;
-  margin: 0;
-  list-style-type: decimal;
+.abbr-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.right-col li {
-  margin-bottom: 6px;
+.abbr-list li {
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px dotted #efd5db;
+}
+
+.abbr-list li:last-child {
+    border-bottom: none;
+}
+
+/* KÉPGALÉRIA */
+.image-gallery {
+    display: block;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.gallery-item {
+    float: left;
+    width: 30%;
+    margin: 1.5%;
+    text-align: center;
+}
+
+.gallery-item img {
+    width: 100%;
+    border: 2px solid #f6dbe1;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.caption {
+    font-size: 10px;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* SZEKCIÓ TARTALOM - ÚJ STRUKTÚRA */
+.section-page {
+    position: relative;
+    z-index: 1;
+}
+
+/* KÉPEK KÖZÉPRE IGAZÍTVA MAXIMUM 3 EGY SORBAN */
+.section-images-center {
+    display: block;
+    text-align: center;
+    margin: 30px 0;
+    overflow: hidden;
+}
+
+.section-image-item {
+    display: inline-block;
+    vertical-align: top;
+    margin: 0 15px 20px 15px;
+    max-width: 30%;
+    text-align: center;
+}
+
+.section-img {
+    max-width: 100%;
+    border: 2px solid #f6dbe1;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(217, 84, 120, 0.1);
+}
+
+.img-caption {
+    font-size: 10px;
+    color: #666;
+    text-align: center;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* UTASÍTÁSOK KÉT OSZLOPBAN */
+.instructions-container {
+    margin-top: 30px;
+}
+
+.instructions-row {
+    overflow: hidden;
+    clear: both;
+}
+
+.instructions-col {
+    float: left;
+    width: 48%;
+    margin: 0 1%;
+    box-sizing: border-box;
+}
+
+.instruction-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #faf6f8;
+    border: 2px solid #f6dbe1;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.instruction-list li {
+    margin-bottom: 8px;
+    padding: 5px 8px;
+    background: #fff;
+    border-radius: 4px;
+    border-left: 3px solid #d95478;
+}
+
+.row-number {
+    font-weight: bold;
+    color: #d95478;
+    margin-right: 8px;
+}
+
+.instruction {
+    color: #333;
+}
+
+.stitch-count {
+    color: #ca4275;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.comment {
+    color: #666;
+    font-style: italic;
+    margin-left: 5px;
+}
+
+.section-notes {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8d6e1;
+    border-radius: 6px;
+    clear: both;
+}
+
+.notes-list {
+    list-style: disc;
+    padding-left: 20px;
+    margin: 0;
+}
+
+/* OLDALTÖRÉS */
+.page-break {
+    page-break-after: always;
+    clear: both;
+}
+
+/* LÁBLÉC */
+.footer-page {
+    text-align: center;
+    padding: 30px 0;
+    border-top: 2px solid #f6dbe1;
+    margin-top: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.social-links {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.brand-info {
+    font-size: 14px;
+    color: #d95478;
+    line-height: 1.6;
+}
+
+/* KIEGÉSZÍTŐK */
+.mt-20 { margin-top: 20px; }
+
+@media print {
+    .page-break { page-break-after: always; }
+    .instructions-row { page-break-inside: avoid; }
 }

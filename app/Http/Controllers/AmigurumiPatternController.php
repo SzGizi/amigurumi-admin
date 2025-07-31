@@ -9,10 +9,8 @@ use App\Http\Resources\AmigurumiPatternResource;
 use App\Http\Resources\AmigurumiSectionResource;
 use App\Http\Requests\UpdateAmigurumiPatternRequest;
 use Illuminate\Support\Facades\Log;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\ImageService;
 use App\Models\Image;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\Snappy\Facades\SnappyPdf as SnappyPdf;
 
