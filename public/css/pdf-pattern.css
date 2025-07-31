@@ -2,6 +2,8 @@
       margin: 25mm 20mm;
       
       }
+
+
 body {
     font-family: 'DejaVu Sans', sans-serif;
     color: #333;
@@ -39,7 +41,7 @@ body {
     margin-bottom: 10px;
   }
 
-  .cover-image {
+  .main-image {
     display: block;
     position: relative;
     margin: 30px auto 0;
@@ -49,11 +51,7 @@ body {
     border-radius: 6px;
   }
 
-  .section-title {
-    font-size: 18px;
-    color: #444;
-    margin-top: 25px;
-  }
+
 
   .image-gallery {
     
@@ -150,3 +148,60 @@ body {
     margin-bottom: 5px;
     page-break-inside: avoid;
   }
+
+
+/* Általános alapok */
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  color: #333;
+}
+
+.section {
+  margin-bottom: 20px;
+  overflow: hidden; /* lebegő elemek tisztításához */
+}
+
+.section-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Két oszlop float-tal */
+.section-columns {
+  overflow: hidden; /* tartalmazza a floatokat */
+}
+
+.section-columns .left-col {
+  float: left;
+  width: 48%; /* vagy 49%, hogy maradjon hely a margónak */
+  margin-right: 4%;
+}
+
+.section-columns .right-col {
+  float: left;
+  width: 48%;
+}
+
+/* Képek egymás alatt */
+.left-col img {
+  display: block;
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+
+/* Listák stílusa */
+.right-col ul {
+  padding-left: 20px;
+  margin: 0;
+  list-style-type: decimal;
+}
+
+.right-col li {
+  margin-bottom: 6px;
+}

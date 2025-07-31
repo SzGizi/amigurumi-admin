@@ -58,36 +58,40 @@
   {{-- Szekciók --}}
   @if(!empty($pattern['sections']) && is_array($pattern['sections']))
     @foreach($pattern['sections'] as $section)
-      <div class="section">
-        <h3 class="section-title">{{ $section['title'] ?? '' }}</h3>
+  <div class="section">
+  <h3 class="section-title">{{ $section['title'] }}</h3>
 
-        @if(!empty($section['images']) && is_array($section['images']))
-          <div class="images-row">
-            @foreach($section['images'] as $img)
-              @if(!empty($img['url']))
-                <img src="file:///{{ str_replace('\\', '/', public_path('storage/uploads/images/' . basename($img['url']))) }}" alt="Szekció kép" style="max-width:100%;" />
-                @if(!empty($img['caption']))
-                  <div class="image-caption">{{ $img['caption'] }}</div>
-                @endif
-              @endif
-            @endforeach
-          </div>
-        @endif
+  <div class="section-columns">
+    <div class="left-col">
+      @if(!empty($section['images']))
+        @foreach($section['images'] as $img)
+          <img src="file:///{{ str_replace('\\', '/', public_path('storage/uploads/images/' . basename($img['url']))) }}" alt="Section image" />
+          @if(!empty($img['caption']))
+            <div style="font-style: italic; font-size: 10px; margin-bottom: 10px;">{{ $img['caption'] }}</div>
+          @endif
+        @endforeach
+      @endif
+    </div>
 
-        @if(!empty($section['rows']) && is_array($section['rows']))
-          <ul class="rows-list">
-            @foreach($section['rows'] as $row)
-              <li>
-                <strong>{{ $row['row_number'] ?? '' }}:</strong> {{ $row['instructions'] ?? '' }}
-                @if(!empty($row['stitch_number'])) <em>({{ $row['stitch_number'] }})</em> @endif
-                @if(!empty($row['comment'])) | <em>{{ $row['comment'] }}</em> @endif
-              </li>
-            @endforeach
-          </ul>
-        @endif
+    <div class="right-col">
+      <ul>
+        @foreach($section['rows'] as $row)
+          <li>
+            <strong>{{ $row['row_number'] }}:</strong> {{ $row['instructions'] }}
+            @if(!empty($row['stitch_number'])) <em>({{ $row['stitch_number'] }})</em> @endif
+            @if(!empty($row['comment'])) | <em>{{ $row['comment'] }}</em> @endif
+          </li>
+        @endforeach
+      </ul>
+    </div>
+  </div>
+</div>
 
-      </div>
-    @endforeach
+@endforeach
+
+
+
+
   @endif
 
 </div>

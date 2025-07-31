@@ -261,6 +261,7 @@ class AmigurumiPatternController extends Controller
                 'enable-local-file-access' => true,
                 'enable-internal-links' => true,
                 'no-outline' => true,
+                'no-stop-slow-scripts' => true,
             ]);
 
         return $pdf->download('pattern.pdf');
