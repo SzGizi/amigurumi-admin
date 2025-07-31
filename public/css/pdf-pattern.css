@@ -56,10 +56,7 @@ body {
   }
 
   .image-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 10px;
+    
     margin-top: 10px;
   }
 
@@ -78,7 +75,7 @@ body {
   }
 
   .page-break {
-    page-break-after: always;
+    page-break-before: always !important;
   }
 
   ul.rows {
@@ -115,4 +112,41 @@ body {
   .title-page {
     text-align: center;
     padding-top: 50px;
+  }
+
+    .section {
+    margin-bottom: 30px;
+  }
+  .section-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+  }
+   .images-row {
+    font-size: 0;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .image-container {
+    font-size: 12px;
+    display: inline-block;
+    width: 33.33%;
+    vertical-align: top;
+  }
+  .image-container img {
+    max-width: 100%;
+    margin-bottom: 5px;
+  }
+  .image-caption {
+    font-size: 11px;
+    color: #777;
+    margin-bottom: 10px;
+  }
+  ul.rows-list {
+    padding-left: 16px;
+    margin-top: 0;
+  }
+  ul.rows-list li {
+    margin-bottom: 5px;
+    page-break-inside: avoid;
   }

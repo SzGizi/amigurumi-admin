@@ -41,7 +41,7 @@
             <h5 class="text-secondary">{{ __('Additional Images') }}</h5>
             <div class="row">
                 @foreach($otherImages as $image)
-                    <div class="col-md-3 col-6 mb-3">
+                    <div class=" col-3 mb-3">
                         <div class="card shadow-sm h-100">
                             <img src="{{ asset('storage/' .$image->path) }}" class="card-img-top" alt="Pattern Image">
                             @if($image->caption)
@@ -65,7 +65,7 @@
             @if($section->images->count())
                 <div class="row mb-3">
                     @foreach($section->images as $image)
-                        <div class="col-md-3 col-6 mb-2">
+                        <div class=" col-6 mb-2">
                             <div class="card shadow-sm h-100">
                                 <img src="{{asset('storage/' . $image->path) }}" class="card-img-top" alt="Section Image">
                                 @if($image->caption)

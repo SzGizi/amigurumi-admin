@@ -14,6 +14,7 @@ use App\Services\ImageService;
 use App\Models\Image;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\Snappy\Facades\SnappyPdf as SnappyPdf;
 
 
 
@@ -234,142 +235,39 @@ class AmigurumiPatternController extends Controller
 
         
     }
-  public function generatePdf(Request $request){
     
-    $data = $request->all();
-    //Log::info('PDF generálás kérése:', $data);
-
-    $baseUrl = url('/');
-
-    $getLocalPath = function ($url) use ($baseUrl) {
-        $relativePath = str_replace($baseUrl, '', $url);
-        $relativePath = ltrim($relativePath, '/');
-        $fullPath = public_path($relativePath);
-        //Log::info("Resolving URL to path", ['url' => $url, 'path' => $fullPath]);
-        return $fullPath;
-    };
-
-    $encodeBase64 = function ($url) use ($getLocalPath) {
-        $localPath = $getLocalPath($url);
-        if (!file_exists($localPath)) {
-            Log::error("File not found for base64 encode", ['url' => $url, 'path' => $localPath]);
-            return null;
-        }
-
-        $mime = mime_content_type($localPath);
-
     
-        $base64 = base64_encode(file_get_contents($localPath));
-        return "data:$mime;base64,$base64";
-    };
 
-    // Főkép
-    if (!empty($data['main_image_url'])) {
-        $data['main_image_base64'] = $encodeBase64($data['main_image_url']);
-    }
+    public function generatePdf(Request $request)
+    {
+        $data = $request->all();
 
-    // Szűrd ki a főkép URL-jét a többi kép közül
-    if (!empty($data['main_image_url']) && !empty($data['images']) && is_array($data['images'])) {
-        $data['images'] = array_filter($data['images'], function ($img) use ($data) {
-            return $img['url'] !== $data['main_image_url'];
-        });
-        $data['images'] = array_values($data['images']);
-    }
+        // Töröljük a base64 generálást, képek maradnak URL-ként
+        $data['columns'] = 2;
 
-    // Egyéb képek
-    if (!empty($data['images']) && is_array($data['images'])) {
-        foreach ($data['images'] as &$image) {
-            if (!empty($image['url'])) {
-                $image['base64'] = $encodeBase64($image['url']);
-            }
-        }
-    }
+        // HTML renderelés a Blade sablonból
+        $html = view('pdf.pattern', ['pattern' => $data])->render();
 
-    // Szekció képek
-    if (!empty($data['sections']) && is_array($data['sections'])) {
-        foreach ($data['sections'] as &$section) {
-            if (!empty($section['images']) && is_array($section['images'])) {
-                foreach ($section['images'] as &$image) {
-                    if (!empty($image['url'])) {
-                        $image['base64'] = $encodeBase64($image['url']);
-                    }
-                }
-            }
-        }
-    }
-
-    // CSS fájlok betöltése
-    $cssFiles = [
-        'css/bootsrap-minimal.css',
-        'css/pdf-pattern.css',
-        
-    ];
-    
-    $data['css_content'] = $this->loadCssFiles($cssFiles);
-
-
-
-    // PDF generálás HELYES módszerrel
-    $pdf = Pdf::setOptions([
-        'isRemoteEnabled' => true,
-        'isHtml5ParserEnabled' => true,
-        'isPhpEnabled' => true, // FONTOS!
-    ])->loadView('pdf.pattern', ['pattern' => $data]);
-    
-    // PDF renderelés
-    $pdf->render();
-    
-    // Canvas megszerzése és oldalszámozás hozzáadása
-    $canvas = $pdf->getDomPDF()->getCanvas();
-    $fontMetrics = $pdf->getDomPDF()->getFontMetrics();
-       // Oldalszámozás minden oldalra
-    $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
-        $font = $fontMetrics->getFont('Helvetica', 'normal');
-        $size = 10;
-        $text = "$pageNumber ";
-        
-        // Szöveg szélessége a központosításhoz
-        $textWidth = $fontMetrics->getTextWidth($text, $font, $size);
-        
-        // Pozíció számítása (középre, alulra)
-        $x = ($canvas->get_width() - $textWidth) / 2;
-        $y = $canvas->get_height() - 20; // 20px az oldal aljától
-        
-        // Szöveg rajzolása
-        $canvas->text($x, $y, $text, $font, $size, [0, 0, 0 ]);
-    });
-    
-   
+         $pdf = SnappyPdf::loadHTML($html)
+            ->setOptions([
+                'encoding' => 'utf-8',
+                'page-size' => 'A4',
+                'margin-top' => '15mm',
+                'margin-bottom' => '20mm',
+                'margin-left' => '10mm',
+                'margin-right' => '10mm',
+                'footer-center' => '[page]',
+                'footer-font-size' => 9,
+                'enable-local-file-access' => true,
+                'enable-internal-links' => true,
+                'no-outline' => true,
+            ]);
 
         return $pdf->download('pattern.pdf');
     }
 
-    private function loadCssFiles($cssFiles)
-    {
-        $allCssContent = '';
-        $loadedFiles = [];
-        $missingFiles = [];
-        
-        foreach ($cssFiles as $cssFile) {
-            $cssPath = public_path($cssFile);
-            if (file_exists($cssPath)) {
-                $cssContent = file_get_contents($cssPath);
-                $allCssContent .= "\n/* === " . basename($cssFile) . " === */\n";
-                $allCssContent .= $cssContent . "\n";
-                $loadedFiles[] = $cssFile;
-            } else {
-                $missingFiles[] = $cssFile;
-            }
-        }
-        
-        Log::info('CSS loading summary:', [
-            'loaded' => $loadedFiles,
-            'missing' => $missingFiles,
-            'total_size' => strlen($allCssContent)
-        ]);
-        
-        return $allCssContent;
-    }
+    
+
 
 
 }
