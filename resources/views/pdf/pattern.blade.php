@@ -13,17 +13,17 @@
         <link rel="stylesheet" href="file:///{{ str_replace('\\', '/', public_path('css/pdf-pattern.css')) }}" />
     @endif
     <style>
-      .fullpage-background{
-        background-image: url(file:///{{ str_replace('\\', '/', public_path('images/pdf-bg.jpg')) }})
-      }
     </style>
 </head>
 <body>
- <div class="fullpage-background"></div>
+
+<div class="bg-left"></div>
+<div class="bg-right"></div>
+
 
 <div class="pdf-wrapper">
     {{-- CÍMOLDAL --}}
-    <div class="page page-1">
+    
         <div class="title-page">
             <h1 class="main-title">{{ $pattern['title'] ?? 'Amigurumi minta' }}</h1>
             <div class="subtitle">PDF amigurumi pattern</div>
@@ -36,13 +36,13 @@
                 </div>
             @endif
         </div>
-    </div>
-
     <div class="page-break"></div>
 
+   
     {{-- BEVEZETŐ OLDAL --}}
-    <div class="page page-2">
+   
         <div class="intro-page">
+           
             <div class="thank-you-box">
                 <h2>Kedves horgolóbarát!</h2>
                 <p>Köszönöm, hogy ezt a mintát választottad. Remélem, hogy ugyanolyan élvezettel készíted el, 
@@ -73,12 +73,12 @@
                 </div>
             </div>
         </div>
-    </div>
+    
 
-    <div class="page-break"></div>
+    
 
     {{-- ANYAGOK ÉS RÖVIDÍTÉSEK KÉTOSZLOPBAN --}}
-    <div class="page page-3">
+   
         <div class="materials-page">
             <div class="row">
                 <div class="col-6">
@@ -124,12 +124,9 @@
                 </div>
             </div>
         </div>
-    </div>
-
     {{-- EGYÉB KÉPEK GALÉRIA --}}
     @if(!empty($pattern['images']) && is_array($pattern['images']))
-        <div class="page-break"></div>
-        <div class="page page-4">
+       
             <div class="image-gallery-page">
                 <h2 class="section-heading">KÉPEK</h2>
                 <div class="image-gallery">
@@ -145,127 +142,141 @@
                         @endif
                     @endforeach
                 </div>
-            </div>
-        </div>
+            
     @endif
 
     {{-- SZEKCIÓK ÚJRA STRUKTURÁLVA --}}
     @if(!empty($pattern['sections']) && is_array($pattern['sections']))
-        @php $pageCounter = 5; @endphp
+        
         @foreach($pattern['sections'] as $section)
-            <div class="page-break"></div>
-            <div class="page page-{{ $pageCounter }}">
-                <div class="section-page">
-                    <h2 class="section-title">{{ $section['title'] }}</h2>
-                    <div class="section-subtitle">{{ $section['color'] ?? '' }}</div>
 
-                    {{-- KÉPEK KÖZÉPRE IGAZÍTVA MAXIMUM 3 EGY SORBAN --}}
-                    @if(!empty($section['images']))
-                        <div class="section-images-center">
-                            @foreach($section['images'] as $img)
-                                <div class="section-image-item">
-                                    <img src="file:///{{ str_replace('\\', '/', public_path('storage/uploads/images/' . basename($img['url']))) }}" 
-                                         alt="Section image" class="section-img" />
-                                    @if(!empty($img['caption']))
-                                        <div class="img-caption">{{ $img['caption'] }}</div>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
+            <div class="section-page">
+                <h2 class="section-title">{{ $section['title'] }}</h2>
+                <div class="section-subtitle">{{ $section['color'] ?? '' }}</div>
 
-                    {{-- UTASÍTÁSOK KÉT OSZLOPBAN --}}
-                    @if(!empty($section['rows']))
-                        <div class="instructions-container">
-                            @php
-                                $rows = $section['rows'];
-                                $halfCount = ceil(count($rows) / 2);
-                                $leftRows = array_slice($rows, 0, $halfCount);
-                                $rightRows = array_slice($rows, $halfCount);
-                            @endphp
+                {{-- KÉPEK KÖZÉPRE IGAZÍTVA MAXIMUM 3 EGY SORBAN --}}
+                @if(!empty($section['images']))
+                    <div class="section-images-center">
+                        @foreach($section['images'] as $img)
+                            <div class="section-image-item">
+                                <img src="file:///{{ str_replace('\\', '/', public_path('storage/uploads/images/' . basename($img['url']))) }}" 
+                                        alt="Section image" class="section-img" />
+                                @if(!empty($img['caption']))
+                                    <div class="img-caption">{{ $img['caption'] }}</div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- UTASÍTÁSOK KÉT OSZLOPBAN --}}
+                @if(!empty($section['rows']))
+                    {{-- <div class="instructions-container">
+                        @php
+                            $rows = $section['rows'];
+                            $halfCount = ceil(count($rows) / 2);
+                            $leftRows = array_slice($rows, 0, $halfCount);
+                            $rightRows = array_slice($rows, $halfCount);
+                        @endphp
+                        
+                        <div class="instructions-row">
+                            <div class="instructions-col">
+                                <ul class="instruction-list">
+                                    @foreach($leftRows as $row)
+                                        <li>
+                                            <span class="row-number">{{ $row['row_number'] }}:</span> 
+                                            <span class="instruction">{{ $row['instructions'] }}</span>
+                                            @if(!empty($row['stitch_number'])) 
+                                                <span class="stitch-count">({{ $row['stitch_number'] }})</span> 
+                                            @endif
+                                            @if(!empty($row['comment'])) 
+                                                <span class="comment">{{ $row['comment'] }}</span> 
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
                             
-                            <div class="instructions-row">
-                                <div class="instructions-col">
-                                    <ul class="instruction-list">
-                                        @foreach($leftRows as $row)
-                                            <li>
-                                                <span class="row-number">{{ $row['row_number'] }}:</span> 
-                                                <span class="instruction">{{ $row['instructions'] }}</span>
-                                                @if(!empty($row['stitch_number'])) 
-                                                    <span class="stitch-count">({{ $row['stitch_number'] }})</span> 
-                                                @endif
-                                                @if(!empty($row['comment'])) 
-                                                    <span class="comment">{{ $row['comment'] }}</span> 
-                                                @endif
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                                
-                                <div class="instructions-col">
-                                    <ul class="instruction-list">
-                                        @foreach($rightRows as $row)
-                                            <li>
-                                                <span class="row-number">{{ $row['row_number'] }}:</span> 
-                                                <span class="instruction">{{ $row['instructions'] }}</span>
-                                                @if(!empty($row['stitch_number'])) 
-                                                    <span class="stitch-count">({{ $row['stitch_number'] }})</span> 
-                                                @endif
-                                                @if(!empty($row['comment'])) 
-                                                    <span class="comment">{{ $row['comment'] }}</span> 
-                                                @endif
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
+                            <div class="instructions-col">
+                                <ul class="instruction-list">
+                                    @foreach($rightRows as $row)
+                                        <li>
+                                            <span class="row-number">{{ $row['row_number'] }}:</span> 
+                                            <span class="instruction">{{ $row['instructions'] }}</span>
+                                            @if(!empty($row['stitch_number'])) 
+                                                <span class="stitch-count">({{ $row['stitch_number'] }})</span> 
+                                            @endif
+                                            @if(!empty($row['comment'])) 
+                                                <span class="comment">{{ $row['comment'] }}</span> 
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
                             </div>
                         </div>
+                    </div> --}}
+                   <ul class="instruction-list">
+                @foreach($section['rows'] as $row)
+                <li>
+                    <span class="row-number">{{ $row['row_number'] }}:</span>
+                    <span class="instruction">{{ $row['instructions'] }}</span>
+                    @if(!empty($row['stitch_number'])) 
+                    <span class="stitch-count">({{ $row['stitch_number'] }})</span>
                     @endif
+                    @if(!empty($row['comment'])) 
+                    <span class="comment">{{ $row['comment'] }}</span>
+                    @endif
+                </li>
+                @endforeach
+                </ul>
 
-                    {{-- JEGYZETEK --}}
-                    @if(!empty($section['notes']))
-                        <div class="section-notes">
-                            <ul class="notes-list">
-                                @foreach($section['notes'] as $note)
-                                    <li>{{ $note }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                </div>
+
+
+
+                @endif
+
+                {{-- JEGYZETEK --}}
+                @if(!empty($section['notes']))
+                    <div class="section-notes">
+                        <ul class="notes-list">
+                            @foreach($section['notes'] as $note)
+                                <li>{{ $note }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
             </div>
-            @php $pageCounter++; @endphp
+  
         @endforeach
     @endif
 
     {{-- ÖSSZEÁLLÍTÁSI ÚTMUTATÓ --}}
     @if(!empty($pattern['assembly_instructions']))
-        <div class="page-break"></div>
-        <div class="page page-{{ $pageCounter }}">
+       
             <div class="assembly-page">
                 <h2 class="section-heading">ÖSSZEÁLLÍTÁS</h2>
                 <div class="assembly-content">
                     {!! nl2br(e($pattern['assembly_instructions'])) !!}
                 </div>
             </div>
-        </div>
-        @php $pageCounter++; @endphp
+       
+        
     @endif
 
     {{-- LÁBLÉC --}}
-    <div class="page page-{{ $pageCounter }}">
-        <div class="footer-page">
-            <div class="social-links">
-                <span>instagram.com/{{ $pattern['instagram'] ?? 'stockindesign' }}</span>
-            </div>
-            <div class="brand-info">
-                <strong>{{ $pattern['brand'] ?? 'StockInDesign' }}</strong><br>
-                <span>{{ $pattern['tagline'] ?? 'The LAB of InDesign Templates' }}</span><br>
-                <span>{{ $pattern['website'] ?? 'www.stockindesign.com' }}</span><br>
-                <span>{{ $pattern['facebook'] ?? 'fb.com/stockInDesign' }}</span>
-            </div>
+
+    <div class="footer-page">
+        <div class="social-links">
+            <span>instagram.com/{{ $pattern['instagram'] ?? 'stockindesign' }}</span>
+        </div>
+        <div class="brand-info">
+            <strong>{{ $pattern['brand'] ?? 'StockInDesign' }}</strong><br>
+            <span>{{ $pattern['tagline'] ?? 'The LAB of InDesign Templates' }}</span><br>
+            <span>{{ $pattern['website'] ?? 'www.stockindesign.com' }}</span><br>
+            <span>{{ $pattern['facebook'] ?? 'fb.com/stockInDesign' }}</span>
         </div>
     </div>
+
 </div>
 
 </body>

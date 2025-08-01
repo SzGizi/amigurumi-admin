@@ -1,4 +1,4 @@
-@page { margin: 20mm 15mm 20mm 15mm; }
+@page { }
 
 
 
@@ -9,21 +9,27 @@ body {
     line-height: 1.4;
     background-color: #fff;
     margin: 0;
-    padding: 0;
+    padding: 0 20mm
 }
 
-.fullpage-background {
+      .bg-left, .bg-right {
     position: fixed;
-    top: -15mm;
-    left: -20mm;
-    width: 100% ;
+    top: 0;
+    width: 15mm;
     height: 100%;
+    z-index: -1;
+    background: #f6dbe1;
+    }
 
-    background-size: 100%;
-    background-position: center;
+    .bg-left {
+        left: 0;
+    }
 
-    /*z-index: -9999;*/
-}
+    .bg-right {
+        right: 0;
+    }
+
+
 
 .pdf-wrapper { width: 100%; position: relative; }
 
@@ -384,4 +390,21 @@ body {
 @media print {
     .page-break { page-break-after: always; }
     .instructions-row { page-break-inside: avoid; }
+}
+
+
+.instruction-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.instruction-list li {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  margin-bottom: 8px;
+  padding: 5px 8px;
+  background: #fff;
+  border-radius: 4px;
+  border-left: 3px solid #d95478;
 }

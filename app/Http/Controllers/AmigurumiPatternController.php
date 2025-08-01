@@ -16,6 +16,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf as SnappyPdf;
 
 
 
+
 class AmigurumiPatternController extends Controller
 {
 
@@ -238,6 +239,7 @@ class AmigurumiPatternController extends Controller
 
     public function generatePdf(Request $request)
     {
+        
         $data = $request->all();
 
         // Töröljük a base64 generálást, képek maradnak URL-ként
@@ -246,20 +248,31 @@ class AmigurumiPatternController extends Controller
         // HTML renderelés a Blade sablonból
         $html = view('pdf.pattern', ['pattern' => $data])->render();
 
+     
+
          $pdf = SnappyPdf::loadHTML($html)
             ->setOptions([
                 'encoding' => 'utf-8',
                 'page-size' => 'A4',
-                'margin-top' => '15mm',
+                // 🆕 PDF margók teljes kikapcsolása
+                'margin-top' => '20mm',
                 'margin-bottom' => '20mm',
-                'margin-left' => '10mm',
-                'margin-right' => '10mm',
+                'margin-left' => '0mm',
+                'margin-right' => '0mm',
+
+                // 🆕 Háttér engedélyezése (CSS-ből is)
+                'background' => true,
+
+                'no-outline' => true,
+                
+     
                 'footer-center' => '[page]',
                 'footer-font-size' => 9,
                 'enable-local-file-access' => true,
                 'enable-internal-links' => true,
                 'no-outline' => true,
                 'no-stop-slow-scripts' => true,
+                
             ]);
 
         return $pdf->download('pattern.pdf');
