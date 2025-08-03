@@ -3,6 +3,23 @@
 <head>
     <meta charset="UTF-8" />
     <title>{{ $pattern['title'] ?? 'Amigurumi minta' }}</title>
+    <style> 
+        @font-face {
+            font-family: 'Twinkle Star';
+            src: url("file:///{{ str_replace('\\', '/', public_path('fonts/TwinkleStar-Regular.ttf')) }}") format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Oranienbaum';
+            src: url("file:///{{ str_replace('\\', '/', public_path('fonts/Oranienbaum-Regular.ttf')) }}") format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+    </style>
+
+    {{-- PDF stílusok --}}
 
     {{-- CSS fájlok helyi eléréssel (eredeti kódod alapján) --}}
     @if(!empty($pattern['css_files']) && is_array($pattern['css_files']))
@@ -17,8 +34,6 @@
 </head>
 <body>
 
-<div class="bg-left"></div>
-<div class="bg-right"></div>
 
 
 <div class="pdf-wrapper">
@@ -28,6 +43,7 @@
             <h1 class="main-title">{{ $pattern['title'] ?? 'Amigurumi minta' }}</h1>
             <div class="subtitle">PDF amigurumi pattern</div>
             <div class="author">by {{ $pattern['author'] ?? 'Szántó Gizella' }}</div>
+        </div>
             
             @if(!empty($pattern['main_image_url']))
                 <div class="main-image">
@@ -35,7 +51,7 @@
                          alt="Főkép" class="cover-image" />
                 </div>
             @endif
-        </div>
+        
     <div class="page-break"></div>
 
    

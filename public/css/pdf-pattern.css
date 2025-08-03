@@ -1,33 +1,17 @@
 @page { }
 
 
-
 body {
-    font-family: 'DejaVu Sans', sans-serif;
+    /*font-family: 'DejaVu Sans', sans-serif;*/
     color: #333;
     font-size: 11px;
     line-height: 1.4;
     background-color: #fff;
     margin: 0;
-    padding: 0 20mm
+   
 }
 
-      .bg-left, .bg-right {
-    position: fixed;
-    top: 0;
-    width: 15mm;
-    height: 100%;
-    z-index: -1;
-    background: #f6dbe1;
-    }
 
-    .bg-left {
-        left: 0;
-    }
-
-    .bg-right {
-        right: 0;
-    }
 
 
 
@@ -49,6 +33,9 @@ body {
     padding: 60px 0;
     position: relative;
     z-index: 1;
+    display: block;
+
+  
 }
 
 .main-title {
@@ -57,6 +44,9 @@ body {
     color: #d95478;
     margin-bottom: 15px;
     letter-spacing: 2px;
+    font-family: "Twinkle Star", cursive;
+    font-weight: 400;
+    
 }
 
 .subtitle {
@@ -72,14 +62,24 @@ body {
     margin-bottom: 40px;
     font-style: italic;
 }
-
+.main-image{
+    height: 200mm;
+    width: 100%;
+    overflow: hidden;
+    display: block;
+    position: relative;
+}
 .cover-image {
-    max-width: 300px;
-    border: 4px solid #f6dbe1;
-    border-radius: 15px;
-    padding: 8px;
-    background: #fff;
-    box-shadow: 0 4px 15px rgba(217, 84, 120, 0.2);
+    height: 100%;
+    margin: auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    vertical-align: middle;
+    display: block;
+    border-radius: 20px;
 }
 
 /* BEVEZETŐ OLDAL */

@@ -247,18 +247,21 @@ class AmigurumiPatternController extends Controller
 
         // HTML renderelés a Blade sablonból
         $html = view('pdf.pattern', ['pattern' => $data])->render();
-
+        $footerHtml = view('pdf.footer', ['pattern' => $data])->render();
+        $footerPath = storage_path('app/pdf-footer.html');
+        file_put_contents($footerPath, $footerHtml);
      
 
          $pdf = SnappyPdf::loadHTML($html)
+            ->setOption('footer-html', $footerPath)
             ->setOptions([
                 'encoding' => 'utf-8',
                 'page-size' => 'A4',
                 // 🆕 PDF margók teljes kikapcsolása
                 'margin-top' => '20mm',
                 'margin-bottom' => '20mm',
-                'margin-left' => '0mm',
-                'margin-right' => '0mm',
+                'margin-left' => '15mm',
+                'margin-right' => '15mm',
 
                 // 🆕 Háttér engedélyezése (CSS-ből is)
                 'background' => true,
