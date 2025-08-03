@@ -1,18 +1,14 @@
 @page { }
 
+   
 
 body {
-    /*font-family: 'DejaVu Sans', sans-serif;*/
-    color: #333;
-    font-size: 11px;
-    line-height: 1.4;
+    font-size: 13px;
+    line-height: 1.6;
     background-color: #fff;
     margin: 0;
-   
+ 
 }
-
-
-
 
 
 .pdf-wrapper { width: 100%; position: relative; }
@@ -39,9 +35,9 @@ body {
 }
 
 .main-title {
-    font-size: 36px;
+    font-size: 46px;
     font-weight: bold;
-    color: #d95478;
+    color:  #54d966;
     margin-bottom: 15px;
     letter-spacing: 2px;
     font-family: "Twinkle Star", cursive;
@@ -63,7 +59,7 @@ body {
     font-style: italic;
 }
 .main-image{
-    height: 200mm;
+    height: 230mm;
     width: 100%;
     overflow: hidden;
     display: block;
@@ -156,23 +152,22 @@ body {
 }
 
 /* SZAKASZ CÍMEK */
-.section-heading {
-    font-size: 16px;
-    font-weight: bold;
-    color: #d95478;
-    margin-bottom: 15px;
-    margin-top: 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+/* SZAKASZ CÍMEK */
+.section-title-container{
+    text-align: center;
 
+}
 .section-title {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 35px;
     color: #d95478;
     margin: 20px 0 10px 0;
-    border-bottom: 3px solid #f6dbe1;
-    padding-bottom: 8px;
+    border-bottom: 1px solid #f6dbe1;
+    padding-bottom: 5px;
+    max-width: fit-content;
+    display: inline-block;
+    margin: 20px auto 10px;
+    text-align: center;
+    
 }
 
 .section-subtitle {
@@ -221,23 +216,22 @@ body {
 
 /* KÉPGALÉRIA */
 .image-gallery {
-    display: block;
+   text-align: center;
+    margin: 30px 0;
     overflow: hidden;
-    margin: 20px 0;
 }
 
 .gallery-item {
-    float: left;
-    width: 30%;
-    margin: 1.5%;
+   display: inline-block;
+    vertical-align: top;
+    margin: 0 15px 20px 15px;
+    max-width: 30%;
     text-align: center;
 }
 
 .gallery-item img {
-    width: 100%;
-    border: 2px solid #f6dbe1;
-    border-radius: 8px;
-    background: #fff;
+   max-width: 100%;
+    border-radius: 20px;
 }
 
 .caption {
@@ -271,10 +265,7 @@ body {
 
 .section-img {
     max-width: 100%;
-    border: 2px solid #f6dbe1;
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(217, 84, 120, 0.1);
+    border-radius: 20px;
 }
 
 .img-caption {
@@ -285,61 +276,60 @@ body {
     font-style: italic;
 }
 
-/* UTASÍTÁSOK KÉT OSZLOPBAN */
-.instructions-container {
-    margin-top: 30px;
-}
 
-.instructions-row {
-    overflow: hidden;
-    clear: both;
-}
-
-.instructions-col {
-    float: left;
-    width: 48%;
-    margin: 0 1%;
-    box-sizing: border-box;
-}
 
 .instruction-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    background: #faf6f8;
-    border: 2px solid #f6dbe1;
-    border-radius: 8px;
-    padding: 15px;
+   
 }
 
 .instruction-list li {
-    margin-bottom: 8px;
-    padding: 5px 8px;
-    background: #fff;
-    border-radius: 4px;
-    border-left: 3px solid #d95478;
+    margin-bottom: 3px;
+    padding: 0;
+    page-break-inside: avoid;
+    font-size: 16px;
+    border-bottom:2px dotted #cfcfcf;
+    
 }
 
 .row-number {
+    display: inline-block;
     font-weight: bold;
     color: #d95478;
     margin-right: 8px;
+    width: 20mm;
 }
 
 .instruction {
+   display: inline-block;
     color: #333;
+    width: 179mm;
+    letter-spacing: 0.3em;
 }
 
 .stitch-count {
+    display: inline-block;
     color: #ca4275;
     font-weight: bold;
     margin-left: 5px;
+    text-align: right;
+    width: 20mm;
 }
 
 .comment {
-    color: #666;
+    color: #e5e5e5;
     font-style: italic;
-    margin-left: 5px;
+    margin: 10px;
+    width: fit-content;
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: #ca4275;
+}
+.without-border{
+    border:none !important;
 }
 
 .section-notes {
@@ -399,12 +389,4 @@ body {
   margin: 0;
 }
 
-.instruction-list li {
-  page-break-inside: avoid;
-  break-inside: avoid;
-  margin-bottom: 8px;
-  padding: 5px 8px;
-  background: #fff;
-  border-radius: 4px;
-  border-left: 3px solid #d95478;
-}
+

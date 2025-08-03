@@ -1,8 +1,29 @@
+@php
+    $primaryColor = '#54d95f'; // Alap szín
+    $titleColor = '#54d966'; // Title szín
+    $textColor = '#333'; // Szöveg szín
+    $fontFamily = 'Montserrat, sans-serif'; // Alap betűtípus
+    $titleFontFamily = "Charm, cursive"; // Cím betűtípus
+    $subtitleFontFamily = 'Poiret One, sans-serif'; // Alcím betű
+    $primaryBgTextColor = 'white'; // Alap háttérszín
+
+
+@endphp
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>
     <meta charset="UTF-8" />
     <title>{{ $pattern['title'] ?? 'Amigurumi minta' }}</title>
+
+       {{-- CSS fájlok helyi eléréssel (eredeti kódod alapján) --}}
+    @if(!empty($pattern['css_files']) && is_array($pattern['css_files']))
+        @foreach($pattern['css_files'] as $cssFile)
+            <link rel="stylesheet" href="file:///{{ str_replace('\\', '/', public_path($cssFile)) }}" />
+        @endforeach
+    @else
+        <link rel="stylesheet" href="file:///{{ str_replace('\\', '/', public_path('css/pdf-pattern.css')) }}" />
+    @endif
     <style> 
         @font-face {
             font-family: 'Twinkle Star';
@@ -17,18 +38,71 @@
             font-weight: 400;
             font-style: normal;
         }
+        @font-face {
+            font-family: 'Charm';
+            src: url("file:///{{ str_replace('\\', '/', public_path('fonts/Charm-Regular.ttf')) }}") format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+         @font-face {
+            font-family: 'Charm';
+            src: url("file:///{{ str_replace('\\', '/', public_path('fonts/Charm-Bold.ttf')) }}") format('truetype');
+            font-weight: 600;
+            font-style: bold;
+        }
+        @font-face {
+            font-family: 'Poiret One';
+            src: url("file:///{{ str_replace('\\', '/', public_path('fonts/PoiretOne-Regular.ttf')) }}") format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Montserrat';
+            src: url("file:///{{ str_replace('\\', '/', public_path('fonts/Montserrat-Regular.ttf')) }}") format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Montserrat';
+            src: url("file:///{{ str_replace('\\', '/', public_path('fonts/Montserrat-Thin.ttf')) }}") format('truetype');
+            font-weight: 200;
+            font-style: thin;
+        }
+        @font-face {
+            font-family: 'Montserrat';
+            src: url("file:///{{ str_replace('\\', '/', public_path('fonts/Montserrat-Bold.ttf')) }}") format('truetype');
+            font-weight: 600;
+            font-style: bold;
+        }
+
+        
+     
+        body{
+            color: {{ $textColor }};
+            font-family: {{ $fontFamily }};
+        }
+        .section-title, .main-title{
+            color: {{ $titleColor }};
+            font-family: {{ $titleFontFamily }};
+        }
+        .subtitle{
+            font-family: {{ $subtitleFontFamily }};
+            color: {{ $textColor }};
+        }
+        .border-color{
+            border-color: {{ $primaryColor }};
+        }
+        .primary-bg{
+            text:{{$primaryBgTextColor}};
+            background-color: {{ $primaryColor }};
+        }
+
+       
     </style>
 
     {{-- PDF stílusok --}}
 
-    {{-- CSS fájlok helyi eléréssel (eredeti kódod alapján) --}}
-    @if(!empty($pattern['css_files']) && is_array($pattern['css_files']))
-        @foreach($pattern['css_files'] as $cssFile)
-            <link rel="stylesheet" href="file:///{{ str_replace('\\', '/', public_path($cssFile)) }}" />
-        @endforeach
-    @else
-        <link rel="stylesheet" href="file:///{{ str_replace('\\', '/', public_path('css/pdf-pattern.css')) }}" />
-    @endif
+ 
     <style>
     </style>
 </head>
@@ -59,7 +133,7 @@
    
         <div class="intro-page">
            
-            <div class="thank-you-box">
+            <div class="thank-you-box border-color">
                 <h2>Kedves horgolóbarát!</h2>
                 <p>Köszönöm, hogy ezt a mintát választottad. Remélem, hogy ugyanolyan élvezettel készíted el, 
                    mint amilyen örömmel én terveztem.</p>
@@ -69,7 +143,7 @@
                    amikor megosztod a kész munkádat.</p>
             </div>
 
-            <div class="info-box">
+            <div class="info-box border-color">
                 <h3>Fontos információk</h3>
                 <ul>
                     <li>Folyamatos spirálban horgolj, ne kapcsold össze a sorokat!</li>
@@ -79,15 +153,7 @@
                 </ul>
             </div>
 
-            <div class="contact-info">
-                <div class="contact-box">
-                    <strong>{{ $pattern['author'] ?? 'Szántó Gizella' }}</strong><br>
-                    {{ $pattern['description'] ?? 'Rövid leírás' }}<br>
-                    {{ $pattern['website'] ?? 'weboldal' }}<br>
-                    {{ $pattern['social'] ?? 'fb.com/' }}<br>
-                    {{ $pattern['etsy'] ?? 'etsy' }}
-                </div>
-            </div>
+           
         </div>
     
 
@@ -115,7 +181,7 @@
 
                 <div class="col-6">
                     <h2 class="section-heading">RÖVIDÍTÉSEK</h2>
-                    <div class="abbreviations-box">
+                    <div class="abbreviations-box border-color">
                         @if(!empty($pattern['abbreviations']))
                             <ul class="abbr-list">
                                 @foreach($pattern['abbreviations'] as $abbr)
@@ -144,13 +210,12 @@
     @if(!empty($pattern['images']) && is_array($pattern['images']))
        
             <div class="image-gallery-page">
-                <h2 class="section-heading">KÉPEK</h2>
                 <div class="image-gallery">
                     @foreach($pattern['images'] as $image)
-                        @if(!empty($image['url']))
+                        @if(!empty($image['url']) && !$image['is_main'])
                             <div class="gallery-item">
                                 <img src="file:///{{ str_replace('\\', '/', public_path('storage/uploads/images/' . basename($image['url']))) }}" 
-                                     alt="Minta kép" />
+                                      />
                                 @if(!empty($image['caption']))
                                     <div class="caption">{{ $image['caption'] }}</div>
                                 @endif
@@ -167,85 +232,49 @@
         @foreach($pattern['sections'] as $section)
 
             <div class="section-page">
-                <h2 class="section-title">{{ $section['title'] }}</h2>
-                <div class="section-subtitle">{{ $section['color'] ?? '' }}</div>
+                <div class="section-title-container">
+                    <h2 class="section-title">{{ $section['title'] }}</h2>
+                </div>
+               
+               
 
                 {{-- KÉPEK KÖZÉPRE IGAZÍTVA MAXIMUM 3 EGY SORBAN --}}
                 @if(!empty($section['images']))
                     <div class="section-images-center">
                         @foreach($section['images'] as $img)
+                           
+                            @if(!empty($img['caption']))
+                                    <div class="img-caption">{{ $img['caption'] }}</div>
+                                @endif
                             <div class="section-image-item">
                                 <img src="file:///{{ str_replace('\\', '/', public_path('storage/uploads/images/' . basename($img['url']))) }}" 
                                         alt="Section image" class="section-img" />
-                                @if(!empty($img['caption']))
-                                    <div class="img-caption">{{ $img['caption'] }}</div>
-                                @endif
+                                
                             </div>
+                            
                         @endforeach
                     </div>
                 @endif
 
-                {{-- UTASÍTÁSOK KÉT OSZLOPBAN --}}
+                {{-- UTASÍTÁSOK  --}}
                 @if(!empty($section['rows']))
-                    {{-- <div class="instructions-container">
-                        @php
-                            $rows = $section['rows'];
-                            $halfCount = ceil(count($rows) / 2);
-                            $leftRows = array_slice($rows, 0, $halfCount);
-                            $rightRows = array_slice($rows, $halfCount);
-                        @endphp
-                        
-                        <div class="instructions-row">
-                            <div class="instructions-col">
-                                <ul class="instruction-list">
-                                    @foreach($leftRows as $row)
-                                        <li>
-                                            <span class="row-number">{{ $row['row_number'] }}:</span> 
-                                            <span class="instruction">{{ $row['instructions'] }}</span>
-                                            @if(!empty($row['stitch_number'])) 
-                                                <span class="stitch-count">({{ $row['stitch_number'] }})</span> 
-                                            @endif
-                                            @if(!empty($row['comment'])) 
-                                                <span class="comment">{{ $row['comment'] }}</span> 
-                                            @endif
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                            
-                            <div class="instructions-col">
-                                <ul class="instruction-list">
-                                    @foreach($rightRows as $row)
-                                        <li>
-                                            <span class="row-number">{{ $row['row_number'] }}:</span> 
-                                            <span class="instruction">{{ $row['instructions'] }}</span>
-                                            @if(!empty($row['stitch_number'])) 
-                                                <span class="stitch-count">({{ $row['stitch_number'] }})</span> 
-                                            @endif
-                                            @if(!empty($row['comment'])) 
-                                                <span class="comment">{{ $row['comment'] }}</span> 
-                                            @endif
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    </div> --}}
+                   
                    <ul class="instruction-list">
-                @foreach($section['rows'] as $row)
-                <li>
-                    <span class="row-number">{{ $row['row_number'] }}:</span>
-                    <span class="instruction">{{ $row['instructions'] }}</span>
-                    @if(!empty($row['stitch_number'])) 
-                    <span class="stitch-count">({{ $row['stitch_number'] }})</span>
-                    @endif
-                    @if(!empty($row['comment'])) 
-                    <span class="comment">{{ $row['comment'] }}</span>
-                    @endif
-                </li>
-                @endforeach
+                    @foreach($section['rows'] as $row)
+                    <li>
+                        <div class="row-number">{{ $row['row_number'] }}:</div>
+                        <div class="instruction">{{ $row['instructions'] }}</div>
+                        @if(!empty($row['stitch_number'])) 
+                        <div class="stitch-count">({{ $row['stitch_number'] }})</div>
+                        @endif
+                    </li>
+                    <li class="without-border">
+                        @if(!empty($row['comment'])) 
+                            <div class="comment bg-primary">{{ $row['comment'] }}</div>
+                        @endif
+                    </li>
+                    @endforeach
                 </ul>
-
 
 
 
