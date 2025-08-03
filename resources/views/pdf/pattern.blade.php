@@ -3,7 +3,7 @@
     $titleColor = '#54d966'; // Title szín
     $textColor = '#333'; // Szöveg szín
     $fontFamily = 'Montserrat, sans-serif'; // Alap betűtípus
-    $titleFontFamily = "Charm, cursive"; // Cím betűtípus
+    $titleFontFamily = "Poiret One, sans-serif"; // Cím betűtípus
     $subtitleFontFamily = 'Poiret One, sans-serif'; // Alcím betű
     $primaryBgTextColor = 'white'; // Alap háttérszín
 
@@ -233,7 +233,7 @@
 
             <div class="section-page">
                 <div class="section-title-container">
-                    <h2 class="section-title">{{ $section['title'] }}</h2>
+                    <h2 class="section-title border-color">{{ $section['title'] }}</h2>
                 </div>
                
                
