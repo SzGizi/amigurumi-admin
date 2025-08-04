@@ -232,6 +232,7 @@
                         class="form-control"
                       />
                     </div>
+
                     <div class="funtions-btn-container">
                      <input
                         type="checkbox"
@@ -239,12 +240,26 @@
                         :id="'toggleComment' + sectionIndex + '_' + rowIndex"
                         v-model="row.showComment"
                       />
+                      
                       <label
                         class="btn btn-outline-secondary"
                         :class="{ active: row.showComment }"
                         :for="'toggleComment' + sectionIndex + '_' + rowIndex"
                       >
                         <i class="bi bi-chat-right-text"></i>
+                      </label>
+                      <input
+                        type="checkbox"
+                        class="btn-check"
+                        :id="'toggleColorChange' + sectionIndex + '_' + rowIndex"
+                        v-model="row.showColorChange"
+                      />
+                        <label
+                        class="btn btn-outline-secondary btn-sm  ms-1 align-self-end"
+                        :class="{ active: row.showColorChange }"
+                        :for="'toggleColorChange' + sectionIndex + '_' + rowIndex"
+                      >
+                        <i class="bi bi-palette"></i>
                       </label>
                       <button
                         type="button"
@@ -258,8 +273,10 @@
                         @click="confirmDelete('row', sectionIndex, rowIndex)"
                       ><i class="bi bi-x"></i></button>
                     </div>
+
                   </div>
-                   <div class="collapse w-100 mt-3 mb-3" :class="{ show: row.showComment }">
+
+                  <div class="collapse w-100 mt-3 mb-3" :class="{ show: row.showComment }">
                     <div class="basic-input">    
                     <label class="form-label">Comment</label>
                     <input
@@ -269,6 +286,18 @@
                     />
                     </div>
                   </div>
+
+                  <div class="collapse w-100 mt-3 mb-3" :class="{ show: row.showColorChange }">
+                    <div class="basic-input">    
+                    <label class="form-label">Change to Color</label>
+                    <input
+                      type="text"
+                      v-model="row.color_change"
+                      class="form-control"
+                    />
+                    </div>
+                  </div>
+
                 </div>
               </template>
                 
@@ -348,7 +377,9 @@ export default {
             instructions: row.instructions ?? '',
             stitch_number: row.stitch_number ?? null,
             comment: row.comment ?? '',
+            color_change: row.color_change ?? '',
             showComment: !!row.comment,
+            showColorChange: !!row.color_change,
             order: row.order ?? 0,
             uid: row.uid ?? crypto.randomUUID(),
           })),
@@ -523,6 +554,7 @@ export default {
         uid: crypto.randomUUID(),
         order: rows.length + 1,
         showComment: false,
+        showColorChange: false,
       };
 
       rows.push(newRow);

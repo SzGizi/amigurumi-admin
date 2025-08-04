@@ -83,6 +83,9 @@
             <ul class="list-group">
                 @foreach ($section->amigurumiRows as $row)
                     <li class="list-group-item">
+                          @if(isset($row->color_change ) && !empty($row->color_change))
+                            | <span class="text-muted fst-bold">{{ $row->color_change }}</span><br>
+                            @endif
                         <strong>{{ __('Row') }} {{ $row->row_number }}:</strong> {{ $row->instructions }}
                         @if(isset($row->stitch_number))
                             ({{ $row->stitch_number }})

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AmigurumiRow extends Model
 {
-    protected $fillable = ['amigurumi_section_id', 'row_number', 'instructions', 'stitch_number','comment', 'order'];
+    protected $fillable = ['amigurumi_section_id', 'row_number', 'instructions', 'stitch_number','comment', 'order', 'color_change'];
 
     public function amigurumiSection()
     {

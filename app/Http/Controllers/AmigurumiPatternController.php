@@ -113,6 +113,7 @@ class AmigurumiPatternController extends Controller
             $rows = $sectionData['rows'] ?? [];
             foreach ($rows as $rowData) {
                 $hasComment = !empty($rowData['showComment']) && $rowData['showComment'];
+                $hasColorChange = !empty($rowData['showColorChange']) && $rowData['showColorChange'];
 
                 if (!empty($rowData['id'])) {
                     $row = $section->amigurumiRows()->find($rowData['id']);
@@ -122,6 +123,7 @@ class AmigurumiPatternController extends Controller
                             'instructions' => $rowData['instructions'] ?? '',
                             'stitch_number' => $rowData['stitch_number'] ?? null,
                             'comment' => $hasComment ? ($rowData['comment'] ?? '') : '',
+                            'color_change' => $hasColorChange ? ($rowData['color_change'] ?? '') : '',
                             'order' => $rowData['order'] ?? null,
                         ]);
                         $existingRowIds[] = $row->id;
@@ -132,6 +134,7 @@ class AmigurumiPatternController extends Controller
                         'instructions' => $rowData['instructions'] ?? '',
                         'stitch_number' => $rowData['stitch_number'] ?? null,
                         'comment' => $hasComment ? ($rowData['comment'] ?? '') : '',
+                        'color_change' => $hasColorChange ? ($rowData['color_change'] ?? '') : '',
                         'order' => $rowData['order'] ?? null,
                     ]);
                     $existingRowIds[] = $newRow->id;

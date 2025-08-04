@@ -261,18 +261,25 @@
                    
                    <ul class="instruction-list">
                     @foreach($section['rows'] as $row)
-                    <li>
-                        <div class="row-number">{{ $row['row_number'] }}:</div>
-                        <div class="instruction">{{ $row['instructions'] }}</div>
-                        @if(!empty($row['stitch_number'])) 
-                        <div class="stitch-count">({{ $row['stitch_number'] }})</div>
+                        @if(!empty($row['color_change'])) 
+                            <li class="without-border">
+                                <div class="color_change"><strong>//</strong>{{ $row['color_change'] }}</div>
+                            </li>
                         @endif
-                    </li>
-                    <li class="without-border">
+                        <li>
+                            <div class="row-number">{{ $row['row_number'] }}:</div>
+                            <div class="instruction">{{ $row['instructions'] }}</div>
+                            @if(!empty($row['stitch_number'])) 
+                            <div class="stitch-count">({{ $row['stitch_number'] }})</div>
+                            @endif
+                        </li>
+                    
                         @if(!empty($row['comment'])) 
-                            <div class="comment bg-primary">{{ $row['comment'] }}</div>
+                            <li class="without-border">
+                                <div class="comment ">{{ $row['comment'] }}</div>
+                            </li>
                         @endif
-                    </li>
+                    
                     @endforeach
                 </ul>
 

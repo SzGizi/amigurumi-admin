@@ -27,6 +27,7 @@ class StoreAmigurumiRowRequest extends FormRequest
             'amigurumi_section_id' => 'required|exists:amigurumi_sections,id',
             'stitch_number' => 'integer|min:1',
             'comment' => 'string|max:255',
+            'color_change' => 'string|max:255',
             'order' => 'required|integer',
         ];
     }
