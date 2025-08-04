@@ -28,6 +28,8 @@
         <div class="card-body">
             <p><strong>{{ __('Yarn') }}:</strong> {{ $amigurumiPattern->yarn_description }}</p>
             <p><strong>{{ __('Tools') }}:</strong> {{ $amigurumiPattern->tools_description }}</p>
+            <p><strong>{{ __('Final Size') }}:</strong> {{ $amigurumiPattern->final_size }}</p>
+            <p><strong>{{ __('Difficulty') }}:</strong> {{ $amigurumiPattern->difficulty }}</p>
         </div>
     </div>
 

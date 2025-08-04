@@ -25,6 +25,8 @@ class UpdateAmigurumiPatternRequest extends FormRequest
             'title' => 'required|string|max:255',
             'yarn_description' => 'nullable|string',
             'tools_description' => 'nullable|string',
+            'final_size' => 'nullable|string|max:255',
+            'difficulty' => 'nullable|string|max:255',
             'sections' => 'nullable|array',
             'sections.*.title' => 'required|string|max:255',
             'sections.*.order' => 'required|integer|min:0',

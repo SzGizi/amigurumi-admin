@@ -148,7 +148,7 @@
                 <ul>
                     <li>Folyamatos spirálban horgolj, ne kapcsold össze a sorokat!</li>
                     <li>Használj jelölőt minden sor elején!</li>
-                    <li>Végső magasság: {{ $pattern['final_height'] ?? '19-20cm' }}</li>
+                    <li>Végső magasság: {{ $pattern['final_size'] ?? '19-20cm' }}</li>
                     <li>Nehézségi szint: {{ $pattern['difficulty'] ?? 'közepes' }}</li>
                 </ul>
             </div>

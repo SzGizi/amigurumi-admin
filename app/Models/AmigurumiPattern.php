@@ -8,7 +8,14 @@ use Illuminate\Support\Facades\File;
 
 class AmigurumiPattern extends Model
 {
-    protected $fillable = ['title', 'image_path', 'yarn_description', 'tools_description'];
+    protected $fillable = [
+        'title', 
+        'image_path', 
+        'yarn_description', 
+        'tools_description',
+        'final_size',
+        'difficulty'
+    ];
 
     public function amigurumiSections()
     {

@@ -73,9 +73,19 @@
             <input type="text" id="title" v-model="pattern.title" class="form-control" />
           </div>
 
+           <div class="basic-input">
+            <label for="final_size" class="form-label">Final Size</label>
+            <textarea id="final_size" rows="1" v-model="pattern.final_size" class="form-control"></textarea>
+          </div>
+
+           <div class="basic-input">
+            <label for="difficulty" class="form-label">Difficulty</label>
+            <textarea id="difficulty" rows="1" v-model="pattern.difficulty" class="form-control"></textarea>
+          </div>
+
           <div class="basic-input">
             <label for="yarn_description" class="form-label">Yarn Description</label>
-            <textarea id="yarn_description" v-model="pattern.yarn_description" class="form-control"></textarea>
+            <textarea id="yarn_description" rows="7" v-model="pattern.yarn_description" class="form-control"></textarea>
           </div>
 
          
@@ -83,7 +93,7 @@
         <div class="col-md-6 ">
           <div class="basic-input">
             <label for="tools_description" class="form-label">Tools Description</label>
-            <textarea  id="tools_description" v-model="pattern.tools_description" class="form-control"></textarea>
+            <textarea  id="tools_description" rows="15" v-model="pattern.tools_description" class="form-control"></textarea>
           </div>
       
         </div>
@@ -361,6 +371,8 @@ export default {
       pattern: {
         id:this.initialPatternId,
         title: this.initialTitle,
+        difficulty: this.initialDifficulty,
+        final_size: this.initialFinalSize,
         yarn_description: this.initialYarnDescription,
         tools_description: this.initialToolsDescription,
         deleted_image_ids : [],
