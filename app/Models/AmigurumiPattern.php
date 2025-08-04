@@ -14,7 +14,9 @@ class AmigurumiPattern extends Model
         'yarn_description', 
         'tools_description',
         'final_size',
-        'difficulty'
+        'difficulty',
+        'introduction',
+        'abbreviations',
     ];
 
     public function amigurumiSections()

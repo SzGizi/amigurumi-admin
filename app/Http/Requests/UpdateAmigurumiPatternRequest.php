@@ -27,6 +27,8 @@ class UpdateAmigurumiPatternRequest extends FormRequest
             'tools_description' => 'nullable|string',
             'final_size' => 'nullable|string|max:255',
             'difficulty' => 'nullable|string|max:255',
+            'introduction' => 'nullable|string',
+            'abbreviations' => 'nullable|string',
             'sections' => 'nullable|array',
             'sections.*.title' => 'required|string|max:255',
             'sections.*.order' => 'required|integer|min:0',

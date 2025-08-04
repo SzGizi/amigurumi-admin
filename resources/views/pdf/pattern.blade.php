@@ -133,25 +133,14 @@
    
         <div class="intro-page">
            
-            <div class="thank-you-box border-color">
-                <h2>Kedves horgolóbarát!</h2>
-                <p>Köszönöm, hogy ezt a mintát választottad. Remélem, hogy ugyanolyan élvezettel készíted el, 
-                   mint amilyen örömmel én terveztem.</p>
-                <p>Ez a minta szerzői jogvédelem alatt áll és csak személyes használatra készült. 
-                   A kész játékot szabadon eladhatod vagy ajándékba adhatod. 
-                   Kérlek, tüntesd fel a készítő nevét ({{ $pattern['author'] ?? 'Szántó Gizella' }}) 
-                   amikor megosztod a kész munkádat.</p>
-            </div>
+            @if(!empty($pattern['introduction']))
+                <div class="thank-you-box border-color">
+                {{ $pattern['introduction'] }}
+                </div>
+                
+            @endif
 
-            <div class="info-box border-color">
-                <h3>Fontos információk</h3>
-                <ul>
-                    <li>Folyamatos spirálban horgolj, ne kapcsold össze a sorokat!</li>
-                    <li>Használj jelölőt minden sor elején!</li>
-                    <li>Végső magasság: {{ $pattern['final_size'] ?? '19-20cm' }}</li>
-                    <li>Nehézségi szint: {{ $pattern['difficulty'] ?? 'közepes' }}</li>
-                </ul>
-            </div>
+           
 
            
         </div>
@@ -165,7 +154,7 @@
             <div class="row">
                 <div class="col-6">
                     @if(!empty($pattern['yarn_description']))
-                        <h2 class="section-heading">ANYAGOK</h2>
+                        <h2 class="section-heading">FONALAK</h2>
                         <div class="materials-box">
                             {!! nl2br(e($pattern['yarn_description'])) !!}
                         </div>
@@ -180,27 +169,21 @@
                 </div>
 
                 <div class="col-6">
+                     @if(!empty($pattern['final_size']))
+                        <div class="info-box border-color">
+                            <p>Végső magasság: {{ $pattern['final_size'] }}</p>
+                        </div>
+                    @endif
+
+                    @if(!empty($pattern['difficulty']))
+                        <div class="info-box border-color">
+                            <li>Nehézségi szint: {{ $pattern['difficulty'] }}</li>
+                        </div>
+                    @endif
                     <h2 class="section-heading">RÖVIDÍTÉSEK</h2>
                     <div class="abbreviations-box border-color">
                         @if(!empty($pattern['abbreviations']))
-                            <ul class="abbr-list">
-                                @foreach($pattern['abbreviations'] as $abbr)
-                                    <li><strong>{{ $abbr['short'] }}</strong> - {{ $abbr['desc'] }}</li>
-                                @endforeach
-                            </ul>
-                        @else
-                            <ul class="abbr-list">
-                                <li><strong>ch</strong> - chain</li>
-                                <li><strong>sc</strong> - single crochet</li>
-                                <li><strong>dc</strong> - double crochet</li>
-                                <li><strong>inc</strong> - increase - two single crochet in one stitch</li>
-                                <li><strong>dec</strong> - decrease - two single crochet together</li>
-                                <li><strong>*...*</strong> - repeat as instructed</li>
-                                <li><strong>(12)</strong> - number of single crochet in the row</li>
-                                <li><strong>sl</strong> - slip stitch</li>
-                                <li><strong>st</strong> - stitch</li>
-                                <li><strong>MR</strong> - magic ring</li>
-                            </ul>
+                            {{$pattern['abbreviations']}}
                         @endif
                     </div>
                 </div>
@@ -287,16 +270,7 @@
 
                 @endif
 
-                {{-- JEGYZETEK --}}
-                @if(!empty($section['notes']))
-                    <div class="section-notes">
-                        <ul class="notes-list">
-                            @foreach($section['notes'] as $note)
-                                <li>{{ $note }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+               
             </div>
   
         @endforeach

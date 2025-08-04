@@ -84,16 +84,28 @@
           </div>
 
           <div class="basic-input">
-            <label for="yarn_description" class="form-label">Yarn Description</label>
-            <textarea id="yarn_description" rows="7" v-model="pattern.yarn_description" class="form-control"></textarea>
+            <label for="introduction" class="form-label">Introduction</label>
+            <textarea id="introduction" rows="21" v-model="pattern.introduction" class="form-control"></textarea>
           </div>
+
+          
+
+          
 
          
         </div>
         <div class="col-md-6 ">
           <div class="basic-input">
+            <label for="yarn_description" class="form-label">Yarn Description</label>
+            <textarea id="yarn_description" rows="7" v-model="pattern.yarn_description" class="form-control"></textarea>
+          </div>
+          <div class="basic-input">
             <label for="tools_description" class="form-label">Tools Description</label>
-            <textarea  id="tools_description" rows="15" v-model="pattern.tools_description" class="form-control"></textarea>
+            <textarea  id="tools_description" rows="7" v-model="pattern.tools_description" class="form-control"></textarea>
+          </div>
+          <div class="basic-input">
+            <label for="abbreviations" class="form-label">Abbreviations</label>
+            <textarea id="abbreviations" rows="11" v-model="pattern.abbreviations" class="form-control"></textarea>
           </div>
       
         </div>
@@ -362,7 +374,11 @@ export default {
     'initialYarnDescription',
     'initialToolsDescription',
     'updateUrl',
-    'initialMainImageId'
+    'initialMainImageId',
+    'initialDifficulty',
+    'initialFinalSize',
+    'initialIntroduction',
+    'initialAbbreviations',
   ],
   data() {
     return {
@@ -375,6 +391,8 @@ export default {
         final_size: this.initialFinalSize,
         yarn_description: this.initialYarnDescription,
         tools_description: this.initialToolsDescription,
+        introduction: this.initialIntroduction,
+        abbreviations: this.initialAbbreviations,
         deleted_image_ids : [],
         main_image_id : this.initialMainImageId ?? null,
         main_image_url: null, 

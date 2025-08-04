@@ -26,6 +26,9 @@
             :initial-tools-description='@json($amigurumiPattern->tools_description)'
             :initial-final-size='@json($amigurumiPattern->final_size)'
             :initial-difficulty='@json($amigurumiPattern->difficulty)'
+            :initial-introduction='@json($amigurumiPattern->introduction)'
+            :initial-abbreviations='@json($amigurumiPattern->abbreviations)'
+
             :initial-sections='{{ $sectionsJson }}'
             update-url="{{ route('amigurumi-patterns.update', $amigurumiPattern) }}"
             

@@ -75,6 +75,8 @@ class AmigurumiPatternController extends Controller
             'tools_description',
             'final_size',
             'difficulty',
+            'introduction',
+            'abbreviations',
         ]));
 
         $sections = $request->input('sections', []);
