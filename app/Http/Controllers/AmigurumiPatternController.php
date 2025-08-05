@@ -63,7 +63,7 @@ class AmigurumiPatternController extends Controller
 
     public function update(UpdateAmigurumiPatternRequest $request, AmigurumiPattern $amigurumiPattern)
     {
-          //Log::info('Beérkezett PUT kérés: ' . var_export($request->all(), true));
+          Log::info('Beérkezett PUT kérés: ' . var_export($request->all(), true));
         //Log::info('Sections:', $request->input('sections'));
         if ($amigurumiPattern->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
@@ -80,12 +80,15 @@ class AmigurumiPatternController extends Controller
         ]));
 
         $sections = $request->input('sections', []);
+        $assemblySteps = $request->input('assemblySteps', []);
 
         $existingSectionIds = [];
         $existingRowIds = [];
+        $existingAssemblyStepIds = [];
 
         $createdSectionMap = []; // uid => new_id
         $createdRowMap = [];     // uid => new_id
+        $createdAssemblyStepMap = [];     // uid => new_id
 
         foreach ($sections as $sectionData) {
             // Ha van section id → frissítünk, egyébként létrehozunk
@@ -149,6 +152,33 @@ class AmigurumiPatternController extends Controller
             }
         }
 
+        foreach ($assemblySteps as $assemblyStepData) {
+            // Ha van section id → frissítünk, egyébként létrehozunk
+            if (!empty($assemblyStepData['id'])) {
+                $assemblyStep = $amigurumiPattern->assemblySteps()->find($assemblyStepData['id']);
+
+                if ($assemblyStep) {
+                    $assemblyStep->update([
+                        'text' => $assemblyStepData['text'] ?? '',
+                        'order' => $assemblyStepData['order'] ?? 0,
+                    ]);
+                    $existingAssemblyStepIds[] = $assemblyStep->id;
+                } else {
+                    continue; // ha nem található a section ID, nem csinálunk semmit
+                }
+            } else {
+                $assemblyStep = $amigurumiPattern->assemblySteps()->create([
+                    'text' => $assemblyStepData['text'] ?? '',
+                    'order' => $assemblyStepData['order'] ?? 0,
+                ]);
+                $existingAssemblyStepIds[] = $assemblyStep->id;
+
+                if (!empty($assemblyStepData['uid'])) {
+                    $$createdAssemblyStepMap[$assemblyStepData['uid']] = $assemblyStep->id;
+                }
+            }
+        }
+
         // ✳️ Opcionális: nem szereplő section-ök és row-k törlése (ha kell)
         $amigurumiPattern->amigurumiSections()
             ->whereNotIn('id', $existingSectionIds)
@@ -186,6 +216,7 @@ class AmigurumiPatternController extends Controller
             'pattern' => $amigurumiPattern->load('amigurumiSections.amigurumiRows'),
             'created_section_ids' => $createdSectionMap,
             'created_row_ids' => $createdRowMap,
+            'created_assembly_step_ids' => $createdAssemblyStepMap,
         ]);
     }
 

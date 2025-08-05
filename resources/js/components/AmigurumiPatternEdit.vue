@@ -340,6 +340,85 @@
       </draggable>
 
       <button type="button" class="btn btn-outline-primary my-3" @click="addSection">Add Section</button>
+
+    <!-- AssemblySteps -->
+      <h4 class="mt-4">Assembly</h4>
+      
+      <draggable
+        v-model="pattern.assemblySteps"
+        handle=".drag-handle"
+        animation="150"
+        @update="updateAssemblyStepsOrders"
+        item-key="uid"
+        ref="draggableAssemblySteps"
+      >
+        <template #item="{element: assemblyStep, index: assemblyStepsIndex}" >
+          <div class="card mb-3 p-3 section-card" :key="assemblyStep.uid">
+
+            <div class="d-flex align-items-center flex-row justify-content-between gap-2">
+               <div class="arrow-btn-container">
+                <span class="drag-handle cursor-move">⠿</span>
+                <input type="hidden" v-model.number="assemblyStep.order" />
+                <button  type="button" class="btn" @click="moveAssemblyStepUp(assemblyStepsIndex)" :disabled="assemblyStepsIndex === 0">
+                  <i class="bi bi-arrow-up"></i>
+                </button>
+                <button type="button" class="btn" @click="moveAssemblyStepDown(assemblyStepsIndex)" :disabled="assemblyStepsIndex === pattern.assemblySteps.length - 1">
+                <i class="bi bi-arrow-down"></i>
+                </button>
+              </div>
+              <div class="basic-input flex-fill mb-0">
+                <label class="form-label">Assembly text</label>
+                <input type="text" v-model="assemblyStep.text" class="form-control" required />
+              </div>
+
+              <div class="funtions-btn-container">
+
+                 <button
+                    class="btn btn-sm btn-outline-info "
+                    type="button"
+                    @click="toggleCollapse('assemblyStepImageCollapse' +assemblyStepsIndex)"
+                    title="Toggle Images"
+                  ><i class="bi bi-images"></i></button>
+                
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary "
+                  @click="duplicateAssemblyStep(assemblyStepsIndex)"
+                  title="Duplicate Assembly step without images"
+                ><i class="bi bi-copy"></i></button>
+
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger "
+                  @click="confirmDelete('assemblyStep', assemblyStepsIndex)"
+                ><i class="bi bi-x"></i></button>
+                
+              </div>
+            </div>
+             <div class="collapse row-list" :id="'assemblyStepImageCollapse' + assemblyStepsIndex" >  
+              <div class="col-md-12 mb-2 mt-3">
+               
+                 <FileUploader 
+                model-type="AmigurumiPatternAssemblyStep" 
+                :model-id="assemblyStep.id" 
+                :ref="`assemblyStepUploader${assemblyStepsIndex}`"
+                :get-assembly-step-id-by-uid="getAssemblyStepIdByUid"
+                @updateDeletedImages="onUpdateDeletedImages"
+                :has-main-image="false"
+              />
+
+              </div>
+             
+             </div>
+
+          </div>
+        </template>
+      </draggable>
+
+      <button type="button" class="btn btn-outline-primary my-3" @click="addAssemblyStep">Add Assembly Step</button>
+
+      <br>
+
       <button type="submit" class="btn btn-primary" :disabled="isSaving">
         <span v-if="isSaving" class="spinner-border spinner-border-sm me-1"></span>
         {{ isSaving ? 'Saving...' : 'Save' }}
@@ -370,6 +449,7 @@ export default {
   props: [
     'initialPatternId',
     'initialSections',
+    'initialAssemblySteps',
     'initialTitle',
     'initialYarnDescription',
     'initialToolsDescription',
@@ -416,6 +496,13 @@ export default {
           uid: section.uid ?? crypto.randomUUID(),
           images: [],
         })),
+        assemblySteps: this.initialAssemblySteps.map((assemblyStep) => ({
+          id: assemblyStep.id,
+          uid: assemblyStep.uid ?? crypto.randomUUID(),
+          text: assemblyStep.text,
+          order: assemblyStep.order,
+          images: [],
+        })),
       },
       success: null,
       error: null,
@@ -459,6 +546,12 @@ export default {
           uploaders.push(this.$refs[refName]);
         }
       });
+       this.pattern.assemblySteps.forEach((assemblyStep, index) => {
+        const refName = `assemblyStepUploader${index}`;
+        if (this.$refs[refName]) {
+          uploaders.push(this.$refs[refName]);
+        }
+      });
 
       if (!uploaders.length) {
         console.error('ImageUploader ref not found');
@@ -481,6 +574,7 @@ export default {
         // 🔁 Frissítsd a section id-ket uid alapján
         const createdSectionIds = response.data.created_section_ids || {};
         const createdRowIds = response.data.created_row_ids || {};
+        const createdAssemblyStepIds = response.data.created_assembly_step_ids || {};
 
         this.pattern.sections.forEach(section => {
           if (!section.id && section.uid && createdSectionIds[section.uid]) {
@@ -493,6 +587,10 @@ export default {
             }
           });
         });
+        this.pattern.assemblySteps.forEach(assemblyStep => {
+          if (!assemblyStep.id && assemblyStep.uid && createdAssemblyStepIds[assemblyStep.uid]) {
+            assemblyStep.id = createdAssemblyStepIds[assemblyStep.uid];
+        }});
 
         
 
@@ -516,6 +614,11 @@ export default {
       const found = pattern.sections.find(s => s.uid === uid);
       return found?.id || null;
     },
+    getAssemblyStepIdByUid(uid) {
+      const found = pattern.assemblySteps.find(s => s.uid === uid);
+      return found?.id || null;
+    },
+ 
 
     async loadImages() {
       try {
@@ -533,7 +636,16 @@ export default {
           })
         );
 
+
         await Promise.all(sectionImagePromises);
+
+        // assemblyStep képek
+        const assemblyStepImagePromises = this.pattern.assemblySteps.map(assemblyStep =>
+          axios.get(`/api/assemblystep/${assemblyStep.id}/images`).then(response => {
+            assemblyStep.images = response.data;
+          })
+        );
+        await Promise.all(assemblyStepImagePromises);
 
         
       } catch (error) {
@@ -550,6 +662,11 @@ export default {
       if (!section || !Array.isArray(section.rows)) return;
       section.rows.forEach((row, i) => {
         if (row) row.order = i + 1;
+      });
+    },
+    updateAssemblyStepOrders() {
+      this.pattern.assemblySteps.forEach((assemblyStep, index) => {
+        if (assemblyStep) assemblyStep.order = index + 1;
       });
     },
     addSection() {
@@ -589,6 +706,15 @@ export default {
 
       rows.push(newRow);
       this.updateRowOrders(sectionIndex);
+    },
+    addAssemblyStep() {
+      this.pattern.assemblySteps.push({
+        text: '',
+        id: null,
+        uid: crypto.randomUUID(),
+        order: this.pattern.sections.length + 1,
+      });
+      this.updateAssemblyStepOrders();
     },
     generateInstruction(operation, totalStitches, changeCount) {
 

@@ -30,6 +30,7 @@
             :initial-abbreviations='@json($amigurumiPattern->abbreviations)'
 
             :initial-sections='{{ $sectionsJson }}'
+            :initial-assembly-steps='{{ $amigurumiPattern->assemblySteps }}'
             update-url="{{ route('amigurumi-patterns.update', $amigurumiPattern) }}"
             
         />

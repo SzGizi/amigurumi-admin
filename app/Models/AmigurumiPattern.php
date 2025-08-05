@@ -63,6 +63,10 @@ class AmigurumiPattern extends Model
             $pattern->images()->delete();
         });
     }
+    public function assemblySteps()
+    {
+        return $this->hasMany(AmigurumiPatternAssemblyStep::class)->orderBy('order');
+    }
 
 
 }

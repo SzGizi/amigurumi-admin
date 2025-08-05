@@ -123,6 +123,26 @@ class ImageController extends Controller
             })
         );
     }
+
+    
+     public function amigurumiAssemblyStepIndex($assemblystepId)
+    {
+        $assemblyStep = \App\Models\AmigurumiPatternAssemblyStep::findOrFail($assemblystepId);
+      
+        $images = $assemblyStep->images->sortBy('order')->values();
+        return response()->json(
+            $images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'path' => $image->path,
+                    'order' => $image->order,
+                    'is_main' => $image->is_main,
+                    'caption' => $image->caption, 
+                    'url' => asset('storage/' . $image->path), 
+                ];
+            })
+        );
+    }
     
     /**
      * Set an image as the main image for its model.

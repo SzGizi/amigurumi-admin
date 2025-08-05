@@ -12,6 +12,7 @@ const props = defineProps({
   modelId: Number,
   modelUid: String,
   getSectionIdByUid: Function, 
+  getAssemblyStepIdByUid: Function, 
   patternMainImageId: Number,
   hasMainImage: {
     type: Boolean,
@@ -24,6 +25,7 @@ const emit = defineEmits(['updateDeletedImages', 'updateMainImageId'])
 const endpointMap = {
   AmigurumiPattern: `/api/patterns/${props.modelId}/images`,
   AmigurumiSection: `/api/sections/${props.modelId}/images`,
+  AmigurumiPatternAssemblyStep: `/api/assemblystep/${props.modelId}/images`,
 }
 const endpoint = endpointMap[props.modelType]
 
@@ -202,6 +204,15 @@ async function uploadPendingImages() {
     if (newId) {
       const fixedEndpoint = `/api/sections/${newId}/images`;
       console.log('Frissített endpoint section-nek:', fixedEndpoint);
+      await uploadImagesTo(newImages, fixedEndpoint, newId);
+    } else {
+      console.error('Nem található ID a megadott UID alapján:', props.modelUid);
+    }
+  } else if (!props.modelId && props.modelType === 'AmigurumiPatternAssemblyStep' && props.modelUid && typeof props.getSectionIdByUid === 'function') {
+    const newId = props.getAssemblyStepIdByUid(props.modelUid);
+    if (newId) {
+      const fixedEndpoint = `/api/assemblystep/${newId}/images`;
+      console.log('Frissített endpoint assemblystep-nek:', fixedEndpoint);
       await uploadImagesTo(newImages, fixedEndpoint, newId);
     } else {
       console.error('Nem található ID a megadott UID alapján:', props.modelUid);
