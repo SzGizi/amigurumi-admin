@@ -18,6 +18,7 @@ class AmigurumiPatternAssemblyStep extends Model
 
     public function images()
     {
-        return $this->morphMany(Image::class, 'model')->orderBy('order_column');
+        return $this->morphMany(Image::class, 'imageable');
+        //return $this->morphMany(Image::class, 'imageable')->orderBy('order');
     }
 }

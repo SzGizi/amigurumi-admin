@@ -664,7 +664,7 @@ export default {
         if (row) row.order = i + 1;
       });
     },
-    updateAssemblyStepOrders() {
+    updateAssemblyStepsOrders() {
       this.pattern.assemblySteps.forEach((assemblyStep, index) => {
         if (assemblyStep) assemblyStep.order = index + 1;
       });
