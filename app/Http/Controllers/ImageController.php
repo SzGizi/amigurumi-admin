@@ -127,7 +127,7 @@ class ImageController extends Controller
     
      public function amigurumiAssemblyStepIndex($assemblystepId)
     {
-        Log::info('Fetching images for AssemblyStep', ['id' => $assemblystepId]);
+        //Log::info('Fetching images for AssemblyStep', ['id' => $assemblystepId]);
 
         $assemblyStep = \App\Models\AmigurumiPatternAssemblyStep::findOrFail($assemblystepId);
       

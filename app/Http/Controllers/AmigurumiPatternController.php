@@ -174,7 +174,7 @@ class AmigurumiPatternController extends Controller
                 $existingAssemblyStepIds[] = $assemblyStep->id;
 
                 if (!empty($assemblyStepData['uid'])) {
-                    $$createdAssemblyStepMap[$assemblyStepData['uid']] = $assemblyStep->id;
+                    $createdAssemblyStepMap[$assemblyStepData['uid']] = $assemblyStep->id;
                 }
             }
         }
@@ -192,6 +192,12 @@ class AmigurumiPatternController extends Controller
                 ->whereNotIn('id', $existingRowIds)
                 ->delete();
         }
+
+        $amigurumiPattern->assemblySteps()
+            ->whereNotIn('id', $existingAssemblyStepIds)
+            ->each(function ($assemblyStep) {
+                $assemblyStep->delete();
+            });
 
         // Képek törlése
         $deletedImageIds = explode(',', $request->input('deleted_image_ids', ''));

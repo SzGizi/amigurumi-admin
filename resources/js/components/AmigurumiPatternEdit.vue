@@ -390,7 +390,7 @@
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-danger "
-                  @click="confirmDelete('assemblyStep', assemblyStepsIndex)"
+                  @click="confirmDelete('assemblyStep', null, null, assemblyStepsIndex)"
                 ><i class="bi bi-x"></i></button>
                 
               </div>
@@ -811,6 +811,28 @@ export default {
          console.log('Duplicated section:', duplicatedSection);
     console.log('All sections after duplication:', this.pattern.sections);
     },
+    duplicateAssemblyStep(assemblyStepIndex) {
+      const assemblyStep = this.pattern.assemblySteps[assemblyStepIndex];
+      console.log('Original assemblyStep:', this.pattern.assemblySteps[assemblyStepIndex]);
+      
+      // Deep clone a section-t és az összes nested objektumot
+      const duplicatedAssemblyStep = this.deepClone(assemblyStep);
+      
+      // Új egyedi azonosítók generálása
+      duplicatedAssemblyStep.uid = crypto.randomUUID();
+      duplicatedAssemblyStep.id = null; // Új section lesz
+
+      // Order beállítása
+      duplicatedAssemblyStep.order = this.pattern.assemblySteps.length;
+      
+      // Hozzáadás a sections tömbhöz
+      this.pattern.assemblySteps.splice(assemblyStepIndex + 1, 0, duplicatedAssemblyStep);
+      
+      // Orders újraszámolása
+      this.updateAssemblyStepsOrders();
+      console.log('Duplicated section:', duplicatedAssemblyStep);
+      console.log('All sections after duplication:', this.pattern.assemblySteps);
+    },
     
     deepClone(obj) {
         if (obj === null || typeof obj !== 'object') {
@@ -840,11 +862,14 @@ export default {
     removeSection(index) {
       this.pattern.sections.splice(index, 1);
     },
+    removeAssemblyStep(index) {
+      this.pattern.assemblySteps.splice(index, 1);
+    },
     removeRow(sectionIndex, rowIndex) {
       this.pattern.sections[sectionIndex].rows.splice(rowIndex, 1);
     },
-    confirmDelete(type, sectionIndex, rowIndex = null) {
-      this.deleteTarget = { type, sectionIndex, rowIndex };
+    confirmDelete(type, sectionIndex = null, rowIndex = null, assemblyStep = null) {
+      this.deleteTarget = { type, sectionIndex, rowIndex, assemblyStep };
       this.deletemodalInstance.show();
     },
     deleteConfirmed() {
@@ -853,6 +878,8 @@ export default {
         this.removeSection(this.deleteTarget.sectionIndex);
       } else if (this.deleteTarget.type === 'row') {
         this.removeRow(this.deleteTarget.sectionIndex, this.deleteTarget.rowIndex);
+      } else if (this.deleteTarget.type === 'assemblyStep') {
+        this.removeAssemblyStep(this.deleteTarget.assemblyStepIndex);
       }
       this.deletemodalInstance.hide();
       this.deleteTarget = null;
