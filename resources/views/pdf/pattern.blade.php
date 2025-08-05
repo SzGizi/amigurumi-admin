@@ -277,12 +277,31 @@
     @endif
 
     {{-- ÖSSZEÁLLÍTÁSI ÚTMUTATÓ --}}
-    @if(!empty($pattern['assembly_instructions']))
-       
+    @if(!empty($pattern['assemblySteps']))
+      
             <div class="assembly-page">
                 <h2 class="section-heading">ÖSSZEÁLLÍTÁS</h2>
                 <div class="assembly-content">
-                    {!! nl2br(e($pattern['assembly_instructions'])) !!}
+                    @foreach($pattern['assemblySteps'] as $assemblyStep)
+                        <div class="assembly-step">
+                        @if(!empty($assemblyStep['text']))
+                            <p class="assembly-text">{!! nl2br(e($assemblyStep['text'])) !!}</p>
+                        @endif
+
+                        @if(!empty($assemblyStep['images']) && count($assemblyStep['images']) > 0)
+                            <div class="assembly-images">
+                                @foreach($assemblyStep['images'] as $image)
+                                    <div class="assembly-image">
+                                        <img src="{{ public_path('storage/' . $image['path']) }}" alt="Step image">
+                                        @if(!empty($image['caption']))
+                                            <div class="caption">{{ $image['caption'] }}</div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                    @endforeach
                 </div>
             </div>
        

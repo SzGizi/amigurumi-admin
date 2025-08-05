@@ -383,3 +383,39 @@ body {
 }
 
 
+
+
+.assembly-page {
+    margin-top: 30px;
+}
+.assembly-step {
+    margin-bottom: 20px;
+}
+.assembly-text {
+    font-size: 12pt;
+    margin-bottom: 10px;
+}
+.assembly-images {
+   display: block;
+  
+    margin: 30px 0;
+    overflow: hidden;
+}
+.assembly-image {
+   display: inline-block;
+    vertical-align: top;
+    margin: 0 15px 20px 15px;
+    max-width: 30%;
+    
+}
+.assembly-image img {
+    max-width: 100%;
+    border-radius: 20px;
+}
+
+
+.caption {
+    font-size: 10pt;
+    text-align: center;
+    margin-top: 4px;
+}
