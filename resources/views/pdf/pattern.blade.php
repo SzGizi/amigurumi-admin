@@ -135,7 +135,7 @@
            
             @if(!empty($pattern['introduction']))
                 <div class="thank-you-box border-color">
-                {{ $pattern['introduction'] }}
+                {!! $pattern['introduction'] !!}
                 </div>
                 
             @endif
@@ -156,14 +156,14 @@
                     @if(!empty($pattern['yarn_description']))
                         <h2 class="section-heading">FONALAK</h2>
                         <div class="materials-box">
-                            {!! nl2br(e($pattern['yarn_description'])) !!}
+                            {!! $pattern['yarn_description'] !!}
                         </div>
                     @endif
 
                     @if(!empty($pattern['tools_description']))
                         <h2 class="section-heading mt-20">ESZKÖZÖK</h2>
                         <div class="tools-box">
-                            {!! nl2br(e($pattern['tools_description'])) !!}
+                            {!! $pattern['tools_description'] !!}
                         </div>
                     @endif
                 </div>
@@ -183,7 +183,7 @@
                     <h2 class="section-heading">RÖVIDÍTÉSEK</h2>
                     <div class="abbreviations-box border-color">
                         @if(!empty($pattern['abbreviations']))
-                            {{$pattern['abbreviations']}}
+                            {!! $pattern['abbreviations']  !!}
                         @endif
                     </div>
                 </div>

@@ -3,9 +3,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Twinkle+Star&display=swap');
 @import "bootstrap-icons/font/bootstrap-icons";
 
+
 @import '_variables';
 @import '_mixins';
 @import 'fileuploader';
+
 
 
 :root {
@@ -120,11 +122,25 @@ a{
     background-color: $bg;
     color:$primary;
   }
-  textarea,input, select{
+  textarea,input, select, .quill-editor-container{
       border-radius: $border-radius;
       padding: 10px 20px;
       border-color:$border-primary;
   }
+  .quill-editor-container{
+    border: 1px solid  $border-primary;
+    .ck-toolbar{
+      border-left: 0;
+      border-top: 0;
+      border-right: 0;
+      border-bottom:1px solid $border-primary;
+    }
+    .ck-content{
+      border:none !important;
+      box-shadow: none !important;
+    }
+  }
+
 }
 .row-list {
   .basic-input{

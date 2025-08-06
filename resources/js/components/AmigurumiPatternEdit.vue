@@ -85,7 +85,10 @@
 
           <div class="basic-input">
             <label for="introduction" class="form-label">Introduction</label>
-            <textarea id="introduction" rows="21" v-model="pattern.introduction" class="form-control"></textarea>
+            <!-- <textarea id="introduction" rows="21" v-model="pattern.introduction" class="form-control"></textarea> -->
+             <div class="quill-editor-container">
+                 <TextEditor v-model="pattern.introduction" />
+            </div>
           </div>
 
           
@@ -97,15 +100,25 @@
         <div class="col-md-6 ">
           <div class="basic-input">
             <label for="yarn_description" class="form-label">Yarn Description</label>
-            <textarea id="yarn_description" rows="7" v-model="pattern.yarn_description" class="form-control"></textarea>
+            <div class="quill-editor-container">
+              <TextEditor v-model="pattern.yarn_description" />
+            </div>
           </div>
           <div class="basic-input">
             <label for="tools_description" class="form-label">Tools Description</label>
-            <textarea  id="tools_description" rows="7" v-model="pattern.tools_description" class="form-control"></textarea>
+            <!-- <textarea  id="tools_description" rows="7" v-model="pattern.tools_description" class="form-control"></textarea> -->
+             <div class="quill-editor-container">
+               
+                   <TextEditor v-model="pattern.tools_description" />
+            </div>
           </div>
           <div class="basic-input">
             <label for="abbreviations" class="form-label">Abbreviations</label>
-            <textarea id="abbreviations" rows="11" v-model="pattern.abbreviations" class="form-control"></textarea>
+            <!-- <textarea id="abbreviations" rows="11" v-model="pattern.abbreviations" class="form-control"></textarea> -->
+             <div class="quill-editor-container">
+             
+                   <TextEditor v-model="pattern.abbreviations" />
+              </div>
           </div>
       
         </div>
@@ -366,9 +379,14 @@
                 <i class="bi bi-arrow-down"></i>
                 </button>
               </div>
-              <div class="basic-input flex-fill mb-0">
-                <label class="form-label">Assembly text</label>
-                <input type="text" v-model="assemblyStep.text" class="form-control" required />
+        
+               <div class="basic-input flex-fill mb-0">
+                <label for="text" class="form-label">Text</label>
+                <div class="quill-editor-container">
+                
+                     <TextEditor v-model="assemblyStep.text" />
+
+                  </div>
               </div>
 
               <div class="funtions-btn-container">
@@ -430,7 +448,12 @@
 
 <script setup>
   import FileUploader from '@/components/image/FileUploader.vue'
+  import TextEditor from '@/components/element/TextEditor.vue'
+
   import { ref } from 'vue'
+  //import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+
+
 
 
 </script>
@@ -440,12 +463,19 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Modal } from 'bootstrap';
 import draggable from 'vuedraggable';
 import { Collapse } from 'bootstrap';
+//import '@ckeditor/ckeditor5-build-classic/build/styles.css';
 
+
+
+
+
+//const editorContainer = ref(null)
+//let editorInstance = null
 
 const imageUploaderRef = ref()
 
 export default {
-  components: { draggable },
+  components: { draggable  },
   props: [
     'initialPatternId',
     'initialSections',
@@ -523,6 +553,21 @@ export default {
     this.generateRowmodalInstance = new Modal(this.$refs.generateRowsModal);
 
     this.loadImages();
+
+    // ClassicEditor.create(editorContainer.value, {
+    //   toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+    // })
+    // .then(editor => {
+    //   editorInstance = editor
+    //   editor.setData(this.pattern.yarn_description || '')
+
+    //   editor.model.document.on('change:data', () => {
+    //     this.pattern.yarn_description = editor.getData()
+    //   })
+    // })
+    // .catch(error => {
+    //   console.error('CKEditor init error:', error)
+    // })
 
   },
   methods: {
@@ -714,7 +759,7 @@ export default {
         uid: crypto.randomUUID(),
         order: this.pattern.sections.length + 1,
       });
-      this.updateAssemblyStepOrders();
+      this.updateAssemblyStepsOrders();
     },
     generateInstruction(operation, totalStitches, changeCount) {
 
@@ -896,6 +941,20 @@ export default {
         const sections = this.pattern.sections;
         [sections[index + 1], sections[index]] = [sections[index], sections[index + 1]];
         this.updateSectionOrders();
+      }
+    },
+    moveAssemblyStepUp(index) {
+      if (index > 0) {
+        const assemblySteps = this.pattern.assemblySteps;
+        [assemblySteps[index - 1], assemblySteps[index]] = [assemblySteps[index], assemblySteps[index - 1]];
+        this.updateAssemblyStepsOrders();
+      }
+    },
+    moveAssemblyStepDown(index) {
+      if (index < this.pattern.assemblySteps.length - 1) {
+        const assemblySteps = this.pattern.assemblySteps;
+        [assemblySteps[index + 1], assemblySteps[index]] = [assemblySteps[index], assemblySteps[index + 1]];
+        this.updateAssemblyStepsOrders();
       }
     },
 
