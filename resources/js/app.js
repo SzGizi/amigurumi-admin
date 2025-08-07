@@ -1,6 +1,7 @@
 import './bootstrap';
 //import 'bootstrap';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 import Sortable from 'sortablejs';
 import '../sass/app.scss';

@@ -116,7 +116,7 @@
         <div class="title-page">
             <h1 class="main-title">{{ $pattern['title'] ?? 'Amigurumi minta' }}</h1>
             <div class="subtitle">PDF amigurumi pattern</div>
-            <div class="author">by {{ $pattern['author'] ?? 'Szántó Gizella' }}</div>
+            <div class="author">by {{ $pattern['user']['creator_name'] }}</div>
         </div>
             
             @if(!empty($pattern['main_image_url']))
@@ -143,6 +143,26 @@
            
 
            
+        </div>
+         {{-- LÁBLÉC --}}
+
+        <div class="footer-page">
+            <div>{{ $pattern['user']['creator_name'] }}</div>
+            @if(!empty($pattern['user']['logo']))
+                <div class="logo-image">
+                    <img src="file:///{{ str_replace('\\', '/', public_path('storage/logos/' . basename($pattern['user']['logo']))) }}" 
+                          />
+                </div>
+            @endif
+            <div class="social-links">
+                <span>instagram.com/{{ $pattern['instagram'] ?? 'stockindesign' }}</span>
+            </div>
+            <div class="brand-info">
+                <strong>{{ $pattern['brand'] ?? 'StockInDesign' }}</strong><br>
+                <span>{{ $pattern['tagline'] ?? 'The LAB of InDesign Templates' }}</span><br>
+                <span>{{ $pattern['website'] ?? 'www.stockindesign.com' }}</span><br>
+                <span>{{ $pattern['facebook'] ?? 'fb.com/stockInDesign' }}</span>
+            </div>
         </div>
     
 
@@ -308,19 +328,7 @@
         
     @endif
 
-    {{-- LÁBLÉC --}}
-
-    <div class="footer-page">
-        <div class="social-links">
-            <span>instagram.com/{{ $pattern['instagram'] ?? 'stockindesign' }}</span>
-        </div>
-        <div class="brand-info">
-            <strong>{{ $pattern['brand'] ?? 'StockInDesign' }}</strong><br>
-            <span>{{ $pattern['tagline'] ?? 'The LAB of InDesign Templates' }}</span><br>
-            <span>{{ $pattern['website'] ?? 'www.stockindesign.com' }}</span><br>
-            <span>{{ $pattern['facebook'] ?? 'fb.com/stockInDesign' }}</span>
-        </div>
-    </div>
+   
 
 </div>
 

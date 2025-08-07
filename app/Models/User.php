@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'creator_name',
+        'logo'
     ];
 
     /**
@@ -55,4 +58,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(AmigurumiPattern::class);
     }
+
+
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
+            if ($user->logo) {
+    
+                Storage::disk('public')->delete($user->logo);
+            }
+        });
+    }
+
 }

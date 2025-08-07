@@ -69,4 +69,5 @@ class AmigurumiPattern extends Model
     }
 
 
+
 }

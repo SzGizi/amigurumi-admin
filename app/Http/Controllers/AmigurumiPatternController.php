@@ -286,8 +286,21 @@ class AmigurumiPatternController extends Controller
         
         $data = $request->all();
 
-        // Töröljük a base64 generálást, képek maradnak URL-ként
-        $data['columns'] = 2;
+        
+        // Feltételezem, hogy $data['id'] a pattern azonosítója
+        $pattern =  $pattern = AmigurumiPattern::find($data['id']);
+
+        if ($pattern) {
+            $data['user'] = [
+                'creator_name' => $pattern->user->creator_name,   
+                'logo' => $pattern->user->logo,                    
+            ];
+        } else {
+            $data['user'] = [
+                'creator_name' => 'Unknown',
+                'logo' => null,
+            ];
+        }
 
         // HTML renderelés a Blade sablonból
         $html = view('pdf.pattern', ['pattern' => $data])->render();
