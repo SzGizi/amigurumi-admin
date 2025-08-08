@@ -26,6 +26,7 @@ const endpointMap = {
   AmigurumiPattern: `/api/patterns/${props.modelId}/images`,
   AmigurumiSection: `/api/sections/${props.modelId}/images`,
   AmigurumiPatternAssemblyStep: `/api/assemblystep/${props.modelId}/images`,
+
 }
 const endpoint = endpointMap[props.modelType]
 

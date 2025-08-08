@@ -146,7 +146,7 @@
         </div>
          {{-- LÁBLÉC --}}
 
-        <div class="footer-page">
+        <div class="footer-page border-color">
             <div>{{ $pattern['user']['creator_name'] }}</div>
             @if(!empty($pattern['user']['logo']))
                 <div class="logo-image">

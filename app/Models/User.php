@@ -58,6 +58,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(AmigurumiPattern::class);
     }
+    public function socialLinks()
+    {
+        return $this->hasMany(SocialLink::class);
+    }
 
 
     protected static function booted()

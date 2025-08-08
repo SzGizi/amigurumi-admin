@@ -7,6 +7,7 @@ use App\Http\Controllers\AmigurumiSectionController;
 use App\Http\Controllers\AmigurumiRowController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\AmigurumiPatternAssemblyStepController;
+use App\Http\Controllers\SocialLinkController;
 
 
 Route::get('/', function () {
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/images/upload', [ImageController::class, 'upload'])->name('images.upload');
     Route::get('/api/patterns/{pattern}/images', [ImageController::class, 'amigurumiPattenIndex']);
     Route::get('/api/sections/{section}/images', [ImageController::class, 'amigurumiSectionIndex']);
+ 
      Route::get('/api/assemblystep/{assemblystep}/images', [ImageController::class, 'amigurumiAssemblyStepIndex']);
     Route::delete('/images/{image}', [ImageController::class, 'deleteImage']);
     Route::post('/images/{image}/set-main', [ImageController::class, 'setMain']);
@@ -52,6 +54,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/images/{image}/caption', [ImageController::class, 'updateCaption']);
 
 
+    Route::get('/social-links', [SocialLinkController::class, 'index']);
+    Route::post('/social-links', [SocialLinkController::class, 'store']);
+    Route::put('/social-links/{socialLink}', [SocialLinkController::class, 'update']);
+    Route::delete('/social-links/{socialLink}', [SocialLinkController::class, 'destroy']);
 
 
 

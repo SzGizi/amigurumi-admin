@@ -350,7 +350,9 @@ body {
     text-align: center;
     padding: 30px 0;
     border-top: 2px solid #f6dbe1;
+    border-bottom: 2px solid #f6dbe1;
     margin-top: 40px;
+    margin-bottom: 40px;
     position: relative;
     z-index: 1;
 }
@@ -418,4 +420,17 @@ body {
     font-size: 10pt;
     text-align: center;
     margin-top: 4px;
+}
+.logo-image{
+    
+   
+    text-align: center;
+    display: block;
+    position: relative;
+ 
+}
+.logo-image img{
+  width: 250px;
+         margin: 0 auto;
+        display: block;
 }

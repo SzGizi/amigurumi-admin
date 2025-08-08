@@ -63,7 +63,7 @@ class AmigurumiPatternController extends Controller
 
     public function update(UpdateAmigurumiPatternRequest $request, AmigurumiPattern $amigurumiPattern)
     {
-          Log::info('Beérkezett PUT kérés: ' . var_export($request->all(), true));
+          //Log::info('Beérkezett PUT kérés: ' . var_export($request->all(), true));
         //Log::info('Sections:', $request->input('sections'));
         if ($amigurumiPattern->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
