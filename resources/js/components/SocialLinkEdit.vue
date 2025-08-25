@@ -51,11 +51,9 @@
               <button
                 class="btn btn-sm btn-outline-info"
                 type="button"
-                data-bs-toggle="collapse"
-                :data-bs-target="'#socialLinkCollapse' + socialLinkIndex"
-                aria-expanded="false"
-                :aria-controls="'socialLinkCollapse' + socialLinkIndex"
-                title="Toggle Details"
+                @click="toggleCollapse('socialLinkCollapse' + socialLinkIndex)"
+                
+                title="Toggle images"
               >
                 <i class="bi bi-images"></i>
               </button>
@@ -109,8 +107,10 @@
 </template>
 
 <script>
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import draggable from 'vuedraggable';
 import axios from 'axios';
+import { Collapse } from 'bootstrap';
 
 export default {
   components: {
@@ -218,6 +218,13 @@ export default {
           this.socialLinks[index].preview = e.target.result;
         };
         reader.readAsDataURL(file);
+      }
+    },
+    toggleCollapse(index) {
+      const collapseEl = document.getElementById(index);
+      if (collapseEl) {
+        const collapseInstance = Collapse.getOrCreateInstance(collapseEl);
+        collapseInstance.toggle();
       }
     },
 
