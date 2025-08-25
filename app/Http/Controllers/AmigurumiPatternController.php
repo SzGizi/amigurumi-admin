@@ -293,12 +293,20 @@ class AmigurumiPatternController extends Controller
         if ($pattern) {
             $data['user'] = [
                 'creator_name' => $pattern->user->creator_name,   
-                'logo' => $pattern->user->logo,                    
+                'logo' => $pattern->user->logo,       
+                'socialLinks' => $pattern->user->socialLinks->map(function($sl) {
+                    return [
+                        'title' => $sl->title,
+                        'link' => $sl->link,
+                        'icon' => $sl->icon,
+                    ];             
+                    })->toArray(),
             ];
         } else {
             $data['user'] = [
                 'creator_name' => 'Unknown',
                 'logo' => null,
+                'socialLinks' => [],
             ];
         }
 

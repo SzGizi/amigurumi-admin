@@ -154,9 +154,26 @@
                           />
                 </div>
             @endif
-            <div class="social-links">
-                <span>instagram.com/{{ $pattern['instagram'] ?? 'stockindesign' }}</span>
-            </div>
+            @if(!empty($pattern['user']['socialLinks']))
+                <div class="social-links">
+                    @php
+                        $socialLinks = $pattern['user']['socialLinks'] ?? [];
+                    @endphp
+
+                    @foreach($socialLinks as $sl)
+                        <div class="social-item" style="margin-bottom:4px;">
+                            @if(!empty($sl['icon']))
+                                <img src="file:///{{ str_replace('\\', '/', public_path('storage/' . $sl['icon'])) }}" 
+                                    alt="icon" width="16" height="16"
+                                    style="vertical-align:middle; margin-right:4px;">
+                            @endif
+                            <span style="vertical-align:middle;">
+                                <a href="{{ $sl['link'] }}" target="_blank">{{ $sl['title'] }}</a>
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
             <div class="brand-info">
                 <strong>{{ $pattern['brand'] ?? 'StockInDesign' }}</strong><br>
                 <span>{{ $pattern['tagline'] ?? 'The LAB of InDesign Templates' }}</span><br>

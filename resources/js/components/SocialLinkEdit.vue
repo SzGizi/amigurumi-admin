@@ -1,6 +1,7 @@
 <template>
   <div>
-    <h4 class="mt-4">Social Links</h4>
+      <h2 class="h5 mb-3">Social Links</h2>
+  
 
     <draggable
       v-model="socialLinks"
@@ -79,26 +80,34 @@
           </div>
 
           <div class="collapse row-list mt-3" :id="'socialLinkCollapse' + socialLinkIndex">
-            <div class="col-md-12 mb-2">
-              <label class="form-label">Icon</label>
-              <input
-                type="file"
-                class="form-control"
-                accept="image/*"
-                @change="handleImageChange($event, socialLinkIndex)"
-              />
-              <div v-if="socialLink.preview" class="mt-2">
-                <img :src="socialLink.preview" alt="Icon preview" class="img-thumbnail" style="max-width: 100px;" />
-                <br />
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  @click="markImageForRemoval(socialLinkIndex)"
-                >
-                  <i class="bi bi-trash"></i> Remove image
-                </button>
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Icon</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  accept="image/*"
+                  @change="handleImageChange($event, socialLinkIndex)"
+                />
+              
               </div>
+              <div class="col-md-6">
+                <div v-if="socialLink.preview" class="mt-2">
+                  
+                  <img :src="socialLink.preview" alt="Icon preview" class="img-thumbnail" style="max-width: 100px;" />
+                  
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger mt-3 float-end"
+                    @click="markImageForRemoval(socialLinkIndex)"
+                  >
+                    <i class="bi bi-trash"></i> Remove image
+                  </button>
+                </div>
+              </div>
+
             </div>
+           
           </div>
         </div>
       </template>
