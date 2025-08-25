@@ -89,6 +89,14 @@
               />
               <div v-if="socialLink.preview" class="mt-2">
                 <img :src="socialLink.preview" alt="Icon preview" class="img-thumbnail" style="max-width: 100px;" />
+                <br />
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  @click="markImageForRemoval(socialLinkIndex)"
+                >
+                  <i class="bi bi-trash"></i> Remove image
+                </button>
               </div>
             </div>
           </div>
@@ -212,6 +220,8 @@ export default {
       const file = event.target.files[0];
       if (file) {
         this.socialLinks[index].icon = file;
+        this.socialLinks[index].removeIcon = false;
+
 
         const reader = new FileReader();
         reader.onload = e => {
@@ -226,6 +236,11 @@ export default {
         const collapseInstance = Collapse.getOrCreateInstance(collapseEl);
         collapseInstance.toggle();
       }
+    },
+    markImageForRemoval(index) {
+      this.socialLinks[index].removeIcon = true;
+      this.socialLinks[index].preview = '';
+      this.socialLinks[index].icon = null;
     },
 
     async saveSocialLinks() {
@@ -246,7 +261,11 @@ export default {
         if (sl.icon instanceof File) {
           formData.append('icon', sl.icon);
         }
+      
         // Ha nincs új ikon, ne küldjük az icon mezőt, mert null küldése okozza a hibát
+        if (sl.removeIcon) {
+          formData.append('remove_icon', '1'); 
+        }
 
         if (sl.id) {
           formData.append('_method', 'PUT');

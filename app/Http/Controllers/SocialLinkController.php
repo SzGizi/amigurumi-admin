@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SocialLink;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class SocialLinkController extends Controller
 {
@@ -54,6 +55,7 @@ class SocialLinkController extends Controller
             'link' => 'required|url',
             'order' => 'required|integer',
             'icon' => 'nullable|image|max:2048',
+            'remove_icon' => 'nullable|boolean'
         ]);
 
         $social = SocialLink::findOrFail($id);
@@ -62,6 +64,13 @@ class SocialLinkController extends Controller
         if ($request->hasFile('icon')) {
             $path = $request->file('icon')->store('social-icons', 'public');
             $social->icon = $path;
+        }
+          // Ha a felhasználó jelölte, hogy törölni kell az ikont
+        elseif ($request->boolean('remove_icon')) {
+            if ($social->icon && Storage::disk('public')->exists($social->icon)) {
+                Storage::disk('public')->delete($social->icon);
+            }
+            $social->icon = null;
         }
 
         $social->save();
