@@ -1,0 +1,15 @@
+{
+  "name": "pdf-service",
+  "version": "1.0.0",
+  "description": "Microservice for PDF and image generation using Puppeteer",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "puppeteer": "^23.0.2",
+    "body-parser": "^1.20.2"
+  }
+}

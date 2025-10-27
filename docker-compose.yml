@@ -61,7 +61,15 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - amigurumi_net
-
+      
+  pdf-service:
+    build: ./pdf-service
+    container_name: amigurumi_pdf
+    ports:
+      - "3000:3000"
+    networks:
+      - amigurumi_net
+      
 networks:
   amigurumi_net:
 

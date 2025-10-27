@@ -99,7 +99,7 @@
         </div>
         <div class="col-md-6 ">
           <div class="basic-input">
-            <label for="yarn_description" class="form-label">Yarn Description</label>
+            <label for="yarn_description" class="form-label">Yarn Description </label>
             <div class="quill-editor-container">
               <TextEditor v-model="pattern.yarn_description" />
             </div>
